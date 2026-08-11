@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PMT URL, Sitemap & Lossless Content Extractor | Pain Management Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #041021;
+      --surface: #0a1a30;
+      --surface-card: #0f233f;
+      --surface-border: rgba(0, 172, 160, 0.18);
+      --surface-border-hover: rgba(0, 172, 160, 0.4);
+      --pmt-accent: #00aca0;
+      --pmt-accent-glow: rgba(0, 172, 160, 0.25);
+      --pmt-primary: #007fac;
+      --pmt-grad: linear-gradient(135deg, #00aca0 0%, #007fac 100%);
+      --text: #f0f6fc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #061324;
+      --radius: 12px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --font: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 172, 160, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 127, 172, 0.08) 0%, transparent 40%);
+    }
+
+    /* Header */
+    header {
+      background: rgba(10, 26, 48, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: var(--pmt-grad);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 0 16px var(--pmt-accent-glow);
+    }
+
+    .brand-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      background: linear-gradient(90deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.78rem;
+      color: var(--pmt-accent);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Main Container */
+    .app-container {
+      max-width: 1500px;
+      width: 95%;
+      margin: 24px auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.25s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--surface-border-hover);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(0, 172, 160, 0.1);
+      color: var(--pmt-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .stat-info .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .stat-info .label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+
+    .panel-title i { color: var(--pmt-accent); }
+
+    .panel-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .panel-body {
+      padding: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Drop Zone Overlay */
+    .dropzone {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .dropzone.dragover textarea {
+      border-color: var(--pmt-accent);
+      background: rgba(0, 172, 160, 0.05);
+    }
+
+    /* Textarea & Code Viewers */
+    textarea {
+      width: 100%;
+      height: 420px;
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      padding: 14px;
+      resize: vertical;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--pmt-accent);
+      box-shadow: 0 0 10px var(--pmt-accent-glow);
+    }
+
+    pre {
+      width: 100%;
+      height: 420px;
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-family: var(--font-code);
+      font-size: 0.83rem;
+      line-height: 1.5;
+      padding: 14px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      font-family: var(--font);
+    }
+
+    .btn-primary {
+      background: var(--pmt-grad);
+      color: #fff;
+      box-shadow: 0 4px 12px var(--pmt-accent-glow);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--surface-border-hover);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.76rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover { color: #fff; }
+
+    .tab-btn.active {
+      background: var(--pmt-accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Page Extractor Inspector */
+    .extractor-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(6, 19, 36, 0.7);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--surface-border);
+      flex-wrap: wrap;
+    }
+
+    .proxy-select {
+      background: var(--code-bg);
+      color: var(--text);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .page-cards-list {
+      max-height: 420px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 4px;
+    }
+
+    .page-card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border 0.2s;
+    }
+
+    .page-card:hover {
+      border-color: var(--surface-border-hover);
+    }
+
+    .page-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .page-url {
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--pmt-accent);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .page-url:hover { text-decoration: underline; }
+
+    .page-status {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
+    .status-fetching { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .status-done { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+    .status-error { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    .page-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .page-meta span strong { color: #fff; }
+
+    .page-content-box {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      max-height: 180px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+      font-family: var(--font);
+    }
+
+    .page-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* Filter & Search Bar */
+    .search-filter-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.83rem;
+      outline: none;
+    }
+
+    .search-box input:focus { border-color: var(--pmt-accent); }
+
+    .filter-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--surface-border);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover, .chip.active {
+      background: rgba(0, 172, 160, 0.15);
+      border-color: var(--pmt-accent);
+      color: #fff;
+    }
+
+    /* Table View */
+    .table-container {
+      max-height: 420px;
+      overflow-y: auto;
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #071527;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--surface-border);
+      z-index: 10;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-product { background: rgba(0, 172, 160, 0.15); color: var(--pmt-accent); }
+    .badge-page { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-html { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    /* Progress bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--pmt-grad);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--pmt-grad);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--code-bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--pmt-accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo"><i class="fa-solid fa-diagram-project"></i></div>
+      <div class="brand-title">
+        <h1>PMT URL, Sitemap & Lossless Content Extractor</h1>
+        <p>Pain Management Technologies — n8n Knowledge Base Suite</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+        <i class="fa-solid fa-upload"></i> Upload File (.json/.xml/.html)
+        <input type="file" id="file-upload" accept=".json,.xml,.txt,.html,.htm" style="display:none;" onchange="handleFileUpload(event)">
+      </label>
+      <button class="btn btn-secondary btn-sm" onclick="loadSampleData()"><i class="fa-solid fa-arrows-rotate"></i> Reset Sample</button>
+      <button class="btn btn-primary btn-sm" onclick="copyXML()"><i class="fa-solid fa-copy"></i> Copy XML Sitemap</button>
+    </div>
+  </header>
+
+  <!-- App Body -->
+  <div class="app-container">
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-link"></i></div>
+        <div class="stat-info">
+          <div class="value" id="stat-total">0</div>
+          <div class="label">Total URLs / Pages Input</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color: #60a5fa; background: rgba(96,165,250,0.1);"><i class="fa-solid fa-box"></i></div>
+        <div class="stat-info">
+          <div class="value" id="stat-products">0</div>
+          <div class="label">Product Pages</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color: var(--warning); background: rgba(245,158,11,0.1);"><i class="fa-solid fa-folder-tree"></i></div>
+        <div class="stat-info">
+          <div class="value" id="stat-categories">0</div>
+          <div class="label">Category / Section Pages</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color: var(--success); background: rgba(16,185,129,0.1);"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+        <div class="stat-info">
+          <div class="value" id="stat-extracted">0 / 0</div>
+          <div class="label">Extracted Lossless Text</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Input Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-code"></i> Input JSON Array / URL List / Raw HTML
+          </div>
+          <div class="panel-controls">
+            <button class="btn btn-secondary btn-sm" onclick="formatJSON()"><i class="fa-solid fa-wand-magic-sparkles"></i> Prettify</button>
+            <button class="btn btn-secondary btn-sm" onclick="clearInput()"><i class="fa-solid fa-trash"></i> Clear</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="dropzone" id="dropzone">
+            <textarea id="json-input" placeholder="Paste JSON array [{ 'url': '...' }], URL list, or Raw HTML source code (like prductpage.html)..." oninput="processInput()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-bolt"></i> Generated Output Formats
+          </div>
+          <div class="panel-controls">
+            <div class="tabs">
+              <button class="tab-btn active" onclick="switchTab('extractor', this)">Lossless Text Extractor</button>
+              <button class="tab-btn" onclick="switchTab('xml', this)">XML Sitemap</button>
+              <button class="tab-btn" onclick="switchTab('n8n', this)">n8n Set Node</button>
+              <button class="tab-btn" onclick="switchTab('json', this)">Clean JSON</button>
+              <button class="tab-btn" onclick="switchTab('table', this)">Table View</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+
+          <!-- View: Lossless Content Extractor -->
+          <div id="view-extractor" class="view-content">
+            <div class="extractor-toolbar">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button class="btn btn-primary btn-sm" id="btn-fetch-all" onclick="fetchAllPageContents()">
+                  <i class="fa-solid fa-download"></i> Fetch & Extract Remote URLs
+                </button>
+                <select class="proxy-select" id="proxy-select" title="Fetch Method / Proxy">
+                  <option value="corsproxy">Proxy: corsproxy.io</option>
+                  <option value="allorigins">Proxy: allorigins.win</option>
+                  <option value="direct">Direct Fetch (CORS allowed)</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary btn-sm" onclick="exportExtractedJSON()"><i class="fa-solid fa-file-export"></i> Download Extracted JSON</button>
+              </div>
+            </div>
+            
+            <div class="progress-bar-container" id="progress-container" style="display:none;">
+              <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="page-cards-list" id="page-cards-container" style="margin-top:10px;">
+              <!-- Cards rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- View: XML -->
+          <div id="view-xml" class="view-content" style="display:none;">
+            <pre id="output-xml"></pre>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button class="btn btn-primary btn-sm" onclick="copyXML()"><i class="fa-solid fa-copy"></i> Copy XML</button>
+              <button class="btn btn-secondary btn-sm" onclick="downloadXML()"><i class="fa-solid fa-download"></i> Download sitemap.xml</button>
+            </div>
+          </div>
+
+          <!-- View: n8n -->
+          <div id="view-n8n" class="view-content" style="display:none;">
+            <pre id="output-n8n"></pre>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button class="btn btn-primary btn-sm" onclick="copyN8N()"><i class="fa-solid fa-copy"></i> Copy n8n Set Node JSON</button>
+            </div>
+          </div>
+
+          <!-- View: JSON -->
+          <div id="view-json" class="view-content" style="display:none;">
+            <pre id="output-json"></pre>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button class="btn btn-primary btn-sm" onclick="copyJSON()"><i class="fa-solid fa-copy"></i> Copy JSON Array</button>
+              <button class="btn btn-secondary btn-sm" onclick="downloadJSON()"><i class="fa-solid fa-download"></i> Download urls.json</button>
+            </div>
+          </div>
+
+          <!-- View: Table -->
+          <div id="view-table" class="view-content" style="display:none;">
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Type</th>
+                    <th>URL</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Filter & Search Section -->
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Search URL paths or extracted text..." oninput="filterURLs()">
+      </div>
+      <div class="filter-chips">
+        <button class="chip active" data-filter="all" onclick="setFilter('all', this)">All URLs</button>
+        <button class="chip" data-filter="products" onclick="setFilter('products', this)">Products</button>
+        <button class="chip" data-filter="electrotherapy" onclick="setFilter('electrotherapy', this)">Electrotherapy</button>
+        <button class="chip" data-filter="electrodes" onclick="setFilter('electrodes', this)">Electrodes</button>
+        <button class="chip" data-filter="bracing" onclick="setFilter('bracing', this)">Bracing</button>
+        <button class="chip" data-filter="traction" onclick="setFilter('traction', this)">Traction</button>
+        <button class="chip" data-filter="general" onclick="setFilter('general', this)">General Pages</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check"></i> <span id="toast-msg">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    const pmtSampleData = [
+      { "url": "https://paintechnology.com/" },
+      { "url": "https://paintechnology.com/products/electrotherapy-devices-359" },
+      { "url": "https://paintechnology.com/products/clinical-devices-434" },
+      { "url": "https://paintechnology.com/products/tens-361" },
+      { "url": "https://paintechnology.com/products/ems-muscle-stimulators-362" },
+      { "url": "https://paintechnology.com/products/interferential-therapy-363" },
+      { "url": "https://paintechnology.com/products/electrodes-368" },
+      { "url": "https://paintechnology.com/products/foam-electrodes-538" },
+      { "url": "https://paintechnology.com/products/bracing-and-supports-381" },
+      { "url": "https://paintechnology.com/products/traction-385" },
+      { "url": "https://paintechnology.com/products/ultrasound-387" },
+      { "url": "https://paintechnology.com/about" }
+    ];
+
+    let currentParsedUrls = [];
+    let pageExtractedData = {}; // url -> { status, rawHtml, title, heading, content, charCount, wordCount, error }
+    let activeFilter = 'all';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupDragAndDrop();
+      loadSampleData();
+    });
+
+    function setupDragAndDrop() {
+      const dropzone = document.getElementById('dropzone');
+
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }, false);
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          readFile(files[0]);
+        }
+      });
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (file) readFile(file);
+    }
+
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        document.getElementById('json-input').value = content;
+        processInput();
+        showToast(`Loaded ${file.name}`);
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleData() {
+      document.getElementById('json-input').value = JSON.stringify(pmtSampleData, null, 2);
+      processInput();
+    }
+
+    function clearInput() {
+      document.getElementById('json-input').value = '';
+      processInput();
+    }
+
+    function formatJSON() {
+      try {
+        const val = document.getElementById('json-input').value;
+        const parsed = JSON.parse(val);
+        document.getElementById('json-input').value = JSON.stringify(parsed, null, 2);
+      } catch(e) {
+        showToast("Invalid JSON syntax", true);
+      }
+    }
+
+    function decodeHTMLEntities(text) {
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = text;
+      return textarea.value;
+    }
+
+    function escapeXML(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    /* Lossless DOMParser Text Extraction Logic */
+    function extractLosslessTextFromHTML(htmlString, targetUrl = '') {
+      if (!htmlString || !htmlString.trim()) {
+        return { title: '', heading: '', content: '' };
+      }
+
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlString, 'text/html');
+
+        // Title
+        const titleEl = doc.querySelector('title');
+        const title = titleEl ? titleEl.textContent.trim() : '';
+
+        // Main H1
+        const h1El = doc.querySelector('h1');
+        const heading = h1El ? h1El.textContent.trim() : '';
+
+        // Remove non-content elements without truncating main text
+        const toRemove = doc.querySelectorAll('script, style, noscript, svg, iframe, canvas, symbol');
+        toRemove.forEach(el => el.remove());
+
+        // Target body or product main container
+        const mainContainer = doc.querySelector('#productDetailViewPage, #bodyContent, main, article') || doc.body;
+
+        let rawText = '';
+        if (mainContainer) {
+          rawText = mainContainer.innerText || mainContainer.textContent || '';
+        } else {
+          rawText = doc.body ? (doc.body.innerText || doc.body.textContent || '') : '';
+        }
+
+        // Clean & normalize space while preserving all text lines
+        const cleanContent = rawText
+          .replace(/\r\n/g, '\n')
+          .replace(/\n\s*\n/g, '\n\n')
+          .replace(/[ \t]+/g, ' ')
+          .trim();
+
+        return {
+          title,
+          heading,
+          content: cleanContent
+        };
+      } catch(err) {
+        // Fallback simple regex extraction
+        const titleMatch = htmlString.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+
+        const h1Match = htmlString.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        const heading = h1Match ? h1Match[1].replace(/<[^>]+>/g, '').trim() : '';
+
+        let text = htmlString
+          .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+          .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        return { title, heading, content: text };
+      }
+    }
+
+    function extractUrls(inputStr) {
+      if (!inputStr.trim()) return [];
+      
+      let urls = [];
+
+      // Check if input is RAW HTML (like prductpage.html)
+      if (inputStr.includes('<!DOCTYPE') || inputStr.includes('<html') || inputStr.includes('<body') || inputStr.includes('<div')) {
+        // Raw HTML pasted directly into textarea
+        const htmlExtracted = extractLosslessTextFromHTML(inputStr, 'Pasted Raw HTML Source');
+        pageExtractedData['Pasted Raw HTML Source'] = {
+          status: 'done',
+          rawHtml: inputStr,
+          title: htmlExtracted.title || 'Raw HTML Document',
+          heading: htmlExtracted.heading || 'HTML Source Code',
+          content: htmlExtracted.content,
+          charCount: htmlExtracted.content.length,
+          wordCount: htmlExtracted.content.split(/\s+/).filter(Boolean).length,
+          error: null
+        };
+        return ['Pasted Raw HTML Source'];
+      }
+      
+      try {
+        const parsed = JSON.parse(inputStr);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(item => {
+            if (typeof item === 'string') urls.push(item);
+            else if (item && item.url) urls.push(item.url);
+            else if (item && item.loc) urls.push(item.loc);
+          });
+        }
+      } catch (e) {
+        const locMatches = [...inputStr.matchAll(/<loc>(.*?)<\/loc>/g)];
+        if (locMatches.length > 0) {
+          urls = locMatches.map(m => m[1]);
+        } else {
+          const urlMatches = inputStr.match(/https?:\/\/[^\s"',<]+/g);
+          if (urlMatches) urls = urlMatches;
+        }
+      }
+
+      const decoded = urls.map(u => decodeHTMLEntities(u.trim()));
+      return [...new Set(decoded)];
+    }
+
+    function processInput() {
+      const rawInput = document.getElementById('json-input').value;
+      const urls = extractUrls(rawInput);
+      currentParsedUrls = urls;
+
+      // Sync Extracted Data State Map
+      urls.forEach(u => {
+        if (!pageExtractedData[u]) {
+          pageExtractedData[u] = {
+            status: 'pending',
+            rawHtml: '',
+            title: '',
+            heading: '',
+            content: '',
+            charCount: 0,
+            wordCount: 0,
+            error: null
+          };
+        }
+      });
+
+      updateStats(urls);
+      generateOutputs(urls);
+      renderExtractorCards(urls);
+    }
+
+    function updateStats(urls) {
+      document.getElementById('stat-total').innerText = urls.length;
+
+      let productCount = 0;
+      let categoryCount = 0;
+      let downloadedCount = 0;
+
+      urls.forEach(u => {
+        if (u.includes('/products/')) productCount++;
+        else categoryCount++;
+
+        if (pageExtractedData[u] && pageExtractedData[u].status === 'done') {
+          downloadedCount++;
+        }
+      });
+
+      document.getElementById('stat-products').innerText = productCount;
+      document.getElementById('stat-categories').innerText = categoryCount;
+      document.getElementById('stat-extracted').innerText = `${downloadedCount} / ${urls.length}`;
+    }
+
+    function generateOutputs(urls) {
+      // 1. XML Sitemap
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+      urls.forEach(u => {
+        xml += `  <url>\n    <loc>${escapeXML(u)}</loc>\n  </url>\n`;
+      });
+      xml += `</urlset>`;
+      document.getElementById('output-xml').innerText = xml;
+
+      // 2. n8n Set Node JSON
+      const n8nNode = {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "sitemap_data",
+                "name": "data",
+                "value": xml,
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "name": "Set Sitemap XML"
+      };
+      document.getElementById('output-n8n').innerText = JSON.stringify(n8nNode, null, 2);
+
+      // 3. Clean JSON
+      const jsonArr = urls.map(u => ({ url: u }));
+      document.getElementById('output-json').innerText = JSON.stringify(jsonArr, null, 2);
+
+      // 4. Table View
+      renderTable(urls);
+    }
+
+    async function fetchSinglePage(targetUrl, proxyType) {
+      let fetchUrl = targetUrl;
+      if (proxyType === 'corsproxy') {
+        fetchUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      } else if (proxyType === 'allorigins') {
+        fetchUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      }
+
+      const response = await fetch(fetchUrl, {
+        headers: { 'Accept': 'text/html,application/xhtml+xml,*/*' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+      return html;
+    }
+
+    async function fetchAllPageContents() {
+      const urls = currentParsedUrls;
+      if (urls.length === 0) {
+        showToast("No URLs to fetch!", true);
+        return;
+      }
+
+      const proxyType = document.getElementById('proxy-select').value;
+      const btnFetch = document.getElementById('btn-fetch-all');
+      const progressContainer = document.getElementById('progress-container');
+      const progressFill = document.getElementById('progress-fill');
+
+      btnFetch.disabled = true;
+      btnFetch.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Fetching Pages...`;
+      progressContainer.style.display = 'block';
+      progressFill.style.width = '0%';
+
+      let completed = 0;
+
+      for (let i = 0; i < urls.length; i++) {
+        const u = urls[i];
+        if (u === 'Pasted Raw HTML Source') continue;
+
+        pageExtractedData[u].status = 'fetching';
+        renderExtractorCards(urls);
+
+        try {
+          const html = await fetchSinglePage(u, proxyType);
+          const extracted = extractLosslessTextFromHTML(html, u);
+          const words = extracted.content.split(/\s+/).filter(Boolean).length;
+          pageExtractedData[u] = {
+            status: 'done',
+            rawHtml: html,
+            title: extracted.title,
+            heading: extracted.heading,
+            content: extracted.content,
+            charCount: extracted.content.length,
+            wordCount: words,
+            error: null
+          };
+        } catch (err) {
+          pageExtractedData[u] = {
+            status: 'error',
+            rawHtml: '',
+            title: '',
+            heading: '',
+            content: '',
+            charCount: 0,
+            wordCount: 0,
+            error: err.message
+          };
+        }
+
+        completed++;
+        progressFill.style.width = `${Math.round((completed / urls.length) * 100)}%`;
+        updateStats(urls);
+        renderExtractorCards(urls);
+      }
+
+      btnFetch.disabled = false;
+      btnFetch.innerHTML = `<i class="fa-solid fa-download"></i> Fetch & Extract Remote URLs`;
+      showToast(`Completed extracting text from ${completed} pages!`);
+    }
+
+    function renderExtractorCards(urls) {
+      const container = document.getElementById('page-cards-container');
+      container.innerHTML = '';
+
+      const query = document.getElementById('search-input').value.toLowerCase();
+
+      urls.forEach((u, idx) => {
+        const item = pageExtractedData[u] || { status: 'pending', title: '', heading: '', content: '' };
+
+        if (query) {
+          const matchesUrl = u.toLowerCase().includes(query);
+          const matchesTitle = (item.title || '').toLowerCase().includes(query);
+          const matchesHeading = (item.heading || '').toLowerCase().includes(query);
+          const matchesContent = (item.content || '').toLowerCase().includes(query);
+          if (!matchesUrl && !matchesTitle && !matchesHeading && !matchesContent) return;
+        }
+
+        let statusBadge = `<span class="page-status status-pending"><i class="fa-solid fa-clock"></i> Pending</span>`;
+        if (item.status === 'fetching') {
+          statusBadge = `<span class="page-status status-fetching"><i class="fa-solid fa-spinner fa-spin"></i> Downloading</span>`;
+        } else if (item.status === 'done') {
+          statusBadge = `<span class="page-status status-done"><i class="fa-solid fa-circle-check"></i> Extracted (Lossless)</span>`;
+        } else if (item.status === 'error') {
+          statusBadge = `<span class="page-status status-error"><i class="fa-solid fa-circle-xmark"></i> ${item.error || 'Failed'}</span>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'page-card';
+        card.innerHTML = `
+          <div class="page-card-header">
+            <a href="${u.startsWith('http') ? u : '#'}" target="_blank" class="page-url"><i class="fa-solid fa-file-code"></i> ${u}</a>
+            ${statusBadge}
+          </div>
+          ${item.status === 'done' ? `
+            <div class="page-meta">
+              <span><strong>Title:</strong> ${item.title || 'N/A'}</span>
+              <span><strong>Heading (H1):</strong> ${item.heading || 'N/A'}</span>
+              <span><strong>Words:</strong> ${(item.wordCount || 0).toLocaleString()}</span>
+              <span><strong>Characters:</strong> ${(item.charCount || 0).toLocaleString()}</span>
+            </div>
+            <div class="page-content-box">${item.content || '(No text extracted)'}</div>
+            <div class="page-actions">
+              <button class="btn btn-secondary btn-sm" onclick="copyCardContent('${u.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i> Copy All Text</button>
+              <button class="btn btn-secondary btn-sm" onclick="copyCardJSON('${u.replace(/'/g, "\\'")}')"><i class="fa-solid fa-code"></i> Copy JSON Item</button>
+              <button class="btn btn-secondary btn-sm" onclick="downloadPageText('${u.replace(/'/g, "\\'")}')"><i class="fa-solid fa-file-lines"></i> Download .txt</button>
+            </div>
+          ` : `
+            <div style="font-size:0.8rem; color:var(--text-dim);">
+              ${item.status === 'error' ? `Error fetching URL: ${item.error}` : 'Click "Fetch & Extract Remote URLs" or paste raw HTML source code.'}
+            </div>
+          `}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function copyCardContent(url) {
+      const item = pageExtractedData[url];
+      if (item && item.content) {
+        navigator.clipboard.writeText(item.content);
+        showToast("Lossless page text copied!");
+      }
+    }
+
+    function copyCardJSON(url) {
+      const item = pageExtractedData[url];
+      if (item) {
+        const obj = {
+          url: url,
+          title: item.title,
+          heading: item.heading,
+          content: item.content
+        };
+        navigator.clipboard.writeText(JSON.stringify(obj, null, 2));
+        showToast("Page JSON item copied!");
+      }
+    }
+
+    function downloadPageText(url) {
+      const item = pageExtractedData[url];
+      if (item && item.content) {
+        const blob = new Blob([item.content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `extracted_knowledge_${Date.now()}.txt`;
+        a.click();
+      }
+    }
+
+    function exportExtractedJSON() {
+      const result = currentParsedUrls
+        .filter(u => pageExtractedData[u] && pageExtractedData[u].status === 'done')
+        .map(u => ({
+          url: u,
+          title: pageExtractedData[u].title,
+          heading: pageExtractedData[u].heading,
+          content: pageExtractedData[u].content
+        }));
+
+      if (result.length === 0) {
+        showToast("No extracted page content to export! Fetch or paste HTML first.", true);
+        return;
+      }
+
+      const txt = JSON.stringify(result, null, 2);
+      const blob = new Blob([txt], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'extracted_pmt_knowledge_base.json';
+      a.click();
+      showToast(`Exported ${result.length} pages to JSON!`);
+    }
+
+    function renderTable(urls) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      const query = document.getElementById('search-input').value.toLowerCase();
+
+      urls.forEach((u, index) => {
+        if (query && !u.toLowerCase().includes(query)) return;
+        if (activeFilter === 'products' && !u.includes('/products/')) return;
+        if (activeFilter === 'electrotherapy' && !u.includes('electrotherapy')) return;
+        if (activeFilter === 'electrodes' && !u.includes('electrode')) return;
+        if (activeFilter === 'bracing' && !u.includes('bracing') && !u.includes('brace')) return;
+        if (activeFilter === 'traction' && !u.includes('traction')) return;
+        if (activeFilter === 'general' && u.includes('/products/')) return;
+
+        let badgeClass = 'badge-page';
+        let badgeLabel = 'Page';
+        if (u.includes('/products/')) {
+          badgeClass = 'badge-product';
+          badgeLabel = 'Product';
+        } else if (!u.startsWith('http')) {
+          badgeClass = 'badge-html';
+          badgeLabel = 'Raw HTML';
+        }
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
+          <td style="font-family:var(--font-code); font-size:0.78rem;">${u}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="copySingle('${u.replace(/'/g, "\\'")}')"><i class="fa-solid fa-copy"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterURLs() {
+      renderTable(currentParsedUrls);
+      renderExtractorCards(currentParsedUrls);
+    }
+
+    function setFilter(filterName, el) {
+      activeFilter = filterName;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderTable(currentParsedUrls);
+    }
+
+    function switchTab(tab, btnEl) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      document.querySelectorAll('.view-content').forEach(v => v.style.display = 'none');
+      document.getElementById('view-' + tab).style.display = 'block';
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.innerText = msg;
+      if (isError) toast.style.background = 'var(--danger)';
+      else toast.style.background = 'var(--pmt-grad)';
+      
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function copyXML() {
+      const txt = document.getElementById('output-xml').innerText;
+      navigator.clipboard.writeText(txt);
+      showToast("XML Sitemap copied to clipboard!");
+    }
+
+    function copyN8N() {
+      const txt = document.getElementById('output-n8n').innerText;
+      navigator.clipboard.writeText(txt);
+      showToast("n8n Set Node JSON copied to clipboard!");
+    }
+
+    function copyJSON() {
+      const txt = document.getElementById('output-json').innerText;
+      navigator.clipboard.writeText(txt);
+      showToast("Clean JSON Array copied to clipboard!");
+    }
+
+    function copySingle(url) {
+      navigator.clipboard.writeText(url);
+      showToast("URL copied to clipboard!");
+    }
+
+    function downloadXML() {
+      const txt = document.getElementById('output-xml').innerText;
+      const blob = new Blob([txt], { type: 'text/xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'sitemap.xml';
+      a.click();
+      showToast("Downloading sitemap.xml...");
+    }
+
+    function downloadJSON() {
+      const txt = document.getElementById('output-json').innerText;
+      const blob = new Blob([txt], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'urls.json';
+      a.click();
+      showToast("Downloading urls.json...");
+    }
+  </script>
+</body>
+</html>

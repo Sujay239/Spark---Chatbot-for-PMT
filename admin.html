@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NerveSpa Admin Panel</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --ns-primary: #2563eb;
+        --ns-accent: #38bdf8;
+        --ns-bg: #020617;
+        --ns-surface: rgba(15, 23, 42, 0.76);
+        --ns-surface-light: rgba(255, 255, 255, 0.03);
+        --ns-text: #f3f4f6;
+        --ns-muted: rgba(229, 231, 235, 0.78);
+        --ns-dim: rgba(229, 231, 235, 0.54);
+        --border-soft: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.14);
+        --input-bg: rgba(15, 23, 42, 0.88);
+        --input-border: rgba(148, 163, 184, 0.28);
+        --input-focus: rgba(56, 189, 248, 0.4);
+        --shadow-btn: 0 10px 24px rgba(37, 99, 235, 0.22);
+        --font: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font);
+        background: var(--ns-bg);
+        color: var(--ns-text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Animated Background Effects */
+      .ambient-glow {
+        position: absolute;
+        width: 80vw;
+        height: 80vw;
+        max-width: 1000px;
+        max-height: 1000px;
+        background: radial-gradient(
+          circle,
+          rgba(37, 99, 235, 0.12) 0%,
+          rgba(2, 6, 23, 0) 70%
+        );
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        pointer-events: none;
+        animation: pulse 12s infinite alternate ease-in-out;
+      }
+
+      .ambient-glow-2 {
+        position: absolute;
+        width: 60vw;
+        height: 60vw;
+        max-width: 800px;
+        max-height: 800px;
+        background: radial-gradient(
+          circle,
+          rgba(56, 189, 248, 0.08) 0%,
+          rgba(2, 6, 23, 0) 70%
+        );
+        border-radius: 50%;
+        top: 0;
+        right: 0;
+        transform: translate(20%, -20%);
+        z-index: 1;
+        pointer-events: none;
+        animation: float 15s infinite alternate ease-in-out;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: translate(-50%, -50%) scale(0.9);
+          opacity: 0.6;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes float {
+        0% {
+          transform: translate(20%, -20%) rotate(0deg);
+        }
+        100% {
+          transform: translate(5%, -5%) rotate(5deg);
+        }
+      }
+
+      /* Login Card */
+      .login-card {
+        background: var(--ns-surface);
+        border: 1px solid var(--border-soft);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 24px;
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 440px;
+        z-index: 10;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(30px);
+        margin: 20px;
+      }
+
+      @keyframes slideUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Logo wrapper matching circular design */
+      .logo-container {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+
+      .logo-container .logo-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 88px;
+        height: 88px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        margin: 0 auto;
+        overflow: hidden;
+        border: 2px solid var(--border-soft);
+      }
+
+      .logo-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      h1 {
+        font-size: 26px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 10px;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #ffffff, #93c5fd);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      p.subtitle {
+        text-align: center;
+        font-size: 14px;
+        color: var(--ns-muted);
+        margin-bottom: 36px;
+        line-height: 1.5;
+      }
+
+      .form-group {
+        margin-bottom: 22px;
+        position: relative;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ns-muted);
+        margin-bottom: 8px;
+        letter-spacing: 0.02em;
+      }
+
+      .form-input {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--ns-text);
+        padding: 14px 16px;
+        border-radius: 14px;
+        font-size: 15px;
+        font-family: inherit;
+        transition: all 0.2s ease;
+        outline: none;
+      }
+
+      .form-input::placeholder {
+        color: var(--ns-dim);
+      }
+
+      .form-input:focus {
+        border-color: var(--ns-accent);
+        box-shadow: 0 0 0 3px var(--input-focus);
+        background: rgba(15, 23, 42, 0.95);
+      }
+
+      .submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, var(--ns-accent), #2563eb);
+        color: #ffffff;
+        border: none;
+        padding: 16px;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 10px;
+        margin-bottom: 26px;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+        box-shadow: var(--shadow-btn);
+        letter-spacing: 0.02em;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 32px rgba(37, 99, 235, 0.4);
+      }
+
+      .submit-btn:active {
+        transform: translateY(0);
+      }
+
+      .footer-link {
+        text-align: center;
+        font-size: 13px;
+        color: var(--ns-dim);
+        line-height: 1.6;
+      }
+
+      .footer-link a {
+        color: var(--ns-accent);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.15s ease;
+      }
+
+      .footer-link a:hover {
+        color: #7dd3fc;
+        text-decoration: underline;
+      }
+
+      /* Toast Notification */
+      #toast-container {
+        position: fixed;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3000;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .toast {
+        background: var(--ns-surface);
+        border: 1px solid var(--border-soft);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        padding: 12px 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: toastIn 0.3s ease forwards, toastOut 0.3s ease 3.7s forwards;
+        border: 1px solid var(--border-strong);
+      }
+      @keyframes toastIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes toastOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Subtle animated background elements -->
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+    <div id="toast-container"></div>
+
+    <div class="login-card">
+      <!-- Logo -->
+      <div class="logo-container">
+        <div class="logo-wrapper">
+          <!-- Replace 'logo.png' below with the actual path to your saved logo image file if needed -->
+          <img src="logo.jpg" alt="NerveSpa Logo" />
+        </div>
+      </div>
+
+      <!-- PIN Entry Form -->
+      <div id="pin-section">
+        <h1>Admin PIN Required</h1>
+        <p class="subtitle">Enter the 4-digit security PIN to proceed.</p>
+        
+        <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 30px;">
+          <input type="text" maxlength="1" class="form-input otp-box" id="pin-1" inputmode="numeric" autocomplete="one-time-code" />
+          <input type="text" maxlength="1" class="form-input otp-box" id="pin-2" inputmode="numeric" />
+          <input type="text" maxlength="1" class="form-input otp-box" id="pin-3" inputmode="numeric" />
+          <input type="text" maxlength="1" class="form-input otp-box" id="pin-4" inputmode="numeric" />
+        </div>
+
+        <div id="pin-error" style="color: #f87171; font-size: 13px; text-align: center; margin-bottom: 16px; display: none;">
+          Incorrect PIN. Access denied.
+        </div>
+
+        <button type="button" id="verify-pin-btn" class="submit-btn" style="margin-bottom: 0;">
+          Verify PIN
+        </button>
+      </div>
+
+      <!-- Login Form (Initially Hidden) -->
+      <div id="login-section" style="display: none;">
+        <h1>Welcome to NerveSpa<br />Admin Panel</h1>
+        <p class="subtitle">Please provide your credentials to access the secure dashboard.</p>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="admin@nervespa.com" required />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="••••••••" required />
+          </div>
+
+          <div id="login-error" style="color: #f87171; font-size: 13px; text-align: center; margin-bottom: 16px; display: none;">
+            Invalid credentials. Please try again.
+          </div>
+
+          <button type="submit" id="submit-btn" class="submit-btn" aria-label="Sign In to Dashboard">
+            Sign In
+          </button>
+        </form>
+
+        <div class="footer-link">
+          Forgot password? <br />
+          <div style="color: var(--ns-primary)">Contact the management team</div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .otp-box {
+        width: 60px !important;
+        height: 60px;
+        text-align: center;
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+        background: rgba(15, 23, 42, 0.6) !important;
+      }
+    </style>
+
+    <script>
+      const REQUIRED_PIN = "3487";
+      const pinSection = document.getElementById("pin-section");
+      const loginSection = document.getElementById("login-section");
+      const pinInputs = [
+        document.getElementById("pin-1"),
+        document.getElementById("pin-2"),
+        document.getElementById("pin-3"),
+        document.getElementById("pin-4")
+      ];
+      const verifyPinBtn = document.getElementById("verify-pin-btn");
+      const pinError = document.getElementById("pin-error");
+
+      pinInputs[0].focus();
+      
+      // Check for active session on load to update UI feedback
+      const isActiveSession = localStorage.getItem("isLoggedIn") === "true" && localStorage.getItem("authToken");
+      if (isActiveSession) {
+        const sub = document.querySelector("#pin-section .subtitle");
+        if (sub) sub.innerHTML = '<i class="fa-solid fa-lock-open" style="color:var(--ns-accent)"></i> Active session found. Enter PIN to unlock.';
+      }
+
+      // PIN Input Logic (OTP behavior)
+      pinInputs.forEach((input, index) => {
+        input.addEventListener("input", (e) => {
+          if (e.data && index < 3) {
+            pinInputs[index + 1].focus();
+          }
+          checkPinAuto();
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !input.value && index > 0) {
+            pinInputs[index - 1].focus();
+          }
+        });
+      });
+
+      function checkPinAuto() {
+          const pin = pinInputs.map(i => i.value).join("");
+          if (pin.length === 4) {
+              verifyPin();
+          }
+      }
+
+      function verifyPin() {
+        const pin = pinInputs.map(i => i.value).join("");
+        if (pin === REQUIRED_PIN) {
+          sessionStorage.setItem("pinVerified", "true");
+
+          // Check for existing session - if valid, skip login form
+          if (localStorage.getItem("isLoggedIn") === "true" && localStorage.getItem("authToken")) {
+            window.location.href = "dashboard.html";
+            return;
+          }
+
+          pinSection.style.opacity = "0";
+          setTimeout(() => {
+            pinSection.style.display = "none";
+            loginSection.style.display = "block";
+            loginSection.style.opacity = "0";
+            setTimeout(() => (loginSection.style.opacity = "1"), 50);
+          }, 300);
+        } else {
+          pinError.style.display = "block";
+          pinInputs.forEach(i => {
+              i.value = "";
+              i.style.borderColor = "#f87171";
+          });
+          pinInputs[0].focus();
+        }
+      }
+
+      verifyPinBtn.addEventListener("click", verifyPin);
+
+      // Audit Log Helper
+      async function sendAuditLog({ action_type, description, previous_value = {}, new_value = {}, status = "success" }) {
+        try {
+          const ipRes = await fetch("https://api.ipify.org?format=json");
+          const ipData = await ipRes.json();
+          const ip = ipData.ip;
+
+          const payload = {
+            action_type,
+            user_name: localStorage.getItem("adminUserName") || "Admin",
+            description,
+            previous_value,
+            new_value,
+            source: "admin_panel",
+            ip_address: ip,
+            status: status
+          };
+
+          await fetch("https://n8n.srv917960.hstgr.cloud/webhook/auditlog", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+        } catch (err) {
+          console.warn("Audit log failed:", err);
+        }
+      }
+
+      // Login Logic
+      const loginForm = document.getElementById("login-form");
+      const submitBtn = document.getElementById("submit-btn");
+      const errorDiv = document.getElementById("login-error");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        // Final security check
+        if (sessionStorage.getItem("pinVerified") !== "true") {
+            alert("Unauthorized access attempt.");
+            location.reload();
+            return;
+        }
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Signing In...";
+        errorDiv.style.display = "none";
+        
+        try {
+          const response = await fetch("https://n8n.srv917960.hstgr.cloud/webhook/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.token) {
+              localStorage.setItem("authToken", data.token);
+              localStorage.setItem("isLoggedIn", "true");
+              localStorage.setItem("activeDashboardTab", "overview");
+              
+              // Audit Log Success
+              await sendAuditLog({
+                action_type: "LOGIN",
+                description: `Admin logged in successfully: ${email}`,
+                status: "success"
+              });
+
+              window.location.href = "dashboard.html";
+            } else {
+              errorDiv.innerText = "Authentication error: Missing security token.";
+              errorDiv.style.display = "block";
+              
+              // Audit Log Failure
+              await sendAuditLog({
+                action_type: "LOGIN",
+                description: `Login failed: Missing security token for ${email}`,
+                status: "failed"
+              });
+            }
+          } else {
+            errorDiv.innerText = "Login failed. Please check your credentials.";
+            errorDiv.style.display = "block";
+            
+            // Audit Log Failure
+            await sendAuditLog({
+              action_type: "LOGIN",
+              description: `Login failed: Invalid credentials for ${email}`,
+              status: "failed"
+            });
+          }
+        } catch (err) {
+          console.error("Login error:", err);
+          errorDiv.innerText = "Connection error. Please try again later.";
+          errorDiv.style.display = "block";
+          
+          // Audit Log Failure
+          await sendAuditLog({
+            action_type: "LOGIN",
+            description: `Login failed: Connection error for ${email} - ${err.message}`,
+            status: "failed"
+          });
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Sign In";
+        }
+      });
+
+      // Show Toast Notification
+      function showToast(msg, type = "success") {
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+        const toast = document.createElement("div");
+        toast.className = `toast`;
+        const icon = type === "success" ? "fa-circle-check" : "fa-circle-exclamation";
+        const color = type === "success" ? "#4ade80" : "#f87171";
+        toast.innerHTML = `<i class="fa-solid ${icon}" style="color: ${color}"></i> ${msg}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      }
+
+      // Check for session expiry error on load
+      window.onload = () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("error") === "session_expired") {
+          showToast("Session expired or invalid access. Please log in again.", "error");
+        }
+      };
+    </script>
+  </body>
+</html>

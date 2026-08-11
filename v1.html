@@ -1,0 +1,1425 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Spark — Smart Pain Assistance and Recovery Knowledge | PMT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --pmt-header-gradient: linear-gradient(
+          120deg,
+          #00aca0 0%,
+          #007fac 55%,
+          #041c3d 100%
+        );
+        --font:
+          "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        --font-display: "Roboto Condensed", var(--font);
+        --pmt-accent: #00aca0;
+        --pmt-primary: #007fac;
+        --shadow-1: 0 10px 30px rgba(0, 0, 0, 0.18);
+        --shadow-2: 0 24px 80px rgba(2, 6, 23, 0.28);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      :root {
+        --pmt-bg: #ffffff;
+        --pmt-surface: rgba(255, 255, 255, 0.94);
+        --pmt-surface-2: rgba(4, 28, 61, 0.03);
+        --pmt-text: #041c3d;
+        --pmt-muted: rgba(4, 28, 61, 0.72);
+        --pmt-dim: rgba(4, 28, 61, 0.56);
+        --border-soft: rgba(4, 28, 61, 0.08);
+        --input-bg: rgba(255, 255, 255, 0.98);
+        --input-border: rgba(4, 28, 61, 0.12);
+        --input-focus: rgba(0, 172, 160, 0.28);
+        --chip-bg: rgba(4, 28, 61, 0.03);
+        --card-bg: rgba(4, 28, 61, 0.025);
+        --card-hover: rgba(4, 28, 61, 0.05);
+        --assistant-bubble: rgba(4, 28, 61, 0.04);
+        --user-bubble: linear-gradient(135deg, #00aca0, #007fac);
+        --success-bg: rgba(34, 197, 94, 0.08);
+        --warning-bg: rgba(245, 158, 11, 0.1);
+      }
+      body.pmt-theme-dark {
+        --pmt-bg: #041224;
+        --pmt-surface: rgba(8, 24, 48, 0.78);
+        --pmt-surface-2: rgba(255, 255, 255, 0.03);
+        --pmt-text: #f3f6fb;
+        --pmt-muted: rgba(226, 234, 245, 0.78);
+        --pmt-dim: rgba(226, 234, 245, 0.54);
+        --border-soft: rgba(255, 255, 255, 0.08);
+        --input-bg: rgba(8, 24, 48, 0.88);
+        --input-border: rgba(148, 180, 214, 0.28);
+        --input-focus: rgba(0, 172, 160, 0.3);
+        --chip-bg: rgba(255, 255, 255, 0.04);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-hover: rgba(255, 255, 255, 0.06);
+        --assistant-bubble: rgba(255, 255, 255, 0.04);
+        --success-bg: rgba(34, 197, 94, 0.12);
+        --warning-bg: rgba(245, 158, 11, 0.14);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font);
+        background: transparent;
+        color: var(--pmt-text);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      .pmt-launcher {
+        position: fixed;
+        right: 18px;
+        bottom: calc(18px + var(--safe-bottom));
+        z-index: 999999;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px 12px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(4, 28, 61, 0.08);
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: var(--shadow-1);
+        color: #041c3d;
+        cursor: pointer;
+        user-select: none;
+        backdrop-filter: blur(14px);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease;
+      }
+      body.pmt-theme-dark .pmt-launcher {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(4, 18, 36, 0.86);
+        color: #fff;
+      }
+      .pmt-launcher:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+      }
+      .pmt-launcher:active {
+        transform: scale(0.99);
+      }
+      .pmt-launcher .label {
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        font-family: var(--font-display);
+      }
+      .pmt-shell {
+        position: fixed;
+        right: 18px;
+        bottom: calc(78px + var(--safe-bottom));
+        z-index: 999999;
+        width: 430px;
+        max-width: calc(100vw - 36px);
+        height: min(82dvh, 760px);
+        min-height: 600px;
+        min-width: 340px;
+        max-height: 95dvh;
+        background: var(--pmt-surface);
+        border: 1px solid var(--border-soft);
+        border-radius: 24px;
+        box-shadow: var(--shadow-2);
+        overflow: hidden;
+        display: none;
+        backdrop-filter: blur(20px);
+        container-type: inline-size;
+      }
+      .pmt-shell.open {
+        display: block !important;
+      }
+      .pmt-shell.fullscreen {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw !important;
+        height: 100dvh !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 0;
+        min-width: 100vw;
+        min-height: 100dvh;
+      }
+      .pmt-shell.minimized {
+        height: 72px !important;
+        min-height: 72px !important;
+        width: 360px;
+        overflow: hidden;
+      }
+      .pmt-shell.minimized .pmt-body {
+        display: none;
+      }
+      .pmt-shell.minimized .pmt-topbar {
+        min-height: 72px;
+      }
+      .pmt-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 10px 10px 16px;
+        background: var(--pmt-header-gradient);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        min-height: 70px;
+      }
+      .pmt-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+      .pmt-logo {
+        height: 46px;
+        width: auto;
+        object-fit: contain;
+        display: block;
+      }
+      .pmt-beta-badge {
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.05)
+        );
+        color: #fff;
+        padding: 2px 7px;
+        border-radius: 100px;
+        letter-spacing: 0.7px;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: inline-flex;
+        align-items: center;
+        height: fit-content;
+        margin-left: auto;
+        user-select: none;
+      }
+      .pmt-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .btn-primary,
+      .btn-secondary,
+      .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: var(--font);
+        transition:
+          transform 0.15s ease,
+          opacity 0.15s ease,
+          background 0.15s ease;
+        user-select: none;
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(0, 127, 172, 0.25);
+        padding: 10px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .btn-secondary {
+        color: var(--pmt-text);
+        background: var(--chip-bg);
+        border: 1px solid var(--border-soft);
+        padding: 10px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border: 1px solid rgba(226, 232, 240, 0.22);
+        background: rgba(4, 28, 61, 0.18);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .btn-primary:active,
+      .btn-secondary:active,
+      .btn-icon:active {
+        transform: scale(0.98);
+      }
+      .pmt-body {
+        height: calc(100% - 70px);
+        display: flex;
+        flex-direction: column;
+        background: var(--pmt-bg);
+      }
+      body.pmt-theme-dark .pmt-body {
+        background: radial-gradient(
+          circle at top,
+          rgba(8, 24, 48, 0.92),
+          #041224 70%
+        );
+      }
+      .pmt-screen {
+        padding: 18px 16px 16px;
+        overflow: auto;
+        flex: 1 1 auto;
+        scroll-behavior: smooth;
+      }
+      .thread {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        animation: pmtFadeIn 0.22s ease-out;
+      }
+      @keyframes pmtFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .hero {
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        border-radius: 22px;
+        padding: 18px 16px;
+        box-shadow: 0 10px 24px rgba(4, 28, 61, 0.06);
+      }
+      .heroBadge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        border: 1px solid var(--border-soft);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--pmt-dim);
+        margin-bottom: 14px;
+      }
+      .heroTitle {
+        margin: 0 0 8px;
+        font-family: var(--font-display);
+        font-size: 28px;
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .heroText {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--pmt-muted);
+        max-width: 34ch;
+      }
+      .quickSectionTitle {
+        margin: 6px 2px 2px;
+        color: var(--pmt-dim);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .chip {
+        border: 1px solid var(--border-soft);
+        background: transparent;
+        color: var(--pmt-text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font);
+        transition:
+          background 0.15s ease,
+          transform 0.15s ease;
+        text-align: left;
+        white-space: normal;
+        line-height: 1.3;
+      }
+      .chip:hover {
+        background: var(--card-hover);
+        transform: translateY(-1px);
+      }
+      .cardRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .homeCard {
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        background: var(--card-bg);
+        padding: 14px;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          background 0.15s ease;
+      }
+      .homeCard:hover {
+        background: var(--card-hover);
+        transform: translateY(-1px);
+      }
+      .homeCardTitle {
+        margin: 0 0 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pmt-text);
+        font-family: var(--font-display);
+      }
+      .homeCardSub {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        color: var(--pmt-muted);
+      }
+      .ctaPanel {
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        padding: 14px;
+        background: linear-gradient(180deg, var(--success-bg), transparent);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .ctaPanelTitle {
+        margin: 0 0 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .ctaPanelText {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--pmt-muted);
+      }
+      .message {
+        display: flex;
+        width: 100%;
+        gap: 10px;
+        animation: pmtFadeIn 0.18s ease-out;
+      }
+      .message.assistant {
+        justify-content: flex-start;
+      }
+      .message.user {
+        justify-content: flex-end;
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        box-shadow: 0 8px 20px rgba(0, 127, 172, 0.28);
+        margin-top: 2px;
+        overflow: hidden;
+      }
+      .avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 999px;
+      }
+      .bubbleWrap {
+        max-width: min(84%, 320px);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .pmt-shell.fullscreen .bubbleWrap {
+        max-width: min(84%, 800px);
+      }
+      .message.user .bubbleWrap {
+        align-items: flex-end;
+      }
+      .bubbleLabel {
+        font-size: 11px;
+        color: var(--pmt-dim);
+        font-weight: 700;
+        padding: 0 2px;
+      }
+      .bubble {
+        border-radius: 18px;
+        padding: 13px 14px;
+        border: 1px solid var(--border-soft);
+        background: var(--assistant-bubble);
+        color: var(--pmt-text);
+        line-height: 1.55;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+      .message.user .bubble {
+        background: var(--user-bubble);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 10px 28px rgba(0, 127, 172, 0.25);
+      }
+      .assistantActions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .microPill {
+        border-radius: 999px;
+        padding: 8px 11px;
+        border: 1px solid var(--border-soft);
+        background: var(--chip-bg);
+        color: var(--pmt-text);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font);
+        text-align: left;
+        white-space: normal;
+        line-height: 1.3;
+      }
+      .microPill:hover {
+        background: var(--card-hover);
+      }
+      .typingBubble {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 18px;
+      }
+      .typingBubble span {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--pmt-dim);
+        display: block;
+        animation: pmtBlink 1.2s infinite ease-in-out;
+      }
+      .typingBubble span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .typingBubble span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes pmtBlink {
+        0%,
+        80%,
+        100% {
+          opacity: 0.35;
+          transform: translateY(0);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(-1px);
+        }
+      }
+      .richAnswer p {
+        margin: 0 0 10px;
+      }
+      .richAnswer p:last-child {
+        margin-bottom: 0;
+      }
+      .richAnswer ul,
+      .richAnswer ol {
+        margin: 0 0 10px 18px;
+        padding: 0;
+      }
+      .richAnswer li {
+        margin: 0 0 6px;
+      }
+      .richAnswer strong {
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .message.user .richAnswer strong {
+        color: #fff;
+      }
+      .richAnswer .callout {
+        display: block;
+        margin: 10px 0;
+        padding: 10px 11px;
+        border-radius: 14px;
+        background: var(--warning-bg);
+        border: 1px solid var(--border-soft);
+        font-size: 12px;
+      }
+      .metaRow {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .metaTag {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--pmt-dim);
+        background: var(--chip-bg);
+        border: 1px solid var(--border-soft);
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+      .stuckCard {
+        margin-top: 2px;
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        border-radius: 18px;
+        padding: 14px;
+      }
+      .stuckTitle {
+        margin: 0 0 5px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .stuckText {
+        margin: 0 0 10px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--pmt-muted);
+      }
+      @container (max-width: 480px) {
+        .support-btn-text {
+          display: none !important;
+        }
+      }
+      @media (max-width: 520px) {
+        .support-btn-text {
+          display: none;
+        }
+        .pmt-shell {
+          right: 12px;
+          left: 12px;
+          width: auto;
+          bottom: calc(76px + var(--safe-bottom));
+          height: min(86dvh, 760px);
+          min-height: 540px;
+          min-width: auto;
+          max-width: calc(100vw - 24px);
+        }
+        .heroTitle {
+          font-size: 26px;
+        }
+        .cardRow {
+          grid-template-columns: 1fr;
+        }
+        .bubbleWrap {
+          max-width: 88%;
+        }
+      }
+      .pmt-launcher-note {
+        position: fixed;
+        right: 18px;
+        bottom: calc(76px + var(--safe-bottom));
+        z-index: 999998;
+        background: #fff;
+        color: var(--pmt-text);
+        padding: 10px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-1);
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px) scale(0.95);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-origin: bottom right;
+        cursor: pointer;
+      }
+      .pmt-launcher-note.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+      }
+      .pmt-launcher-note::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        right: 24px;
+        width: 10px;
+        height: 10px;
+        background: #fff;
+        border-right: 1px solid var(--border-soft);
+        border-bottom: 1px solid var(--border-soft);
+        transform: rotate(45deg);
+      }
+      body.pmt-theme-dark .pmt-launcher-note {
+        background: rgba(4, 18, 36, 0.92);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .composer {
+        padding: 12px 14px 16px 14px;
+        border-top: 1px solid var(--border-soft);
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        background: var(--pmt-surface);
+        z-index: 10;
+      }
+      .composerMain {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        border-radius: 20px;
+        padding: 8px 14px;
+      }
+      .composerMain:focus-within {
+        border-color: var(--pmt-primary);
+        box-shadow: 0 0 0 1px rgba(0, 127, 172, 0.2);
+      }
+      .composer textarea {
+        width: 100%;
+        min-height: 26px;
+        max-height: 110px;
+        resize: none;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 13px;
+        font-family: var(--font);
+        padding: 5px 0;
+        margin: 0;
+        color: var(--pmt-text);
+        line-height: 1.45;
+      }
+      .composer textarea:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .send {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.15s ease,
+          opacity 0.15s ease;
+        flex: 0 0 auto;
+        box-shadow: 0 10px 24px rgba(0, 127, 172, 0.25);
+      }
+      .send:active {
+        transform: scale(0.95);
+      }
+      .send:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .footerHint {
+        font-size: 11px;
+        color: var(--pmt-dim);
+        text-align: center;
+        margin: 0 24px 12px;
+      }
+      .pmt-screen.home-search-mode {
+        display: flex;
+        flex-direction: column;
+      }
+      .googleHomeHero {
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        padding: 34px 16px 10px;
+        text-align: center;
+      }
+      .googleHomeHero .heroBadge {
+        margin: 0 auto 12px;
+        justify-content: center;
+      }
+      .googleHomeHero .heroTitle {
+        margin: 0 auto 10px;
+        font-size: clamp(30px, 5vw, 46px);
+        text-align: center;
+        letter-spacing: -0.02em;
+      }
+      .googleHomeHero .heroText {
+        margin: 0 auto;
+        max-width: 560px;
+        text-align: center;
+      }
+      .googleAskWrap {
+        width: 100%;
+        max-width: 760px;
+        margin: 10px auto 4px;
+      }
+      .googleAskBox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 54px;
+        border: 1px solid rgba(4, 28, 61, 0.14);
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 999px;
+        padding: 9px 10px 9px 18px;
+        box-shadow: 0 8px 26px rgba(4, 28, 61, 0.07);
+        transition:
+          box-shadow 0.15s ease,
+          border-color 0.15s ease;
+      }
+      body.pmt-theme-dark .googleAskBox {
+        background: rgba(8, 24, 48, 0.78);
+        border-color: rgba(148, 180, 214, 0.24);
+      }
+      .googleAskBox:focus-within {
+        border-color: var(--pmt-primary);
+        box-shadow: 0 16px 46px rgba(0, 127, 172, 0.2);
+      }
+      .googleAskBox textarea {
+        width: 100%;
+        min-height: 28px;
+        max-height: 96px;
+        resize: none;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--pmt-text);
+        font-size: 14px;
+        line-height: 1.45;
+        font-family: var(--font);
+        padding: 4px 0;
+        margin: 0;
+      }
+      .googleAskBox textarea::placeholder {
+        color: var(--pmt-dim);
+      }
+      .googleAskSend {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        border: 0;
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex: 0 0 auto;
+        box-shadow: 0 10px 22px rgba(0, 127, 172, 0.25);
+      }
+      .googleAskActions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .googleGhostBtn {
+        border: 1px solid var(--border-soft);
+        background: var(--chip-bg);
+        color: var(--pmt-text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font);
+        cursor: pointer;
+      }
+      .googleBrowseWrap {
+        max-width: 760px;
+        width: 100%;
+        margin: 16px auto 0;
+      }
+      .googleBrowseWrap .quickSectionTitle {
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      @media (max-width: 520px) {
+        .googleAskBox {
+          min-height: 50px;
+          border-radius: 24px;
+        }
+      }
+      .pmt-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0 2px;
+      }
+      .pmt-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px 7px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        color: var(--pmt-text);
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font);
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          transform 0.1s ease;
+        white-space: nowrap;
+      }
+      .pmt-nav-btn:hover {
+        background: var(--card-hover);
+        transform: translateY(-1px);
+      }
+      .pmt-nav-btn:active {
+        transform: scale(0.97);
+      }
+      .pmt-nav-home {
+        margin-left: auto;
+      }
+      .pmt-q-list {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--card-bg);
+      }
+      .pmt-q-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 13px 14px;
+        border: none;
+        border-bottom: 1px solid var(--border-soft);
+        background: transparent;
+        color: var(--pmt-text);
+        font-size: 13px;
+        font-weight: 500;
+        font-family: var(--font);
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.12s ease;
+        line-height: 1.4;
+      }
+      .pmt-q-row:last-child {
+        border-bottom: none;
+      }
+      .pmt-q-row:hover {
+        background: var(--card-hover);
+      }
+      .pmt-q-row:active {
+        background: var(--chip-bg);
+      }
+      .pmt-q-text {
+        flex: 1;
+      }
+      .pmt-q-arrow {
+        flex: 0 0 auto;
+        color: var(--pmt-dim);
+      }
+      .pmt-spark-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 999px;
+        display: block;
+        margin: 0 auto 14px;
+        box-shadow: 0 14px 34px rgba(0, 127, 172, 0.22);
+      }
+    </style>
+  </head>
+  <body class="pmt-theme-light">
+    <div class="pmt-launcher-note" id="pmtLauncherNote">Ask Spark</div>
+
+    <div
+      class="pmt-launcher"
+      id="pmtLauncher"
+      aria-label="Open Spark, the Pain Management Technologies Assistant"
+    >
+      <img
+        src="https://res.cloudinary.com/din7hkzcq/image/upload/v1786026169/Untitled_design_74_jyvfu3.png"
+        alt="Spark"
+        width="40"
+        height="40"
+        style="
+          display: block;
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          object-fit: cover;
+          box-shadow: 0 6px 16px rgba(0, 127, 172, 0.28);
+        "
+      />
+      <span class="label">Ask Spark</span>
+    </div>
+
+    <div
+      class="pmt-shell"
+      id="pmtShell"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Spark, the Pain Management Technologies Assistant"
+    >
+      <div class="pmt-topbar">
+        <div class="pmt-topbar-left">
+          <img
+            class="pmt-logo"
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPIAAAB0CAYAAAC/gW9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3xpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpiMWIxNDMyZi1jMzA4LTQ5OGItOTA0Yi1mNjZkYzNjODliNjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NUE5MjUzMjhBNzFDMTFFQUEzOTdDODlEQjZCQzg5MUMiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NUE5MjUzMjdBNzFDMTFFQUEzOTdDODlEQjZCQzg5MUMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3QzdCQjc2NTFBQTdFQTExOUJGRkIyMUNBMjU5OUZBOSIgc3RSZWY6ZG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjZhZjViMjMxLTg3NTItM2E0ZS04MGM1LWJkMTBjY2Rm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"
+            alt="Pain Management Technologies"
+          />
+          <span
+            class="pmt-beta-badge"
+            title="Spark is the beta support assistant."
+            >Beta</span
+          >
+        </div>
+        <div class="pmt-topbar-right">
+          <button class="btn-icon" id="btnClear" title="Clear chat">⌫</button>
+          <button class="btn-icon" id="btnResize" title="Toggle full screen">
+            ⤢
+          </button>
+          <button class="btn-icon" id="btnMinimize" title="Minimize">—</button>
+          <button
+            class="btn-icon"
+            style="
+              width: auto;
+              padding: 0 12px;
+              gap: 1px;
+              font-size: 13px;
+              font-weight: 700;
+              align-items: center;
+            "
+            onclick="window.pmtWidgetActions.openContact()"
+            title="Talk to a Human"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+              <path
+                d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+              ></path>
+            </svg>
+            <span class="support-btn-text">Talk to a Human</span>
+          </button>
+          <button class="btn-icon" id="btnTheme" title="Toggle theme">☀</button>
+          <button class="btn-icon" id="btnClose" title="Close">✕</button>
+        </div>
+      </div>
+      <div class="pmt-body">
+        <div class="pmt-screen" id="screen" role="log" aria-live="polite"></div>
+        <div class="composer">
+          <div class="composerMain">
+            <textarea
+              id="chatInput"
+              rows="1"
+              placeholder="Ask Spark a question"
+            ></textarea>
+          </div>
+          <button class="send" id="btnSend" title="Send message">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="transform: translateX(-1px)"
+            >
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const CATEGORIES = [
+          {
+            key: "basics",
+            title: "TENS Basics",
+            sub: "How TENS works, what it feels like, and general use",
+          },
+          {
+            key: "placement",
+            title: "Pad Placement & Programs",
+            sub: "Where to place pads, channels, modes, and settings",
+          },
+          {
+            key: "safety",
+            title: "Safety & Precautions",
+            sub: "Medical conditions, pacemakers, pregnancy, and cautions",
+          },
+          {
+            key: "troubleshooting",
+            title: "Troubleshooting",
+            sub: "No sensation, skin irritation, and device issues",
+          },
+          {
+            key: "electrodes",
+            title: "Electrodes, Batteries & Care",
+            sub: "Pad life, compatibility, cleaning, and accessories",
+          },
+          {
+            key: "ultima5",
+            title: "Ultima 5 Device Guide",
+            sub: "Features, controls, and settings for your Ultima 5",
+          },
+        ];
+
+        const CATEGORY_QUESTIONS = {
+          basics: [
+            "How does a TENS unit work?",
+            "What does a TENS unit feel like?",
+            "What does a TENS unit actually do?",
+            "Does TENS help reduce inflammation?",
+            "How long does it take to feel relief?",
+            "Can I use a TENS unit every day?",
+          ],
+          placement: [
+            "Where should I place the pads for lower back pain?",
+            "Where do I put the pads for neck pain?",
+            "Can I place the pads directly over where the pain is?",
+            "Can the pads touch each other?",
+            "How far apart should the pads be?",
+          ],
+          safety: [
+            "Is it safe to use a TENS unit while sleeping?",
+            "Can I wear a TENS unit all day?",
+            "Can I use TENS with a pacemaker?",
+            "Is a TENS unit safe to use during pregnancy?",
+          ],
+          troubleshooting: [
+            "Why isn't my TENS unit producing sensation?",
+            "Why is only one pad working?",
+            "Why does the stimulation feel sharp instead of comfortable?",
+            "Why does my skin turn red after treatment?",
+          ],
+          electrodes: [
+            "How long do TENS pads last?",
+            "Why won't my pads stick anymore?",
+            "How do I make my pads sticky again?",
+            "Can I wash or clean electrode pads?",
+          ],
+          ultima5: [
+            "What is the Ultima 5 (U5)?",
+            "What comes in my Ultima 5 kit?",
+            "What does the Pad Contact Interruption Alarm do on my Ultima 5?",
+          ],
+        };
+
+        const KB_ANSWERS = {
+          "How does a TENS unit work?":
+            "A Transcutaneous Electrical Nerve Stimulation (TENS) unit is a small, battery-powered device that helps relieve pain by sending low-voltage electrical pulses through electrode pads placed on the skin.",
+          "What does a TENS unit feel like?":
+            "Most users describe the sensation as a gentle tingling, light buzzing, mild tapping, or comfortable vibration. It should feel strong, but never painful.",
+          "Where should I place the pads for lower back pain?":
+            "Place the pads on either side of the painful area, near the muscles surrounding the spine. Avoid placing pads directly over the spine.",
+          "Is it safe to use a TENS unit while sleeping?":
+            "It is generally not recommended to use a TENS unit while sleeping unless specifically instructed by a healthcare professional.",
+          "Why isn't my TENS unit producing sensation?":
+            "Check that the intensity is turned up, pads are making solid contact with clean skin, leads are securely attached, and batteries are charged.",
+          "What is the Ultima 5 (U5)?":
+            "The Ultima 5 is PMT's dual-channel digital TENS unit offering 10 intensity levels, 9 preset modes, and built-in safety features like the Pad Contact Alarm.",
+        };
+
+        const CONTACT_EMAIL = "info@paintechnology.com";
+        const WARRANTY_URL =
+          "https://paintechnology.com/resources#warranty-info";
+
+        let thread = [];
+        let isTyping = false;
+        let isFullscreen = false;
+        let isMinimized = false;
+
+        const elShell = document.getElementById("pmtShell");
+        const elLauncher = document.getElementById("pmtLauncher");
+        const elScreen = document.getElementById("screen");
+        const btnResize = document.getElementById("btnResize");
+        const btnMinimize = document.getElementById("btnMinimize");
+        const btnClear = document.getElementById("btnClear");
+        const btnClose = document.getElementById("btnClose");
+        const elFreeText = document.getElementById("chatInput");
+        const btnSend = document.getElementById("btnSend");
+
+        function createSparkBotSvg(size = 20) {
+          const safeSize = Number.isFinite(Number(size)) ? Number(size) : 20;
+          return `<img
+      src="https://res.cloudinary.com/din7hkzcq/image/upload/v1786026169/Untitled_design_74_jyvfu3.png"
+      alt="Spark"
+      width="${safeSize}"
+      height="${safeSize}"
+      style="display:block; width:${safeSize}px; height:${safeSize}px; border-radius:999px; object-fit:cover;"
+    />`;
+        }
+
+        function escapeHtml(s) {
+          return String(s ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+        }
+
+        function getQuestionsForCategory(key) {
+          return CATEGORY_QUESTIONS[key] || [];
+        }
+        function getCategoryQuestionCount(key) {
+          return getQuestionsForCategory(key).length;
+        }
+
+        function createAskBoxMarkup() {
+          return `
+      <div class="googleAskWrap">
+        <div class="googleAskBox">
+          <textarea id="homePrompt" rows="1" placeholder="Ask Spark about settings, placement, safety..." aria-label="Ask Spark a question"></textarea>
+          <button class="googleAskSend" onclick="window.pmtWidgetActions.submitHomePrompt()" aria-label="Send question">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: translateX(-1px);">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="googleAskActions">
+          <button class="googleGhostBtn" onclick="window.pmtWidgetActions.openContact()">Talk to a Human</button>
+        </div>
+      </div>`;
+        }
+
+        function renderHome() {
+          document.querySelector(".composer").style.display = "none";
+          elScreen.classList.add("home-search-mode");
+          elScreen.innerHTML = `
+      <div class="thread">
+        <div class="hero googleHomeHero">
+          <div class="pmt-spark-icon" style="background: linear-gradient(135deg, #00aca0, #007fac); display: flex; align-items: center; justify-content: center;">
+            ${createSparkBotSvg(48)}
+          </div>
+          <h1 class="heroTitle">Hi, I'm Spark.</h1>
+          <p class="heroText">Smart Pain Assistance and Recovery Knowledge — your guide to TENS therapy.</p>
+        </div>
+        ${createAskBoxMarkup()}
+        <div class="googleBrowseWrap">
+          <div class="quickSectionTitle">Browse support</div>
+          <div class="cardRow">
+            ${CATEGORIES.map(
+              (c) => `
+              <div class="homeCard" onclick="window.pmtWidgetActions.renderCategory('${escapeHtml(c.key)}')">
+                <div class="homeCardTitle">${escapeHtml(c.title)}</div>
+                <p class="homeCardSub">${escapeHtml(c.sub)}</p>
+                <div class="metaRow" style="margin-top:10px;">
+                  <span class="metaTag">${getCategoryQuestionCount(c.key)} questions</span>
+                </div>
+              </div>
+            `,
+            ).join("")}
+          </div>
+        </div>
+      </div>`;
+          elScreen.scrollTop = 0;
+          attachHomePromptEvents();
+        }
+
+        function renderCategory(key) {
+          const cat = CATEGORIES.find((x) => x.key === key);
+          const questions = getQuestionsForCategory(key);
+          document.querySelector(".composer").style.display = "none";
+          elScreen.classList.remove("home-search-mode");
+          elScreen.innerHTML = `
+      <div class="thread">
+        <div class="pmt-nav-bar">
+          <button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderHome()">← Back</button>
+          <button class="pmt-nav-btn pmt-nav-home" onclick="window.pmtWidgetActions.renderHome()">Home</button>
+        </div>
+        <div class="hero" style="padding:14px 16px;">
+          <h1 class="heroTitle" style="font-size:22px; margin-bottom:4px;">${escapeHtml(cat?.title || "Support")}</h1>
+          <p class="heroText" style="font-size:13px;">Tap a question or ask your own below.</p>
+        </div>
+        ${createAskBoxMarkup()}
+        <div class="quickSectionTitle">Common questions</div>
+        <div class="pmt-q-list">
+          ${questions
+            .map(
+              (q) => `
+            <button class="pmt-q-row" onclick="window.pmtWidgetActions.ask('${escapeHtml(q)}')">
+              <span class="pmt-q-text">${escapeHtml(q)}</span>
+            </button>`,
+            )
+            .join("")}
+        </div>
+      </div>`;
+          elScreen.scrollTop = 0;
+          attachHomePromptEvents();
+        }
+
+        function renderThread() {
+          document.querySelector(".composer").style.display = "flex";
+          elScreen.classList.remove("home-search-mode");
+          elScreen.innerHTML = `
+      <div class="thread">
+        ${thread
+          .map((item) =>
+            item.role === "user"
+              ? `
+          <div class="message user">
+            <div class="bubbleWrap">
+              <div class="bubbleLabel">You</div>
+              <div class="bubble richAnswer"><p>${escapeHtml(item.text)}</p></div>
+            </div>
+          </div>`
+              : `
+          <div class="message assistant">
+            <div class="avatar">${createSparkBotSvg(22)}</div>
+            <div class="bubbleWrap">
+              <div class="bubbleLabel">Spark</div>
+              <div class="bubble"><div class="richAnswer"><p>${escapeHtml(item.text)}</p></div></div>
+            </div>
+          </div>`,
+          )
+          .join("")}
+        ${isTyping ? `<div class="message assistant"><div class="avatar">${createSparkBotSvg(22)}</div><div class="bubbleWrap"><div class="bubble">Typing...</div></div></div>` : ""}
+      </div>`;
+          elScreen.scrollTop = elScreen.scrollHeight;
+        }
+
+        function ask(q) {
+          if (!q || !q.trim()) return;
+          thread.push({ role: "user", text: q });
+          const answer =
+            KB_ANSWERS[q] ||
+            "I don't have a specific answer for that in my knowledge base. Please feel free to use the 'Talk to a Human' button above to reach out directly to our team!";
+          thread.push({ role: "assistant", text: answer });
+          renderThread();
+        }
+
+        function submitHomePrompt() {
+          const elHome = document.getElementById("homePrompt");
+          const val = elHome ? elHome.value : elFreeText.value;
+          if (val && val.trim()) {
+            if (elHome) elHome.value = "";
+            if (elFreeText) elFreeText.value = "";
+            ask(val);
+          }
+        }
+
+        function attachHomePromptEvents() {
+          const el = document.getElementById("homePrompt");
+          if (!el) return;
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              submitHomePrompt();
+            }
+          });
+        }
+
+        function openWidget() {
+          isMinimized = false;
+          isFullscreen = true;
+          elShell.classList.remove("minimized");
+          elShell.classList.add("open", "fullscreen");
+          renderHome();
+        }
+        function closeWidget() {
+          elShell.classList.remove("open");
+        }
+
+        elLauncher.addEventListener("click", () => {
+          if (elShell.classList.contains("open")) closeWidget();
+          else openWidget();
+        });
+
+        btnClose.addEventListener("click", closeWidget);
+        btnResize.addEventListener("click", () => {
+          isFullscreen = !isFullscreen;
+          elShell.classList.toggle("fullscreen", isFullscreen);
+        });
+        btnMinimize.addEventListener("click", () => {
+          isMinimized = !isMinimized;
+          elShell.classList.toggle("minimized", isMinimized);
+        });
+        btnClear.addEventListener("click", () => {
+          thread = [];
+          renderHome();
+        });
+        btnSend.addEventListener("click", submitHomePrompt);
+        elFreeText.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            submitHomePrompt();
+          }
+        });
+
+        window.pmtWidgetActions = {
+          ask,
+          renderHome,
+          renderCategory,
+          submitHomePrompt,
+          openContact: () => window.open(`mailto:${CONTACT_EMAIL}`),
+          openWarranty: () => window.open(WARRANTY_URL, "_blank"),
+        };
+
+        renderHome();
+      });
+    </script>
+  </body>
+</html>
