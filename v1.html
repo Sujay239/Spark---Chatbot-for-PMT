@@ -1311,6 +1311,18 @@
           attachHomePromptEvents();
         }
 
+        function formatMessageText(text) {
+          if (!text) return "";
+          let clean = escapeHtml(text);
+          // Convert Markdown links [label](url) into target="_blank" HTML links
+          clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, (match, label, url) => {
+            return `<a href="${url}" target="_blank" rel="noopener" style="color: #00aca0; text-decoration: underline; font-weight: 500;">${label}</a>`;
+          });
+          // Convert newlines to paragraphs and breaks
+          clean = clean.replace(/\n\n+/g, "</p><p>").replace(/\n/g, "<br>");
+          return `<p>${clean}</p>`;
+        }
+
         function renderThread() {
           document.querySelector(".composer").style.display = "flex";
           elScreen.classList.remove("home-search-mode");
@@ -1323,7 +1335,7 @@
           <div class="message user">
             <div class="bubbleWrap">
               <div class="bubbleLabel">You</div>
-              <div class="bubble richAnswer"><p>${escapeHtml(item.text)}</p></div>
+              <div class="bubble richAnswer">${formatMessageText(item.text)}</div>
             </div>
           </div>`
               : `
@@ -1331,7 +1343,7 @@
             <div class="avatar">${createSparkBotSvg(22)}</div>
             <div class="bubbleWrap">
               <div class="bubbleLabel">Spark</div>
-              <div class="bubble"><div class="richAnswer"><p>${escapeHtml(item.text)}</p></div></div>
+              <div class="bubble"><div class="richAnswer">${formatMessageText(item.text)}</div></div>
             </div>
           </div>`,
           )
@@ -1341,14 +1353,56 @@
           elScreen.scrollTop = elScreen.scrollHeight;
         }
 
-        function ask(q) {
+        // Manage Session ID
+        let sessionId = sessionStorage.getItem("spark_session_id");
+        if (!sessionId) {
+          sessionId = "spark_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now();
+          sessionStorage.setItem("spark_session_id", sessionId);
+        }
+
+        async function ask(q) {
           if (!q || !q.trim()) return;
-          thread.push({ role: "user", text: q });
-          const answer =
-            KB_ANSWERS[q] ||
-            "I don't have a specific answer for that in my knowledge base. Please feel free to use the 'Talk to a Human' button above to reach out directly to our team!";
-          thread.push({ role: "assistant", text: answer });
+          const userQuery = q.trim();
+          thread.push({ role: "user", text: userQuery });
+          isTyping = true;
           renderThread();
+
+          const webhookUrl = `https://n8n.srv917960.hstgr.cloud/webhook/spark-chatbot?chatInput=${encodeURIComponent(userQuery)}&question=${encodeURIComponent(userQuery)}&sessionId=${encodeURIComponent(sessionId)}`;
+
+          try {
+            const response = await fetch(webhookUrl, {
+              method: "GET",
+              headers: {
+                "Accept": "application/json"
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            let replyText = "";
+
+            if (Array.isArray(data) && data.length > 0) {
+              replyText = data[0].text || data[0].output || data[0].message || data[0].response || (typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]));
+            } else if (typeof data === "object" && data !== null) {
+              replyText = data.text || data.output || data.message || data.response || JSON.stringify(data);
+            } else if (typeof data === "string") {
+              replyText = data;
+            } else {
+              replyText = "Sorry, I couldn't retrieve an answer at this time.";
+            }
+
+            thread.push({ role: "assistant", text: replyText });
+          } catch (error) {
+            console.error("Spark Webhook Fetch Error:", error);
+            const fallbackAnswer = KB_ANSWERS[userQuery] || "Sorry, I couldn't connect to Spark right now. Please try again or contact support directly at info@paintechnology.com";
+            thread.push({ role: "assistant", text: fallbackAnswer });
+          } finally {
+            isTyping = false;
+            renderThread();
+          }
         }
 
         function submitHomePrompt() {
@@ -1399,6 +1453,8 @@
         });
         btnClear.addEventListener("click", () => {
           thread = [];
+          sessionId = "spark_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now();
+          sessionStorage.setItem("spark_session_id", sessionId);
           renderHome();
         });
         btnSend.addEventListener("click", submitHomePrompt);

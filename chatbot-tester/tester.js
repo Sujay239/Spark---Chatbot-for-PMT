@@ -3,7 +3,7 @@ const readline = require('readline');
 const crypto = require('crypto');
 
 // Setup
-const inputCsv = process.argv[2] || 'vague_questions.csv';
+const inputCsv = process.argv[2] || 'sample_questions.csv';
 const outputJson = 'test_report.json';
 const outputHtml = 'test_report.html';
 const sessionId = 'test-session-' + crypto.randomBytes(4).toString('hex');
@@ -33,20 +33,23 @@ async function processQuestions() {
             // Parse "Vague","Context" format
             if (raw.includes('","')) {
                 const parts = raw.split('","');
-                vagueQ = parts[0].replace(/^"/, '');
-                contextQ = parts[1].replace(/"$/, '');
+                vagueQ = parts[0].replace(/^"/, '').trim();
+                contextQ = parts[1].replace(/"$/, '').trim();
             } else if (raw.includes(',')) {
-                // Parse Vague,Context format
+                // Parse Vague,Context or Single column with trailing comma format
                 const parts = raw.split(',');
-                vagueQ = parts[0];
-                contextQ = parts[1];
+                vagueQ = parts[0].trim();
+                contextQ = parts[1] ? parts[1].trim() : null;
             } else {
                 // Single column format
-                if (vagueQ.startsWith('"') && vagueQ.endsWith('"')) {
-                    vagueQ = vagueQ.substring(1, vagueQ.length - 1);
-                }
+                vagueQ = raw.trim();
             }
-            questions.push({ q1: vagueQ, q2: contextQ });
+            if (vagueQ.startsWith('"') && vagueQ.endsWith('"')) {
+                vagueQ = vagueQ.substring(1, vagueQ.length - 1).trim();
+            }
+            if (vagueQ) {
+                questions.push({ q1: vagueQ, q2: contextQ || null });
+            }
         }
     }
 
@@ -68,7 +71,7 @@ async function processQuestions() {
         let err1 = null;
 
         try {
-            const url1 = `https://n8n.srv917960.hstgr.cloud/webhook/nervespa-chatbot?chatInput=${encodeURIComponent(question)}&sessionId=${encodeURIComponent(scenarioSessionId)}&is_dev=true`;
+            const url1 = `https://n8n.srv917960.hstgr.cloud/webhook/spark-chatbot?chatInput=${encodeURIComponent(question)}&sessionId=${encodeURIComponent(scenarioSessionId)}&is_dev=true`;
             const res1 = await fetch(url1, { method: 'GET', headers: { 'Accept': 'application/json, text/plain, */*' } });
             const text1 = await res1.text();
             try { resp1Data = JSON.parse(text1); } catch(e) { resp1Data = text1; }
@@ -83,11 +86,11 @@ async function processQuestions() {
         let contextFollowUp = contextFromFile;
         if (!contextFollowUp) {
             const contexts = [
-                "I am asking about the NerveSpa Pro",
-                "The Knee Pro device",
-                "I mean the NerveWave system",
-                "For the NerveBath",
-                "Talking about the power wrap"
+                "I am asking about the Ultima 5",
+                "The Ultima 20 device",
+                "I mean the Ultima 11 system",
+                "For the Thermotech",
+                "Talking about the TENS pads"
             ];
             contextFollowUp = contexts[Math.floor(Math.random() * contexts.length)];
         }
@@ -99,7 +102,7 @@ async function processQuestions() {
         let err2 = null;
 
         try {
-            const url2 = `https://n8n.srv917960.hstgr.cloud/webhook/nervespa-chatbot?chatInput=${encodeURIComponent(contextFollowUp)}&sessionId=${encodeURIComponent(scenarioSessionId)}&is_dev=true`;
+            const url2 = `https://n8n.srv917960.hstgr.cloud/webhook/spark-chatbot?chatInput=${encodeURIComponent(contextFollowUp)}&sessionId=${encodeURIComponent(scenarioSessionId)}&is_dev=true`;
             const res2 = await fetch(url2, { method: 'GET', headers: { 'Accept': 'application/json, text/plain, */*' } });
             const text2 = await res2.text();
             try { resp2Data = JSON.parse(text2); } catch(e) { resp2Data = text2; }
@@ -321,7 +324,7 @@ function generateHtmlReport(results) {
         </div>
         
         <footer class="mt-12 text-center text-sm text-slate-500">
-            <p>NerveSpa Chatbot Tester &copy; ${new Date().getFullYear()}</p>
+            <p>Spark PMT Chatbot Tester &copy; ${new Date().getFullYear()}</p>
         </footer>
     </div>
 </body>
