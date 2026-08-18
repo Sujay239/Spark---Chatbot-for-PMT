@@ -1,0 +1,125 @@
+{
+  "metadata": {
+    "inputFile": "test_questions.json",
+    "total": 7,
+    "successful": 7,
+    "fallbacks": 0,
+    "errors": 0,
+    "avgDurationMs": 1139,
+    "generatedAt": "2026-08-18T07:12:04.941Z"
+  },
+  "results": [
+    {
+      "id": 1,
+      "question": "how soon before it starts helping?",
+      "answer": "Many users will experience relief within 5 to 15 minutes of starting a TENS session, while others may need several treatments before noticing consistent results. The amount of relief varies depending on the person, the type of pain, and the TENS setting being used. Some users will experience relief during treatment, while others may continue to feel the effects afterward.",
+      "rawResponse": {
+        "text": "Many users will experience relief within 5 to 15 minutes of starting a TENS session, while others may need several treatments before noticing consistent results. The amount of relief varies depending on the person, the type of pain, and the TENS setting being used. Some users will experience relief during treatment, while others may continue to feel the effects afterward."
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 1911,
+      "sessionId": "spark-test-0204a29b",
+      "timestamp": "2026-08-18T07:11:54.023Z"
+    },
+    {
+      "id": 2,
+      "question": "How quickly will I notice a difference?",
+      "answer": "Many users will experience relief within 5 to 15 minutes of starting a TENS session, while others may need several treatments before noticing consistent results. The amount of relief varies depending on the person, the type of pain, and the TENS setting being used. Some users will experience relief during treatment, while others may continue to feel the effects afterward.",
+      "rawResponse": {
+        "text": "Many users will experience relief within 5 to 15 minutes of starting a TENS session, while others may need several treatments before noticing consistent results. The amount of relief varies depending on the person, the type of pain, and the TENS setting being used. Some users will experience relief during treatment, while others may continue to feel the effects afterward."
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 806,
+      "sessionId": "spark-test-db44b1d3",
+      "timestamp": "2026-08-18T07:11:55.643Z"
+    },
+    {
+      "id": 3,
+      "question": "Can I use TENS over surgical hardware?",
+      "answer": "In many cases, yes, TENS can be used with metal implants, such as joint replacements or surgical hardware. The electrical stimulation from a TENS unit typically does not affect non-electronic metal implants. However, you should check with your healthcare provider before use, especially if the implant is near the treatment area or if you have any type of electronic implant (such as a pacemaker, defibrillator, or nerve stimulator).",
+      "rawResponse": {
+        "text": "In many cases, yes, TENS can be used with metal implants, such as joint replacements or surgical hardware. The electrical stimulation from a TENS unit typically does not affect non-electronic metal implants. However, you should check with your healthcare provider before use, especially if the implant is near the treatment area or if you have any type of electronic implant (such as a pacemaker, defibrillator, or nerve stimulator)."
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 970,
+      "sessionId": "spark-test-9f183f66",
+      "timestamp": "2026-08-18T07:11:57.415Z"
+    },
+    {
+      "id": 4,
+      "question": "I get red marks after every session, is that bad?",
+      "answer": "Mild redness after using a TENS unit can be normal and is often caused by increased circulation, pressure from the electrode, or mild skin sensitivity. It should typically fade shortly after removing the pads. To reduce skin irritation: Make sure your skin is clean and dry before use. Avoid placing pads on irritated or damaged skin. Rotate pad placement between treatments. Reduce treatment intensity if the sensation feels uncomfortable. Replace electrodes when the gel becomes old or irritating.\n\nUseful Resources & Links:\n📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)",
+      "rawResponse": {
+        "text": "Mild redness after using a TENS unit can be normal and is often caused by increased circulation, pressure from the electrode, or mild skin sensitivity. It should typically fade shortly after removing the pads. To reduce skin irritation: Make sure your skin is clean and dry before use. Avoid placing pads on irritated or damaged skin. Rotate pad placement between treatments. Reduce treatment intensity if the sensation feels uncomfortable. Replace electrodes when the gel becomes old or irritating.\n\nUseful Resources & Links:\n📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)"
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 949,
+      "sessionId": "spark-test-6629ca74",
+      "timestamp": "2026-08-18T07:11:59.166Z"
+    },
+    {
+      "id": 5,
+      "question": "What's the recommended treatment duration?",
+      "answer": "Most TENS sessions typically last 15-60 minutes, depending on your comfort level, the device settings, and your specific needs. General guidelines: Start with 15-30 minutes to see how your body responds. Common session lengths: 30-60 minutes. Repeat Sessions: Many people use TENS multiple times throughout the day if needed, allowing breaks between treatments. Avoid using TENS for extended periods without breaks, and always follow your device's instructions.",
+      "rawResponse": {
+        "text": "Most TENS sessions typically last 15-60 minutes, depending on your comfort level, the device settings, and your specific needs. General guidelines: Start with 15-30 minutes to see how your body responds. Common session lengths: 30-60 minutes. Repeat Sessions: Many people use TENS multiple times throughout the day if needed, allowing breaks between treatments. Avoid using TENS for extended periods without breaks, and always follow your device's instructions."
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 848,
+      "sessionId": "spark-test-f0b42c53",
+      "timestamp": "2026-08-18T07:12:00.823Z"
+    },
+    {
+      "id": 6,
+      "question": "Any drug interactions I should know about?",
+      "answer": "TENS generally does not interact with most medications because it works through electrical stimulation rather than through the bloodstream. However, your health condition and medications may still be important to discuss with a healthcare provider. Use caution and seek medical guidance if you: Take medications that affect sensation, nerve function, or heart rhythm. Have reduced ability to feel stimulation. Use medications that increase skin sensitivity or irritation risk. TENS should also be used carefully with certain medical conditions, such as: Implanted electronic devices (like pacemakers or defibrillators), Pregnancy, Epilepsy, Seizure Disorders, Areas with reduced sensation or damaged skin.",
+      "rawResponse": {
+        "text": "TENS generally does not interact with most medications because it works through electrical stimulation rather than through the bloodstream. However, your health condition and medications may still be important to discuss with a healthcare provider. Use caution and seek medical guidance if you: Take medications that affect sensation, nerve function, or heart rhythm. Have reduced ability to feel stimulation. Use medications that increase skin sensitivity or irritation risk. TENS should also be used carefully with certain medical conditions, such as: Implanted electronic devices (like pacemakers or defibrillators), Pregnancy, Epilepsy, Seizure Disorders, Areas with reduced sensation or damaged skin."
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 1180,
+      "sessionId": "spark-test-ecae1474",
+      "timestamp": "2026-08-18T07:12:02.818Z"
+    },
+    {
+      "id": 7,
+      "question": "What wave options does the U5 have?",
+      "answer": "You get three: asymmetrical, symmetrical, and monophasic. Switch between them by pressing \"PR-\" and \"PW-\" together. For your first session, start with asymmetrical bi-phasic rectangular, the most comfortable default for most people. From there, try symmetrical for a more even feel during longer sessions, or monophasic for smaller, more sensitive areas.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)",
+      "rawResponse": {
+        "text": "You get three: asymmetrical, symmetrical, and monophasic. Switch between them by pressing \"PR-\" and \"PW-\" together. For your first session, start with asymmetrical bi-phasic rectangular, the most comfortable default for most people. From there, try symmetrical for a more even feel during longer sessions, or monophasic for smaller, more sensitive areas.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)"
+      },
+      "statusCode": 200,
+      "success": true,
+      "isFallback": false,
+      "responseType": "answered",
+      "error": null,
+      "durationMs": 1307,
+      "sessionId": "spark-test-a2bbb626",
+      "timestamp": "2026-08-18T07:12:04.940Z"
+    }
+  ]
+}

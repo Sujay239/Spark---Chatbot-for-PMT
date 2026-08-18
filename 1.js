@@ -4,6 +4,111 @@ const userQuestion =
 const sessionId =
   $json.query?.sessionId || $input.first()?.json?.query?.sessionId || "";
 
+// ================= CODE-LEVEL GUARDRAILS (NO LLM NEEDED) =================
+const DOMAIN_WHITELIST = new Set([
+  "tens", "ems", "ifc", "nmes", "microcurrent", "galvanic", "transcutaneous",
+  "interferential", "electrotherapy", "electrodes", "electrode", "leadwires",
+  "leadwire", "rechargeable", "u5", "u1", "u11", "u20", "u3t", "jstim", "qfiber",
+  "pmt", "thermotech", "thermacycle", "theratrac", "theralamp", "thermorelief",
+  "neuropathy", "sciatica", "fibromyalgia", "lumbago", "arthritis", "contraindication",
+  "contraindications", "waveform", "waveforms", "hz", "hertz", "microseconds"
+]);
+
+function isNonEnglish(text) {
+  if (!text) return false;
+  // 1. Non-Latin scripts (Cyrillic, Arabic, CJK, Devanagari, Hebrew, Greek, Thai)
+  const nonLatinRegex = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0900-\u097F\u0590-\u05FF\u0370-\u03FF\u0E00-\u0E7F]/;
+  if (nonLatinRegex.test(text)) return true;
+
+  // 2. Distinctive non-English phrases/words
+  const foreignPhrases = [
+    /¿|¡/,
+    /\b(hola|buenos dias|buenas tardes|buenas noches|como estas|cómo estás|que es|qué es|donde esta|dónde está|para que sirve|para qué sirve|gracias|por favor|ayuda me|ayudame|dolor de|cuanto cuesta|cuánto cuesta)\b/i,
+    /\b(bonjour|bonsoir|comment ca va|comment ça va|merci|s'il vous plait|s'il vous plaît|aidez-moi|pourquoi|combien coute|combien coûte)\b/i,
+    /\b(guten tag|guten morgen|hallo wie|danke schon|danke schön|bitte hilfe|wie funktioniert|wie viel kostet)\b/i,
+    /\b(olá|bom dia|boa tarde|obrigado|por favor me ajude|como funciona|quanto custa)\b/i,
+    /\b(ciao come|buongiorno|grazie mille|per favore|come funziona|quanto costa)\b/i
+  ];
+  return foreignPhrases.some(regex => regex.test(text));
+}
+
+function isGibberishOrKeyboardMash(text) {
+  if (!text) return false;
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return true;
+
+  // Symbols only or punctuation only
+  if (/^[^a-zA-Z0-9]+$/.test(trimmed)) return true;
+
+  const words = trimmed.split(/\s+/);
+  for (const word of words) {
+    const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+    if (cleanWord.length === 0) continue;
+    if (DOMAIN_WHITELIST.has(cleanWord.toLowerCase())) continue;
+
+    // 1. Extreme mixed case inside a single word (e.g. fuihDfuhnsDIO, gfjpISDJgfpisSDJGF)
+    let caseTransitions = 0;
+    for (let i = 0; i < cleanWord.length - 1; i++) {
+      const isCurrUpper = cleanWord[i] === cleanWord[i].toUpperCase();
+      const isNextUpper = cleanWord[i + 1] === cleanWord[i + 1].toUpperCase();
+      if (isCurrUpper !== isNextUpper) caseTransitions++;
+    }
+    if (cleanWord.length >= 7 && caseTransitions >= 3) return true;
+
+    // 2. Consonant clusters >= 6 in a row
+    if (/[bcdfghjklmnpqrstvwxyz]{6,}/i.test(cleanWord)) return true;
+
+    // 3. Long word (>= 6 chars) with zero vowels
+    if (cleanWord.length >= 6 && !/[aeiouy]/i.test(cleanWord)) return true;
+
+    // 4. Repeated character sequence 4+ times
+    if (/(.)\1{4,}/.test(cleanWord) || /([a-zA-Z]{2,4})\1{3,}/.test(cleanWord)) return true;
+
+    // 5. Very low vowel-to-consonant ratio in long words (>= 8 chars with < 13% vowels)
+    if (cleanWord.length >= 8) {
+      const vowels = (cleanWord.match(/[aeiouy]/gi) || []).length;
+      if (vowels / cleanWord.length < 0.13) return true;
+    }
+  }
+  return false;
+}
+
+// Intercept non-English language queries directly in code
+if (isNonEnglish(userQuestion)) {
+  return [
+    {
+      json: {
+        match: true,
+        matchIndex: -1,
+        normalizedQuestion: userQuestion,
+        similarityScore: 1.0,
+        sessionId: sessionId,
+        output: "Matched with defined questions. Please see the details below",
+        matched_question: "__LANGUAGE_NOT_SUPPORTED__",
+        direct_answer: "I can only assist you in English. Please ask your question in English."
+      }
+    }
+  ];
+}
+
+// Intercept gibberish / keyboard mash / severe typos directly in code
+if (isGibberishOrKeyboardMash(userQuestion)) {
+  return [
+    {
+      json: {
+        match: true,
+        matchIndex: -1,
+        normalizedQuestion: userQuestion,
+        similarityScore: 1.0,
+        sessionId: sessionId,
+        output: "Matched with defined questions. Please see the details below",
+        matched_question: "__TYPO_DETECTED__",
+        direct_answer: "Typo detected. Please check your question and try again."
+      }
+    }
+  ];
+}
+
 // ================= GOOGLE SHEET DYNAMIC QUESTIONS =================
 let sheetQuestions = [];
 let cacheSource = 'none';
@@ -221,9 +326,38 @@ const synonyms = {
 
   // Pulse width synonyms
   "width": "pulse width",
-  "duration": "pulse width",
   "microseconds": "pulse width",
   "us": "pulse width",
+
+  // Time / relief synonyms (paraphrase support)
+  "soon": "quickly",
+  "fast": "quickly",
+  "rapid": "quickly",
+  "quickly": "quickly",
+  "difference": "relief",
+  "benefit": "relief",
+  "helping": "relief",
+  "improvement": "relief",
+  "notice": "feel",
+
+  // Medical term synonyms (paraphrase support)
+  "surgical hardware": "metal implants",
+  "surgical": "metal implants",
+  "hardware": "metal implants",
+  "screw": "metal implants",
+  "plate": "metal implants",
+  "rod": "metal implants",
+  "joint replacement": "metal implants",
+  "red marks": "redness",
+  "red mark": "redness",
+  "redness": "redness",
+  "irritation": "redness",
+  "drug": "medication",
+  "drugs": "medication",
+  "medicine": "medication",
+  "medicines": "medication",
+  "interaction": "contraindication",
+  "interactions": "contraindication",
 
   // Placement / position synonyms
   "placement": "position",
@@ -366,14 +500,12 @@ const synonyms = {
   "quick start": "user manual",
 
   // Contact / support synonyms
-  "help": "contact info",
-  "support": "contact info",
-  "phone": "contact info",
-  "email": "contact info",
-  "service": "contact info",
+  // NOTE: "help", "support", "service", "call" removed - too generic, corrupts semantic matching
+  // These are handled by the INTENT OVERRIDE section instead
+  "phone number": "contact info",
+  "email address": "contact info",
   "customer service": "contact info",
-  "call": "contact info",
-  "reach": "contact info",
+  "reach out": "contact info",
   "fax": "contact info",
 
   // Pricing synonyms
@@ -756,6 +888,375 @@ if (matchFound && bestScore < 0.85) {
   }
 }
 
+// ================= PARAPHRASE INTENT MATCHING =================
+// Catches natural language paraphrases that token-level matching misses
+if (!matchFound || bestScore < 0.7) {
+  const normQ = userQuestion.toLowerCase();
+  const paraphraseMap = [
+    // 1. Pacemaker / Cardiac implant (checked before general metal implants)
+    {
+      patterns: [
+        /(pacemaker|cardiac device|defibrillator|icd|implanted cardiac)/i,
+        /tens with a pacemaker/i
+      ],
+      target: "Can I use TENS with a pacemaker?"
+    },
+    // 2. Relief onset & timeline
+    {
+      patterns: [
+        /how (soon|quickly|fast|long|rapidly).*?(help|relief|work|difference|benefit|feel|notice|start|kick)/i,
+        /when.*(start|begin|feel|notice|kick in|take effect)/i,
+        /(time|duration).*(relief|help|feel|notice|benefit)/i,
+        /(start|begin).*help/i,
+        /notice.*(difference|relief|benefit|improvement)/i
+      ],
+      target: "How long does it take to feel relief?"
+    },
+    // 3. Metal implants / surgical hardware / titanium
+    {
+      patterns: [
+        /(surgical|metal|hardware|joint replacement|knee replacement|hip replacement|titanium|screw|plate|rod).*(tens|safe|use|ok|device|problem)/i,
+        /tens.*(surgical|metal|implant|hardware|joint replacement|knee replacement|hip replacement|titanium|screw|plate|rod)/i,
+        /use.*(over|with|near).*(surgical|metal|implant|hardware|titanium)/i
+      ],
+      target: "Can I use a TENS unit if I have metal implants?"
+    },
+    // 4. Skin redness & irritation / breaking out
+    {
+      patterns: [
+        /(red|redness|mark|marks|irritat|rash|burn|itchy|break|breaking out|skin).*(after|session|treatment|use|every|under|where the pad|where the electrode)/i,
+        /skin.*(red|mark|marks|irritat|rash|itchy|break|color)/i,
+        /(breaking out|break out).*(electrode|pad|skin)/i,
+        /(red mark|red spot|redness).*(bad|normal|worried|concern|ok|okay)/i
+      ],
+      target: "Why does my skin turn red after treatment?"
+    },
+    // 5. Treatment / session duration
+    {
+      patterns: [
+        /(recommend|typical|ideal|proper|best|suggested|optimal).*(duration|length|time|long|minute|session)/i,
+        /(duration|length|time).*(treatment|session|therapy|recommend)/i,
+        /how (long|many minute).*(session|treatment|use|per)/i
+      ],
+      target: "How many minutes should I do per session?"
+    },
+    // 6. Drug / medication interactions
+    {
+      patterns: [
+        /(drug|medication|medicine|pharma|prescription).*(interact|contradict|conflict|combine|mix|safe|interfere)/i,
+        /(interact|contradict|conflict|interfere).*(drug|medication|medicine|prescription)/i,
+        /drug interaction/i,
+        /medication.*(safe|ok|concern|worry|interact)/i
+      ],
+      target: "Is there contradictions with medication?"
+    },
+    // 7. U5 Waveform options
+    {
+      patterns: [
+        /(wave|waveform).*(option|type|kind|offer|have|available).*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(wave|waveform).*(option|type|kind|offer|have)/i,
+        /(wave|waveform).*(option|type).*(u5|ultima 5|ultima5)/i
+      ],
+      target: "What wave forms does the Ultima 5 offer, and which one should I use?"
+    },
+    // 8. Pad size (small vs big / 2 inch vs 4 inch)
+    {
+      patterns: [
+        /(small pads?|big (ones|pads?)|pad sizes?|size.*(pad|electrode)|which pad.*best|2 inch.*4 inch)/i,
+        /(difference|between).*(2 inch|4 inch|small.*big).*pad/i
+      ],
+      target: "What's the difference between 2 inch and 4 inch pads?"
+    },
+    // 9. First time use & step by step
+    {
+      patterns: [
+        /(walk me through|how (do|to) use|steps to (set up|run)|first time (user|session|using)|get started).*(tens|device|unit|session|this)/i,
+        /(step by step|how to set up).*(tens|session|unit)/i
+      ],
+      target: "How do I use a TENS unit, step by step?"
+    },
+    // 10. Does TENS work / Evidence / Placebo
+    {
+      patterns: [
+        /(do tens units? actually (help|work)|real evidence|placebo|actually (help|work) people)/i,
+        /(evidence|proof).*(works|effective|placebo)/i
+      ],
+      target: "Does TENS actually work?"
+    },
+    // 11. Intensity setting & pain/hurt
+    {
+      patterns: [
+        /(right|proper|correct|ideal|recommended).*(intensity|level|strength|knob)/i,
+        /(how high|what intensity|intensity level).*(turn up|set|use)/i,
+        /(supposed|meant|should).*(hurt|painful)/i
+      ],
+      target: "How high should I turn up the intensity?"
+    },
+    // 12. Pad Contact Interruption Alarm (U5 beeps)
+    {
+      patterns: [
+        /(beep|beeps|beeping|alert|alarm).*(pad|contact|u5|ultima 5)/i,
+        /pad contact (alert|alarm|interruption|beep)/i
+      ],
+      target: "What does the Pad Contact Interruption Alarm do on my Ultima 5?"
+    },
+    // 13. Usage frequency & schedule
+    {
+      patterns: [
+        /(how often|how many times|how many session|frequency|how many hours).*(day|week|month|daily|weekly|use|using|session)/i,
+        /(reasonable|recommended|typical|proper|schedule|usage).*(frequency|times a week|times per week|per day|per week)/i,
+        /(can|safe|ok).*(use|wear).*(tens|device|unit|this|it).*(every ?day|daily)/i,
+        /(every ?day|daily|weekly).*(use|wear).*(tens|device|unit|this|it)/i
+      ],
+      target: "How often should I use a TENS unit?"
+    },
+    // 14. Stinging / Sharp / Uncomfortable sensation
+    {
+      patterns: [
+        /(sting|stinging|bite|biting|sharp|uncomfortable|prick|pricking|pinch).*(instead of|tingle|tingling|feel|stimulation)/i,
+        /(sharp|uncomfortable).*(stimulation|sensation|feel)/i
+      ],
+      target: "Stimulation feels sharp or uncomfortable"
+    },
+    // 15. Sleep / Overnight use
+    {
+      patterns: [
+        /(overnight|all night|fall asleep|sleeping|while (i|we) sleep).*(tens|device|unit|leave|wear|on|safe|okay)/i,
+        /(safe|okay).*(sleep|sleeping|overnight|all night)/i
+      ],
+      target: "Is it safe to use a TENS unit while sleeping?"
+    },
+    // 16. What's in the box / U5 kit contents
+    {
+      patterns: [
+        /(what('s| is) (included|in the box|in my kit)|what do i get (when|if) i buy).*(ultima 5|u5|kit)/i,
+        /(comes in|included with).*(ultima 5|u5)/i
+      ],
+      target: "What comes in my Ultima 5 kit?"
+    },
+    // 17. Placing directly over sore spot / pain area
+    {
+      patterns: [
+        /(directly|right|on top of).*(pain|painful|sore spot|sore area|hurt)/i,
+        /pads.*(on top of|over).*(pain|sore spot)/i
+      ],
+      target: "Can I place the pads directly over where the pain is?"
+    },
+    // 18. Unit shuts off / powers down mid session
+    {
+      patterns: [
+        /(shuts|turns|powers).*(itself|down|off).*(mid|during|own|automatically)/i,
+        /(device|unit).*(turn off|shut off|power down|stops).*(by itself|on its own|mid-session)/i
+      ],
+      target: "Why does my unit keep turning off?"
+    },
+    // 19. Swelling & inflammation
+    {
+      patterns: [
+        /(bring down|reduce|help).*(swelling|inflammation|edema)/i,
+        /tens.*(swelling|inflammation|edema)/i
+      ],
+      target: "Does TENS help reduce inflammation?"
+    },
+    // 20. One pad / one side working
+    {
+      patterns: [
+        /(one (side|channel|pad|lead) works.*(other|second) doesn't|only one (pad|channel|side) (is )?working)/i,
+        /one pad working/i
+      ],
+      target: "Why is only one pad working?"
+    },
+    // 21. Sensation fading / adaptation / tingling goes away
+    {
+      patterns: [
+        /(tingling|sensation).*(goes away|fades|stops|less|disappear).*(partway|during|after a few minute|normal)/i,
+        /(after a few minute.*stop feeling|stop feeling.*after a few minute)/i,
+        /(stop working|get used to).*if i use.*(too much|often)/i
+      ],
+      target: "Why does the sensation fade after a few minutes?"
+    },
+    // 22. Pads touching / overlapping / separated
+    {
+      patterns: [
+        /(electrodes|pads).*(stay separated|touch|touching|overlap|overlapping)/i,
+        /can.*(pads|electrodes).*touch/i,
+        /(pads|electrodes).*(separated|overlap)/i
+      ],
+      target: "Can the pads touch each other?"
+    },
+    // 23. Prescription / Doctor's note
+    {
+      patterns: [
+        /(doctor('s)? note|rx|prescription.*only|require.*prescription|need a prescription|prescription required)/i,
+        /prescription-only/i
+      ],
+      target: "Is a prescription required?"
+    },
+    // 24. Dead / won't power up / power button does nothing
+    {
+      patterns: [
+        /(power button.*does nothing|won't (turn|power)|completely dead|won't power up|not powering up|won't turn on)/i,
+        /why won't.*turn on/i
+      ],
+      target: "Why won't my TENS unit turn on?"
+    },
+    // 25. Neck & shoulder electrode placement
+    {
+      patterns: [
+        /(stiff neck|neck and shoulder|neck pain).*(where|stick|place|pad|electrode|position)/i,
+        /(pads?|electrodes?).*(neck|shoulder tension|neck pain)/i
+      ],
+      target: "Where do I put the pads for neck pain?"
+    },
+    // 26. All four pads / both channels together
+    {
+      patterns: [
+        /(all four pads|both channels|2 channels|multiple channels).*(at once|together|simultaneously|run both)/i,
+        /use more than one channel/i
+      ],
+      target: "Can I use more than one channel at a time?"
+    },
+    // 27. Driving / Commute / Behind the wheel
+    {
+      patterns: [
+        /(behind the wheel|commute|drive to work|while driving|operating a vehicle|running on my commute)/i,
+        /can i drive/i
+      ],
+      target: "Can I drive while using a TENS unit?"
+    },
+    // 28. Pad spacing / gap between pads
+    {
+      patterns: [
+        /(how much gap|gap.*between|spacing between|how far apart|right spacing).*(pads|electrodes)/i,
+        /how far apart/i
+      ],
+      target: "How far apart should the pads be?"
+    },
+    // 29. Pregnancy / Expecting
+    {
+      patterns: [
+        /(while expecting|pregnant|pregnancy|trimester|weeks pregnant|belly at \d+ weeks)/i,
+        /safe.*during pregnancy/i
+      ],
+      target: "Is a TENS unit safe to use during pregnancy?"
+    },
+    // 30. What is U5 / Device type
+    {
+      patterns: [
+        /(what kind of device is (the )?(u5|ultima 5)|tell me about (the )?(u5|ultima 5)|what is (the )?ultima 5)/i
+      ],
+      target: "What is the Ultima 5 (U5)?"
+    },
+    // 31. Diabetes / Diabetic
+    {
+      patterns: [
+        /(type 2 diabetic|type 1 diabetic|diabetes|diabetic|with diabetes)/i,
+        /tens.*if i have diabetes/i
+      ],
+      target: "Can I use a TENS unit if I have diabetes?"
+    },
+    // 32. First session setup for U5
+    {
+      patterns: [
+        /(starting setup|first.*session setup|recommended settings).*(u5|ultima 5|new.*user)/i
+      ],
+      target: "What settings should I use for my very first Ultima 5 session?"
+    },
+    // 33. Intensity knobs on U5
+    {
+      patterns: [
+        /(intensity controls|intensity knobs|knobs work).*(u5|ultima 5)/i
+      ],
+      target: "How do the intensity knobs work on my Ultima 5?"
+    },
+    // 34. Turned on but no sensation / feel nothing
+    {
+      patterns: [
+        /(turned it on.*feel (absolutely )?nothing|running.*no sensation at all|not feeling (any )?sensation|no sensation)/i,
+        /producing sensation/i
+      ],
+      target: "Why isn't my TENS unit producing sensation?"
+    },
+    // 35. Pad lifespan / How many uses
+    {
+      patterns: [
+        /(how many uses|how long.*last).*(pads|electrodes|set of pads)/i,
+        /how long do tens pads last/i
+      ],
+      target: "How long do TENS pads last?"
+    },
+    // 36. Acute pain / Fresh injury / Hurt yesterday
+    {
+      patterns: [
+        /(fresh injury|hurt.*yesterday|acute pain|new injury|recent strain).*(frequency|hz|setting)/i,
+        /(which hz|what frequency).*(fresh|acute|recent|new injury|yesterday)/i
+      ],
+      target: "What frequency works best for acute pain?"
+    },
+    // 37. Chronic pain frequency / SMS slang
+    {
+      patterns: [
+        /(wat freqency|chronik pane|chronic pain)/i,
+        /what frequency is best for chronic/i
+      ],
+      target: "What frequency is best for chronic pain?"
+    },
+    // 38. Sticky again / Tackiness / Revive old pads / Pads won't stick
+    {
+      patterns: [
+        /(tackiness back|sticky again|revive (old )?pads|restore.*adhes)/i,
+        /how do i make my pads sticky/i
+      ],
+      target: "How do I make my pads sticky again?"
+    },
+    {
+      patterns: [
+        /(pads? (lost their grip|won't stick|aren't sticking|wont stick)|electrodes? won't stay|pads wont stick)/i
+      ],
+      target: "Why won't my pads stick anymore?"
+    },
+    // 39. Lumbar / Lower back placement
+    {
+      patterns: [
+        /(lumbar|lower back).*(pad positions?|placement|where|stick|put)/i,
+        /pads for lower back/i
+      ],
+      target: "Where should I place the pads for lower back pain?"
+    },
+    // 40. Auto power-off on U5
+    {
+      patterns: [
+        /(auto power-off|automatic(ally)? shut off|auto-off).*(u5|ultima 5)/i
+      ],
+      target: "Does my Ultima 5 automatically shut off if I forget to turn it off?"
+    },
+    // 41. All-day continuous wear
+    {
+      patterns: [
+        /(continuous all-day wear|wear.*all day|wear.*continuously)/i
+      ],
+      target: "Can I wear a TENS unit all day?"
+    }
+  ];
+
+  for (const entry of paraphraseMap) {
+    for (const pattern of entry.patterns) {
+      if (pattern.test(normQ)) {
+        const paraphraseIndex = predefinedQuestions.findIndex(
+          (q) => q === entry.target
+        );
+        if (paraphraseIndex !== -1) {
+          matchFound = true;
+          bestIndex = paraphraseIndex;
+          bestScore = 0.95;
+          break;
+        }
+      }
+    }
+    if (matchFound && bestScore >= 0.95) break;
+  }
+}
+
 // ================= INTENT OVERRIDE =================
 if (bestScore < 0.85) {
   const normQ = userQuestion.toLowerCase();
@@ -859,10 +1360,11 @@ if (bestScore < 0.85) {
     }
   }
 
+  // Strictly match intentional contact requests (not general "help" or "contact" words)
   const isContactSupport =
-    /(support|contact|help|email|phone|pmt support|customer support|support team|tech support|contact us|contact pmt|how to contact|phone number|email address|help desk|customer service)/.test(
+    /(contact (pmt|us|support|company|team)|customer (support|service)|reach (out to|pmt|support)|phone number|email address|how (can|do) i contact|how to (contact|reach)|support team|help desk)/i.test(
       normQ,
-    ) && !/(joint health support|support kit|gut support|sleep support)/.test(normQ);
+    ) && !/(joint health support|support kit|gut support|sleep support|pad contact|help (people|with|me|reduce)|actually help)/i.test(normQ);
   if (isContactSupport) {
     const supportIndex = predefinedQuestions.findIndex(
       (q) => q === "contact info",
@@ -876,8 +1378,22 @@ if (bestScore < 0.85) {
 }
 
 // ================= AMBIGUITY OVERRIDE =================
-if (matchFound) {
+// Only apply ambiguity override for weak score matches (< 0.9). High confidence and paraphrase matches are preserved!
+if (matchFound && bestScore < 0.9) {
   const normQ = userQuestion.toLowerCase();
+  
+  // Domain-specific words that indicate a valid TENS/electrotherapy question
+  const domainContextWords = [
+    "session", "treatment", "therapy", "stimulation", "electrode",
+    "relief", "frequency", "intensity", "waveform", "implant",
+    "placement", "chronic", "acute", "pain", "nerve",
+    "muscle", "skin", "redness", "irritation", "medication",
+    "drug", "interaction", "duration", "minutes", "surgical",
+    "hardware", "pacemaker", "pregnancy", "diabetes", "healing",
+    "red", "marks", "mark", "helping", "difference", "notice",
+    "wave", "waveforms", "implants", "metal", "pads", "pad"
+  ];
+  const hasDomainContext = domainContextWords.some((w) => normQ.includes(w));
   
   // Generic terms that usually imply a missing subject
   const genericTerms = ["unit", "device", "machine", "wrap", "system", "it", "this", "these", "they", "them"];
@@ -886,17 +1402,17 @@ if (matchFound) {
   const hasGeneric = genericTerms.some((t) => new RegExp(`\\b${t}\\b`).test(normQ));
   const hasSpecificProduct = products.some((p) => normQ.includes(p));
   const hasCompany = (normQ.includes("tens") || normQ.includes("pmt") || normQ.includes("spark")) || normQ.includes("pmt");
-  const isClearContext = hasSpecificProduct || hasCompany;
+  const isClearContext = hasSpecificProduct || hasCompany || hasDomainContext;
 
-  // 1. If it has a generic term but no clear product/company context, it's ambiguous
-  if (hasGeneric && !isClearContext) {
+  // 1. If it has a generic term but no clear product/company/domain context, AND score is weak
+  if (hasGeneric && !isClearContext && bestScore < 0.65) {
     matchFound = false;
   }
   
-  // 2. If the query is very short (e.g. <= 4 words) and lacks context, treat as ambiguous 
-  // to force LLM clarification (e.g., "cost?", "does it work?", "help?", "why?")
+  // 2. If the query is very short (e.g. <= 3 words) and lacks context, treat as ambiguous 
+  // to force LLM clarification (e.g., "cost?", "help?", "why?")
   const wordCount = normQ.split(/\s+/).filter(w => w.length > 0).length;
-  if (wordCount <= 6 && !isClearContext) {
+  if (wordCount <= 3 && !isClearContext) {
     matchFound = false;
   }
 }
@@ -905,7 +1421,7 @@ if (matchFound) {
 // If the user's query is highly likely to be a follow-up answer to "Which product?" 
 // (e.g., "I mean the NerveBath", "Talking about the power wrap", "For the Knee Pro"),
 // we MUST force it to the LLM so the LLM can combine it with the conversation history.
-if (matchFound) {
+if (matchFound && bestScore < 0.9) {
   const normQ = userQuestion.toLowerCase().trim();
   const isContextFollowUp = /^(i mean|i am asking about|i'm asking about|talking about|for|specifically)?\s*(the|just the|it is the|it's the)?\s*(ultima|tens|u5|u20|u11|u1|neo|thermotech|thermacycle|soft cycle|ucombo|thermorelief|theralamp|aqua relief|polar vortex|arctic ice|theratrac|jstim|qfiber)/.test(normQ);
   

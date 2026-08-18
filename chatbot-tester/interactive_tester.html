@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spark PMT - Interactive Chatbot Tester</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.5); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.8); }
+    </style>
+</head>
+<body class="min-h-screen bg-[#090d16] text-slate-100 antialiased selection:bg-teal-500/30 selection:text-teal-200">
+    <!-- Ambient glowing backgrounds -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-40 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <!-- Top Navbar -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-slate-800">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-500 to-indigo-600 p-[1px] shadow-lg shadow-teal-500/20">
+                    <div class="w-full h-full bg-slate-950 rounded-2xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Spark PMT Chatbot Tester</h1>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20">Live Webhook Runner</span>
+                    </div>
+                    <p class="text-sm text-slate-400 mt-1">Batch Question Tester & JSON Mapping Tool</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="exportToJson()" id="exportJsonBtn" disabled class="disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                    Export JSON
+                </button>
+                <button onclick="exportToCsv()" id="exportCsvBtn" disabled class="disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Export CSV
+                </button>
+            </div>
+        </header>
+
+        <!-- Input Configuration Panel -->
+        <section class="glass-card rounded-2xl p-6 my-8 border border-slate-800">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+                    Test Questions Input
+                </h2>
+                <div class="flex items-center gap-3">
+                    <label class="cursor-pointer inline-flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        Upload CSV / JSON / TXT
+                        <input type="file" id="fileUpload" accept=".csv,.json,.txt" class="hidden" onchange="handleFileUpload(event)">
+                    </label>
+                    <button onclick="loadSampleQuestions()" class="text-xs text-slate-400 hover:text-slate-200 underline">Load Client Test Cases</button>
+                </div>
+            </div>
+
+            <textarea id="questionsInput" rows="5" placeholder="Enter questions (one per line)...&#10;Example:&#10;how soon before it starts helping?&#10;Can I use TENS over surgical hardware?&#10;I get red marks after every session, is that bad?&#10;What's the recommended treatment duration?&#10;Any drug interactions I should know about?&#10;What wave options does the U5 have?" class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl p-4 text-sm font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition custom-scrollbar leading-relaxed"></textarea>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-5">
+                <div class="flex flex-wrap items-center gap-4 text-xs text-slate-400 w-full sm:w-auto">
+                    <div class="flex items-center gap-2">
+                        <span>Delay:</span>
+                        <select id="delaySelect" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-300 focus:outline-none focus:border-teal-500">
+                            <option value="400">400 ms</option>
+                            <option value="800" selected>800 ms</option>
+                            <option value="1500">1500 ms</option>
+                            <option value="3000">3000 ms</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span>Webhook URL:</span>
+                        <input type="text" id="webhookInput" value="https://n8n.srv917960.hstgr.cloud/webhook/spark-chatbot" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-300 w-64 text-xs font-mono focus:outline-none focus:border-teal-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button onclick="clearAll()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-800 transition">Clear</button>
+                    <button onclick="toggleTesting()" id="startBtn" class="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 transition shadow-lg shadow-teal-500/25 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+                        Start Batch Test
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="hidden mt-6 pt-5 border-t border-slate-800/80">
+                <div class="flex items-center justify-between text-xs mb-2">
+                    <span id="progressStatus" class="font-medium text-teal-400">Processing question 1 of 10...</span>
+                    <span id="progressPercent" class="font-mono text-slate-400">10%</span>
+                </div>
+                <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                    <div id="progressBar" class="bg-gradient-to-r from-teal-500 to-cyan-400 h-full transition-all duration-300 w-0"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Metrics Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 my-8">
+            <div class="glass-card rounded-2xl p-5 border border-slate-800">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-400">Total Tested</p>
+                <p class="text-3xl font-extrabold text-white mt-2" id="kpiTotal">0</p>
+                <p class="text-xs text-slate-500 mt-1">Questions executed</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-emerald-500/20 bg-emerald-950/10">
+                <p class="text-xs font-medium uppercase tracking-wider text-emerald-400">Answered</p>
+                <p class="text-3xl font-extrabold text-emerald-300 mt-2" id="kpiSuccess">0</p>
+                <p class="text-xs text-emerald-400/70 mt-1" id="kpiSuccessPct">0% success rate</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-amber-500/20 bg-amber-950/10">
+                <p class="text-xs font-medium uppercase tracking-wider text-amber-400">Fallbacks</p>
+                <p class="text-3xl font-extrabold text-amber-300 mt-2" id="kpiFallback">0</p>
+                <p class="text-xs text-amber-400/70 mt-1" id="kpiFallbackPct">0% fallbacks</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-rose-500/20 bg-rose-950/10">
+                <p class="text-xs font-medium uppercase tracking-wider text-rose-400">Errors</p>
+                <p class="text-3xl font-extrabold text-rose-300 mt-2" id="kpiErrors">0</p>
+                <p class="text-xs text-rose-400/70 mt-1">Network/HTTP issues</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-cyan-500/20 bg-cyan-950/10 col-span-2 md:col-span-1">
+                <p class="text-xs font-medium uppercase tracking-wider text-cyan-400">Avg Latency</p>
+                <div class="flex items-baseline gap-1 mt-2">
+                    <p class="text-3xl font-extrabold text-cyan-300" id="kpiAvgDuration">0</p>
+                    <span class="text-xs font-mono text-cyan-400">ms</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1" id="kpiMinMax">Min: 0ms / Max: 0ms</p>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="glass-card rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="relative w-full sm:w-96">
+                <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Filter by question, answer, or ID..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 pl-10 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition">
+                <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
+                <button onclick="setStatusFilter('all')" id="filter-all" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-500 text-slate-950 transition font-bold">All (0)</button>
+                <button onclick="setStatusFilter('answered')" id="filter-answered" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Answered (0)</button>
+                <button onclick="setStatusFilter('fallback')" id="filter-fallback" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Fallback (0)</button>
+                <button onclick="setStatusFilter('error')" id="filter-error" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Error (0)</button>
+            </div>
+        </div>
+
+        <!-- Real-time Live Q&A Table -->
+        <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-800" id="qaTable">
+                    <thead class="bg-slate-950/80">
+                        <tr>
+                            <th class="px-5 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider w-16">#</th>
+                            <th class="px-5 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider w-2/5">Question Asked</th>
+                            <th class="px-5 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Chatbot Answer</th>
+                            <th class="px-5 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider w-28">Status</th>
+                            <th class="px-5 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider w-28">Latency</th>
+                            <th class="px-4 py-4 text-center text-xs font-bold text-slate-400 uppercase tracking-wider w-16">JSON</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 bg-transparent text-sm" id="tableBody">
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                                Enter or upload questions above and click <span class="text-teal-400 font-semibold">"Start Batch Test"</span> to begin.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON Inspector Modal -->
+    <div id="jsonModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between p-5 border-b border-slate-800">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                    Raw Response Inspector (<span id="modalId">#1</span>)
+                </h3>
+                <button onclick="closeModal()" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-5 overflow-y-auto custom-scrollbar flex-1">
+                <div class="mb-3">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Question</p>
+                    <p id="modalQuestion" class="text-sm font-medium text-teal-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800"></p>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Full Response JSON</p>
+                    <pre id="modalJson" class="font-mono text-xs text-emerald-400 bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto custom-scrollbar whitespace-pre-wrap"></pre>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-800 flex justify-end gap-3 bg-slate-950/40 rounded-b-2xl">
+                <button onclick="copyModalJson()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">Copy JSON</button>
+                <button onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold transition">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let results = [];
+        let isTesting = false;
+        let shouldStop = false;
+        let currentFilter = 'all';
+        let currentModalItem = null;
+
+        const sampleQuestions = [
+            "how soon before it starts helping?",
+            "How quickly will I notice a difference?",
+            "Can I use TENS over surgical hardware?",
+            "I get red marks after every session, is that bad?",
+            "What's the recommended treatment duration?",
+            "Any drug interactions I should know about?",
+            "What wave options does the U5 have?",
+            "How does a TENS unit work?",
+            "What frequency is best for chronic pain?",
+            "Can I use TENS with a pacemaker?"
+        ];
+
+        function loadSampleQuestions() {
+            document.getElementById('questionsInput').value = sampleQuestions.join('\n');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                if (file.name.endsWith('.json')) {
+                    try {
+                        const parsed = JSON.parse(content);
+                        if (Array.isArray(parsed)) {
+                            const qs = parsed.map(item => typeof item === 'string' ? item : (item.question || item.q || item.chatInput)).filter(Boolean);
+                            document.getElementById('questionsInput').value = qs.join('\n');
+                        }
+                    } catch {
+                        alert('Invalid JSON file format.');
+                    }
+                } else {
+                    // CSV or TXT
+                    const lines = content.split('\n')
+                        .map(l => l.trim().replace(/^"|"$/g, '').split(',')[0].trim())
+                        .filter(l => l && !/^(question|vaguequestion|prompt|q)/i.test(l));
+                    document.getElementById('questionsInput').value = lines.join('\n');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAll() {
+            if (isTesting) return;
+            document.getElementById('questionsInput').value = '';
+            results = [];
+            updateKPIs();
+            renderTable([]);
+            document.getElementById('progressContainer').classList.add('hidden');
+        }
+
+        async function toggleTesting() {
+            if (isTesting) {
+                shouldStop = true;
+                document.getElementById('startBtn').innerHTML = 'Stopping...';
+                return;
+            }
+
+            const rawInput = document.getElementById('questionsInput').value.trim();
+            if (!rawInput) {
+                alert('Please enter or upload at least one question.');
+                return;
+            }
+
+            const questions = rawInput.split('\n').map(q => q.trim()).filter(Boolean);
+            if (questions.length === 0) return;
+
+            const webhookUrl = document.getElementById('webhookInput').value.trim();
+            const delay = parseInt(document.getElementById('delaySelect').value, 10) || 800;
+
+            isTesting = true;
+            shouldStop = false;
+            results = [];
+            
+            document.getElementById('startBtn').innerHTML = `
+                <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Stop Testing
+            `;
+            document.getElementById('startBtn').className = 'px-6 py-2.5 rounded-xl text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white transition shadow-lg shadow-rose-500/25 flex items-center gap-2';
+            document.getElementById('progressContainer').classList.remove('hidden');
+
+            for (let i = 0; i < questions.length; i++) {
+                if (shouldStop) break;
+
+                const q = questions[i];
+                const pct = Math.round(((i + 1) / questions.length) * 100);
+                document.getElementById('progressStatus').textContent = `Processing question ${i + 1} of ${questions.length}...`;
+                document.getElementById('progressPercent').textContent = `${pct}%`;
+                document.getElementById('progressBar').style.width = `${pct}%`;
+
+                const resItem = await executeSingleQuestion(q, i + 1, webhookUrl);
+                results.push(resItem);
+
+                updateKPIs();
+                applyFilters();
+
+                if (i < questions.length - 1 && delay > 0) {
+                    await new Promise(r => setTimeout(r, delay));
+                }
+            }
+
+            isTesting = false;
+            document.getElementById('startBtn').innerHTML = `
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+                Start Batch Test
+            `;
+            document.getElementById('startBtn').className = 'px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 transition shadow-lg shadow-teal-500/25 flex items-center gap-2';
+            document.getElementById('progressStatus').textContent = `Completed ${results.length} questions.`;
+            document.getElementById('exportJsonBtn').disabled = false;
+            document.getElementById('exportCsvBtn').disabled = false;
+        }
+
+        async function executeSingleQuestion(question, id, webhookBase) {
+            const sessionId = `spark-test-${Math.random().toString(36).substring(2, 10)}`;
+            const startTime = performance.now();
+            let answerText = '';
+            let rawData = null;
+            let isSuccess = false;
+            let errorMsg = null;
+            let isFallback = false;
+
+            const url = `${webhookBase}?chatInput=${encodeURIComponent(question)}&sessionId=${encodeURIComponent(sessionId)}&is_dev=true`;
+
+            try {
+                const resp = await fetch(url);
+                const text = await resp.text();
+                try { rawData = JSON.parse(text); } catch { rawData = text; }
+
+                if (resp.ok) {
+                    isSuccess = true;
+                    if (typeof rawData === 'string') answerText = rawData;
+                    else if (typeof rawData === 'object' && rawData !== null) {
+                        answerText = rawData.output || rawData.answer || rawData.text || JSON.stringify(rawData);
+                    }
+
+                    if (/couldn't find a relevant answer|sorry.*find.*answer|i am spark.*how can i help you today/i.test(answerText) && !/how long does it take to feel relief|1-800-239-7880/i.test(question)) {
+                        isFallback = true;
+                    }
+                } else {
+                    errorMsg = `HTTP Error ${resp.status}`;
+                }
+            } catch (e) {
+                errorMsg = e.message || String(e);
+            }
+
+            const durationMs = Math.round(performance.now() - startTime);
+
+            return {
+                id: id,
+                question: question,
+                answer: answerText || (errorMsg ? `[Error] ${errorMsg}` : 'No response'),
+                rawResponse: rawData,
+                success: isSuccess,
+                isFallback: isFallback,
+                error: errorMsg,
+                durationMs: durationMs,
+                sessionId: sessionId,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        function updateKPIs() {
+            const total = results.length;
+            const success = results.filter(r => r.success && !r.isFallback).length;
+            const fallbacks = results.filter(r => r.isFallback).length;
+            const errors = results.filter(r => !r.success).length;
+            const avgDur = total > 0 ? Math.round(results.reduce((a, b) => a + b.durationMs, 0) / total) : 0;
+            const minDur = total > 0 ? Math.min(...results.map(r => r.durationMs)) : 0;
+            const maxDur = total > 0 ? Math.max(...results.map(r => r.durationMs)) : 0;
+
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiSuccess').textContent = success;
+            document.getElementById('kpiSuccessPct').textContent = `${total ? ((success / total) * 100).toFixed(1) : 0}% success rate`;
+            document.getElementById('kpiFallback').textContent = fallbacks;
+            document.getElementById('kpiFallbackPct').textContent = `${total ? ((fallbacks / total) * 100).toFixed(1) : 0}% fallbacks`;
+            document.getElementById('kpiErrors').textContent = errors;
+            document.getElementById('kpiAvgDuration').textContent = avgDur;
+            document.getElementById('kpiMinMax').textContent = `Min: ${minDur}ms / Max: ${maxDur}ms`;
+
+            document.getElementById('filter-all').textContent = `All (${total})`;
+            document.getElementById('filter-answered').textContent = `Answered (${success})`;
+            document.getElementById('filter-fallback').textContent = `Fallback (${fallbacks})`;
+            document.getElementById('filter-error').textContent = `Error (${errors})`;
+        }
+
+        function setStatusFilter(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+            });
+            const active = document.getElementById('filter-' + status);
+            if (active) active.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-500 text-slate-950 transition font-bold';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+            const filtered = results.filter(r => {
+                if (currentFilter === 'answered' && (!r.success || r.isFallback)) return false;
+                if (currentFilter === 'fallback' && !r.isFallback) return false;
+                if (currentFilter === 'error' && r.success) return false;
+
+                if (query) {
+                    return r.question.toLowerCase().includes(query) ||
+                           r.answer.toLowerCase().includes(query) ||
+                           String(r.id) === query;
+                }
+                return true;
+            });
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-slate-500">${results.length === 0 ? 'No tests executed yet.' : 'No results match your filter.'}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const safeAnswer = String(item.answer).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const badge = !item.success ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">Error</span>' :
+                              (item.isFallback ? '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">Fallback</span>' :
+                              '<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Answered</span>');
+                
+                const latBadge = item.durationMs < 1000 ? `<span class="font-mono text-xs font-semibold text-emerald-400">${item.durationMs} ms</span>` :
+                                 (item.durationMs < 3000 ? `<span class="font-mono text-xs font-semibold text-amber-400">${item.durationMs} ms</span>` :
+                                 `<span class="font-mono text-xs font-semibold text-rose-400">${item.durationMs} ms</span>`);
+
+                return `
+                    <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/50">
+                        <td class="px-5 py-4 text-xs font-mono text-slate-500 align-top">#${item.id}</td>
+                        <td class="px-5 py-4 align-top">
+                            <p class="font-medium text-slate-200 text-sm leading-snug">${item.question}</p>
+                            <p class="text-[11px] font-mono text-slate-500 mt-1">${item.sessionId}</p>
+                        </td>
+                        <td class="px-5 py-4 align-top">
+                            <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800/80 text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap leading-relaxed select-text">${safeAnswer}</div>
+                        </td>
+                        <td class="px-5 py-4 whitespace-nowrap align-top">${badge}</td>
+                        <td class="px-5 py-4 whitespace-nowrap text-right align-top">${latBadge}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-center align-top">
+                            <button onclick="openModal(${item.id})" title="Inspect Raw JSON" class="p-2 rounded-lg bg-slate-800 hover:bg-teal-500/20 text-slate-400 hover:text-teal-300 border border-slate-700/60 transition">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openModal(id) {
+            const item = results.find(r => r.id === id);
+            if (!item) return;
+            currentModalItem = item;
+            document.getElementById('modalId').textContent = '#' + item.id;
+            document.getElementById('modalQuestion').textContent = item.question;
+            document.getElementById('modalJson').textContent = JSON.stringify(item.rawResponse || item, null, 2);
+            document.getElementById('jsonModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('jsonModal').classList.add('hidden');
+            currentModalItem = null;
+        }
+
+        function copyModalJson() {
+            if (!currentModalItem) return;
+            navigator.clipboard.writeText(JSON.stringify(currentModalItem.rawResponse || currentModalItem, null, 2));
+            alert('JSON copied to clipboard!');
+        }
+
+        function exportToJson() {
+            if (results.length === 0) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(results, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "spark_chatbot_results.json");
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+        }
+
+        function exportToCsv() {
+            if (results.length === 0) return;
+            const headers = ["ID", "Question", "Answer", "Status", "Duration_ms", "SessionId", "Timestamp"];
+            const rows = results.map(r => [
+                r.id,
+                '"' + (r.question || '').replace(/"/g, '""') + '"',
+                '"' + (r.answer || '').replace(/"/g, '""') + '"',
+                r.isFallback ? "Fallback" : (r.success ? "Answered" : "Error"),
+                r.durationMs,
+                r.sessionId,
+                r.timestamp
+            ]);
+            const csv = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+            const dl = document.createElement('a');
+            dl.setAttribute("href", encodeURI(csv));
+            dl.setAttribute("download", "spark_chatbot_results.csv");
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+        document.addEventListener('DOMContentLoaded', () => loadSampleQuestions());
+    </script>
+</body>
+</html>
