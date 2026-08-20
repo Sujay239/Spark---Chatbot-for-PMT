@@ -1,0 +1,10 @@
+{
+  "correctness": "The response must preserve the factual meaning of the expected answer.",
+  "completeness": "Important expected facts must not be omitted.",
+  "relevance": "The response must answer the current/combined question rather than merely mention the topic.",
+  "groundedness": "Factual claims must be supported by the supplied Q&A/knowledge context or an explicitly configured authoritative fallback source.",
+  "hallucination": "A factual claim absent from, or contradicted by, the supplied evidence is unsupported and may be classified as hallucination.",
+  "intentMatch": "The response must address all explicit intents in multi-intent tests.",
+  "instructionFollowing": "Hardcoded response rules, scope rules, history behavior, and no-internal-disclosure rules are evaluated separately from factual similarity.",
+  "notFoundRule": "NOT_FOUND is reserved for correct non-invention/unavailability behavior. Failure to retrieve information that exists in the supplied source is FAILED with RETRIEVAL_FAILURE/MISSING_INFORMATION."
+}

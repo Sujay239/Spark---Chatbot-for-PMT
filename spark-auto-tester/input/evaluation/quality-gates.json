@@ -1,0 +1,7 @@
+{
+  "minimumPassRate": 0.90,
+  "minimumAverageScore": 85,
+  "maximumHallucinationRate": 0.02,
+  "maximumWebhookErrorRate": 0.05,
+  "note": "These are starting gates from the master specification and remain configurable in chatbot-tester.config.json."
+}

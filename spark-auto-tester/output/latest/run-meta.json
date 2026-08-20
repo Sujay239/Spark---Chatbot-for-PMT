@@ -1,0 +1,57 @@
+{
+  "runId": "2026-08-20T11-04-49-277Z",
+  "completedAt": "2026-08-20T11:11:37.595Z",
+  "summary": {
+    "total": 100,
+    "counts": {
+      "OK": 70,
+      "FAILED": 16,
+      "HALLUCINATION": 6,
+      "PARTIAL": 8
+    },
+    "passed": 70,
+    "partial": 8,
+    "failed": 16,
+    "notFound": 0,
+    "hallucination": 6,
+    "webhookErrors": 0,
+    "timeouts": 0,
+    "invalid": 0,
+    "unsafe": 0,
+    "averageScore": 85.41,
+    "averageLatencyMs": 3720.45,
+    "passRate": 0.7,
+    "failureRate": 0.3,
+    "hallucinationRate": 0.06,
+    "webhookErrorRate": 0,
+    "qualityGate": {
+      "status": "FAILED",
+      "reasons": [
+        "Pass rate 0.7 < 0.9",
+        "Hallucination rate 0.06 > 0.02"
+      ]
+    },
+    "comparison": {
+      "passRate": {
+        "previous": 0.23,
+        "current": 0.7,
+        "change": 0.47
+      },
+      "hallucinationRate": {
+        "previous": 0.01,
+        "current": 0.06,
+        "change": 0.05
+      },
+      "averageScore": {
+        "previous": 66.94,
+        "current": 85.41,
+        "change": 18.47
+      },
+      "averageLatencyMs": {
+        "previous": 5363.88,
+        "current": 3720.45,
+        "change": -1643.43
+      }
+    }
+  }
+}

@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import { analyzeFailures } from '../src/improvement/analyzer.js';
+test('improvement analysis groups recurring failures',()=>{const p=analyzeFailures([{testId:'T1',failureReasons:['HALLUCINATION']},{testId:'T2',failureReasons:['HALLUCINATION']}]);assert.equal(p[0].reason,'HALLUCINATION');assert.equal(p[0].count,2);assert.equal(p[0].priority,'CRITICAL');});

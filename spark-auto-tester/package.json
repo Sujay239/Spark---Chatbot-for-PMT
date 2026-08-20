@@ -1,0 +1,15 @@
+{
+  "name": "spark-auto-chatbot-tester",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node ./src/start.js",
+    "start:mock": "node ./src/start.js --mock",
+    "run-once": "node ./src/start.js --no-server --no-open",
+    "test": "node --test",
+    "analyze": "node ./src/cli/index.js analyze",
+    "generate": "node ./src/cli/index.js generate --dry-run"
+  }
+}

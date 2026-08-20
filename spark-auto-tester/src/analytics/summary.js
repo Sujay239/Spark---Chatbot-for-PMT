@@ -1,0 +1,13 @@
+const GOOD=new Set(['OK','NOT_FOUND']);
+export function summarize(tests,qualityGates,previous=null){
+  const counts={}; let score=0,lat=0,latN=0;
+  for(const t of tests){counts[t.status]=(counts[t.status]||0)+1; score+=Number(t.evaluation?.overallScore||0); if(Number.isFinite(t.latencyMs)){lat+=t.latencyMs;latN++;}}
+  const total=tests.length||1, passed=tests.filter(t=>GOOD.has(t.status)).length;
+  const summary={total:tests.length,counts,passed,partial:counts.PARTIAL||0,failed:counts.FAILED||0,notFound:counts.NOT_FOUND||0,hallucination:counts.HALLUCINATION||0,webhookErrors:counts.WEBHOOK_ERROR||0,timeouts:counts.TIMEOUT||0,invalid:counts.INVALID||0,unsafe:counts.UNSAFE||0,averageScore:Number((score/total).toFixed(2)),averageLatencyMs:Number((lat/(latN||1)).toFixed(2)),passRate:Number((passed/total).toFixed(4)),failureRate:Number(((tests.length-passed)/total).toFixed(4)),hallucinationRate:Number(((counts.HALLUCINATION||0)/total).toFixed(4)),webhookErrorRate:Number(((counts.WEBHOOK_ERROR||0)/total).toFixed(4))};
+  const failures=[]; if(summary.passRate<qualityGates.minimumPassRate)failures.push(`Pass rate ${summary.passRate} < ${qualityGates.minimumPassRate}`); if(summary.averageScore<qualityGates.minimumAverageScore)failures.push(`Average score ${summary.averageScore} < ${qualityGates.minimumAverageScore}`); if(summary.hallucinationRate>qualityGates.maximumHallucinationRate)failures.push(`Hallucination rate ${summary.hallucinationRate} > ${qualityGates.maximumHallucinationRate}`); if(summary.webhookErrorRate>qualityGates.maximumWebhookErrorRate)failures.push(`Webhook error rate ${summary.webhookErrorRate} > ${qualityGates.maximumWebhookErrorRate}`);
+  summary.qualityGate={status:failures.length?'FAILED':'PASSED',reasons:failures};
+  if(previous){summary.comparison={passRate:delta(previous.passRate,summary.passRate),hallucinationRate:delta(previous.hallucinationRate,summary.hallucinationRate),averageScore:delta(previous.averageScore,summary.averageScore),averageLatencyMs:delta(previous.averageLatencyMs,summary.averageLatencyMs)};}
+  return summary;
+}
+function delta(prev,cur){return {previous:prev??null,current:cur,change:prev==null?null:Number((cur-prev).toFixed(4))};}
+export function coverage(tests,spec){const refs=new Set(tests.flatMap(t=>t.generatedFrom||[])); const qaIds=new Set((spec.qa||[]).map(x=>x.id)); const covered=[...qaIds].filter(x=>refs.has(x)).length; return {knowledgeAreas:(spec.knowledgeAreas||[]).length,knownQa:qaIds.size,qaCovered:covered,qaCoverage:qaIds.size?Number((covered/qaIds.size).toFixed(4)):0,categoriesTested:[...new Set(tests.map(t=>t.category))]};}

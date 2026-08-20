@@ -1,0 +1,101 @@
+{
+  "version": "2.0.0",
+  "target": {
+    "urlEnv": "CHATBOT_WEBHOOK_URL",
+    "defaultUrl": "https://n8n.srv917960.hstgr.cloud/webhook/spark-chatbot",
+    "methodEnv": "CHATBOT_WEBHOOK_METHOD",
+    "defaultMethod": "GET",
+    "headers": {},
+    "auth": { "headerNameEnv": "CHATBOT_AUTH_HEADER", "valueEnv": "CHATBOT_AUTH_VALUE" },
+    "request": {
+      "location": "query",
+      "questionField": "chatInput",
+      "sessionField": "sessionId",
+      "staticFields": {}
+    },
+    "response": {
+      "answerPaths": ["text", "answer", "output", "response", "data.text", "data.answer", "data.output"],
+      "sourcePaths": ["sources", "data.sources"],
+      "intentPaths": ["intent", "data.intent"],
+      "confidencePaths": ["confidence", "data.confidence"]
+    }
+  },
+  "testing": {
+    "questionsPerCycle": 100,
+    "similarityThreshold": 0.85,
+    "categories": ["KB_KNOWLEDGE", "DIRECT", "PARAPHRASE", "SEMANTIC", "TYPO", "INFORMAL", "MULTI_INTENT", "CONTEXTUAL", "AMBIGUOUS", "NEGATIVE", "OUT_OF_SCOPE", "HALLUCINATION", "BOUNDARY", "PROMPT_INJECTION", "SECURITY", "LONG_CONTEXT", "MULTILINGUAL", "REGRESSION"],
+    "categoryWeights": {
+      "KB_KNOWLEDGE": 0.20,
+      "DIRECT": 0.06,
+      "PARAPHRASE": 0.18,
+      "SEMANTIC": 0.10,
+      "TYPO": 0.09,
+      "INFORMAL": 0.07,
+      "MULTI_INTENT": 0.06,
+      "CONTEXTUAL": 0.06,
+      "AMBIGUOUS": 0.04,
+      "NEGATIVE": 0.04,
+      "OUT_OF_SCOPE": 0.03,
+      "HALLUCINATION": 0.03,
+      "BOUNDARY": 0.01,
+      "PROMPT_INJECTION": 0.01,
+      "SECURITY": 0.01,
+      "LONG_CONTEXT": 0.01,
+      "MULTILINGUAL": 0.01
+    },
+    "enableNegativeTests": true,
+    "enableHallucinationTests": true,
+    "enablePromptInjectionTests": true,
+    "enableEdgeCases": true,
+    "enableMultiTurnTests": true,
+    "enableRegressionTests": true,
+    "regressionShare": 0.15
+  },
+  "execution": {
+    "requestTimeoutMs": 30000,
+    "maxRetries": 3,
+    "concurrency": 1,
+    "requestsPerSecond": 1,
+    "delayMs": 250,
+    "backoffBaseMs": 500,
+    "retryStatusCodes": [408, 429, 502, 503, 504]
+  },
+  "evaluation": {
+    "weights": { "correctness": 0.27, "completeness": 0.18, "relevance": 0.18, "groundedness": 0.20, "intentMatch": 0.10, "instructionFollowing": 0.07 },
+    "thresholds": { "ok": 85, "partial": 65, "hallucinationGroundedness": 45 },
+    "unsupportedClaimPenalty": 18,
+    "requireEvidence": true
+  },
+  "qualityGates": {
+    "minimumPassRate": 0.90,
+    "minimumAverageScore": 85,
+    "maximumHallucinationRate": 0.02,
+    "maximumWebhookErrorRate": 0.05
+  },
+  "ai": {
+    "enabledEnv": "AI_ENABLED",
+    "baseUrlEnv": "AI_BASE_URL",
+    "apiKeyEnv": "AI_API_KEY",
+    "modelEnv": "AI_MODEL",
+    "temperatureEnv": "AI_TEMPERATURE",
+    "timeoutEnv": "AI_REQUEST_TIMEOUT_MS"
+  },
+  "input": {
+    "knowledgeBase": ["input/knowledge-base"],
+    "qa": ["input/qa"],
+    "prompts": ["input/prompts"],
+    "workflow": ["input/workflow"],
+    "semanticRules": ["input/semantic-rules"],
+    "evaluation": ["input/evaluation"],
+    "examples": ["input/examples"]
+  },
+  "storage": {
+    "resultsDir": "results",
+    "reportsDir": "reports",
+    "regressionDir": "regression",
+    "logsDir": "logs",
+    "improvementsFile": "CHATBOT_IMPROVEMENTS.md",
+    "questionHistoryFile": "state/generated-question-history.json",
+    "improvementHistoryDir": "state/improvement-history"
+  }
+}

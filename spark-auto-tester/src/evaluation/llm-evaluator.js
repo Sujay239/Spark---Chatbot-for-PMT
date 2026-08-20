@@ -1,0 +1,5 @@
+export async function llmEvaluate(ai,test,actual,context=''){
+  const rubric={task:'Evaluate chatbot response. Use only expected answer, supplied knowledge context, and rules. Unsupported factual claims lower groundedness. Return strict JSON.',schema:{correctness:'0-100',completeness:'0-100',relevance:'0-100',groundedness:'0-100',intentMatch:'0-100',instructionFollowing:'0-100',overallScore:'0-100',reasons:['machine_reason'],explanation:'brief evidence-based explanation'}};
+  const data=await ai.json([{role:'system',content:JSON.stringify(rubric)},{role:'user',content:JSON.stringify({question:test.question,category:test.category,expected:test.expected,actualAnswer:actual?.answer,knowledgeContext:context.slice(0,12000)})}]);
+  for(const k of ['correctness','completeness','relevance','groundedness','intentMatch','instructionFollowing','overallScore']) data[k]=Math.max(0,Math.min(100,Number(data[k])||0)); data.reasons=Array.isArray(data.reasons)?data.reasons.map(String):[]; return data;
+}
