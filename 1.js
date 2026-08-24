@@ -6,18 +6,52 @@ const sessionId =
 
 // ================= CODE-LEVEL GUARDRAILS (NO LLM NEEDED) =================
 const DOMAIN_WHITELIST = new Set([
-  "tens", "ems", "ifc", "nmes", "microcurrent", "galvanic", "transcutaneous",
-  "interferential", "electrotherapy", "electrodes", "electrode", "leadwires",
-  "leadwire", "rechargeable", "u5", "u1", "u11", "u20", "u3t", "jstim", "qfiber",
-  "pmt", "thermotech", "thermacycle", "theratrac", "theralamp", "thermorelief",
-  "neuropathy", "sciatica", "fibromyalgia", "lumbago", "arthritis", "contraindication",
-  "contraindications", "waveform", "waveforms", "hz", "hertz", "microseconds"
+  "tens",
+  "ems",
+  "ifc",
+  "nmes",
+  "microcurrent",
+  "galvanic",
+  "transcutaneous",
+  "interferential",
+  "electrotherapy",
+  "electrodes",
+  "electrode",
+  "leadwires",
+  "leadwire",
+  "rechargeable",
+  "u5",
+  "u1",
+  "u11",
+  "u20",
+  "u3t",
+  "jstim",
+  "qfiber",
+  "pmt",
+  "thermotech",
+  "thermacycle",
+  "theratrac",
+  "theralamp",
+  "thermorelief",
+  "neuropathy",
+  "sciatica",
+  "fibromyalgia",
+  "lumbago",
+  "arthritis",
+  "contraindication",
+  "contraindications",
+  "waveform",
+  "waveforms",
+  "hz",
+  "hertz",
+  "microseconds",
 ]);
 
 function isNonEnglish(text) {
   if (!text) return false;
   // 1. Non-Latin scripts (Cyrillic, Arabic, CJK, Devanagari, Hebrew, Greek, Thai)
-  const nonLatinRegex = /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0900-\u097F\u0590-\u05FF\u0370-\u03FF\u0E00-\u0E7F]/;
+  const nonLatinRegex =
+    /[\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AF\u0900-\u097F\u0590-\u05FF\u0370-\u03FF\u0E00-\u0E7F]/;
   if (nonLatinRegex.test(text)) return true;
 
   // 2. Distinctive non-English phrases/words
@@ -27,9 +61,9 @@ function isNonEnglish(text) {
     /\b(bonjour|bonsoir|comment ca va|comment ça va|merci|s'il vous plait|s'il vous plaît|aidez-moi|pourquoi|combien coute|combien coûte)\b/i,
     /\b(guten tag|guten morgen|hallo wie|danke schon|danke schön|bitte hilfe|wie funktioniert|wie viel kostet)\b/i,
     /\b(olá|bom dia|boa tarde|obrigado|por favor me ajude|como funciona|quanto custa)\b/i,
-    /\b(ciao come|buongiorno|grazie mille|per favore|come funziona|quanto costa)\b/i
+    /\b(ciao come|buongiorno|grazie mille|per favore|come funziona|quanto costa)\b/i,
   ];
-  return foreignPhrases.some(regex => regex.test(text));
+  return foreignPhrases.some((regex) => regex.test(text));
 }
 
 function isGibberishOrKeyboardMash(text) {
@@ -42,7 +76,7 @@ function isGibberishOrKeyboardMash(text) {
 
   const words = trimmed.split(/\s+/);
   for (const word of words) {
-    const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+    const cleanWord = word.replace(/[^a-zA-Z]/g, "");
     if (cleanWord.length === 0) continue;
     if (DOMAIN_WHITELIST.has(cleanWord.toLowerCase())) continue;
 
@@ -62,7 +96,8 @@ function isGibberishOrKeyboardMash(text) {
     if (cleanWord.length >= 6 && !/[aeiouy]/i.test(cleanWord)) return true;
 
     // 4. Repeated character sequence 4+ times
-    if (/(.)\1{4,}/.test(cleanWord) || /([a-zA-Z]{2,4})\1{3,}/.test(cleanWord)) return true;
+    if (/(.)\1{4,}/.test(cleanWord) || /([a-zA-Z]{2,4})\1{3,}/.test(cleanWord))
+      return true;
 
     // 5. Very low vowel-to-consonant ratio in long words (>= 8 chars with < 13% vowels)
     if (cleanWord.length >= 8) {
@@ -85,9 +120,10 @@ if (isNonEnglish(userQuestion)) {
         sessionId: sessionId,
         output: "Matched with defined questions. Please see the details below",
         matched_question: "__LANGUAGE_NOT_SUPPORTED__",
-        direct_answer: "I can only assist you in English. Please ask your question in English."
-      }
-    }
+        direct_answer:
+          "I can only assist you in English. Please ask your question in English.",
+      },
+    },
   ];
 }
 
@@ -103,22 +139,23 @@ if (isGibberishOrKeyboardMash(userQuestion)) {
         sessionId: sessionId,
         output: "Matched with defined questions. Please see the details below",
         matched_question: "__TYPO_DETECTED__",
-        direct_answer: "Typo detected. Please check your question and try again."
-      }
-    }
+        direct_answer:
+          "Typo detected. Please check your question and try again.",
+      },
+    },
   ];
 }
 
 // ================= GOOGLE SHEET DYNAMIC QUESTIONS =================
 let sheetQuestions = [];
-let cacheSource = 'none';
+let cacheSource = "none";
 try {
   // 1. Try static data first
   try {
-    const staticData = $getWorkflowStaticData('global');
+    const staticData = $getWorkflowStaticData("global");
     sheetQuestions = staticData.sheetQuestions || [];
     if (sheetQuestions.length > 0) {
-      cacheSource = 'staticData';
+      cacheSource = "staticData";
     }
   } catch (err) {
     // Ignore static data error
@@ -126,15 +163,15 @@ try {
 
   // 2. If static data is empty, try file cache
   if (!sheetQuestions || sheetQuestions.length === 0) {
-    const os = require('os');
-    const path = require('path');
-    const fs = require('fs');
-    const cachePath = path.join(os.tmpdir(), 'n8n_sheet_questions_cache.json');
+    const os = require("os");
+    const path = require("path");
+    const fs = require("fs");
+    const cachePath = path.join(os.tmpdir(), "n8n_sheet_questions_cache.json");
     if (fs.existsSync(cachePath)) {
-      const cacheData = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+      const cacheData = JSON.parse(fs.readFileSync(cachePath, "utf8"));
       sheetQuestions = cacheData.questions || [];
       if (sheetQuestions.length > 0) {
-        cacheSource = 'fileCache';
+        cacheSource = "fileCache";
       }
     }
   }
@@ -249,254 +286,255 @@ const hardcodedQuestions = [
   "What is the Lock/Unlock feature, and how do I use it?",
   "What settings should I use for my very first Ultima 5 session?",
   "How far apart should the electrode pads be on my Ultima 5?",
-  "Where can I learn more about my Ultima 5?"
+  "Where can I learn more about my Ultima 5?",
 ];
 
-
 // Merge: Sheet questions first, then hardcoded (keeping unique ones)
-const predefinedQuestions = [...new Set([...sheetQuestions, ...hardcodedQuestions])];
+const predefinedQuestions = [
+  ...new Set([...sheetQuestions, ...hardcodedQuestions]),
+];
 
 // ================= SYNONYMS =================
 const synonyms = {
   // Device / unit names
-  "device": "tens unit",
-  "unit": "tens unit",
-  "machine": "tens unit",
-  "stimulator": "tens unit",
-  "massager": "tens unit",
-  "electrotherapy": "tens unit",
+  device: "tens unit",
+  unit: "tens unit",
+  machine: "tens unit",
+  stimulator: "tens unit",
+  massager: "tens unit",
+  electrotherapy: "tens unit",
   "e stim": "tens unit",
-  "estim": "tens unit",
+  estim: "tens unit",
   "electrical stimulation": "tens unit",
 
   // Product model synonyms
-  "u5": "ultima 5",
+  u5: "ultima 5",
   "u 5": "ultima 5",
-  "u1": "ultima 1",
+  u1: "ultima 1",
   "u 1": "ultima 1",
-  "u11": "ultima 11",
+  u11: "ultima 11",
   "u 11": "ultima 11",
-  "u20": "ultima 20",
+  u20: "ultima 20",
   "u 20": "ultima 20",
-  "u3t": "ultima 3t",
+  u3t: "ultima 3t",
   "u 3t": "ultima 3t",
-  "neo": "ultima neo",
+  neo: "ultima neo",
 
   // Electrode / pad synonyms
-  "pads": "electrodes",
-  "pad": "electrodes",
-  "electrode": "electrodes",
-  "patch": "electrodes",
-  "patches": "electrodes",
-  "gelpad": "electrodes",
-  "gelpads": "electrodes",
-  "stickers": "electrodes",
-  "sticker": "electrodes",
+  pads: "electrodes",
+  pad: "electrodes",
+  electrode: "electrodes",
+  patch: "electrodes",
+  patches: "electrodes",
+  gelpad: "electrodes",
+  gelpads: "electrodes",
+  stickers: "electrodes",
+  sticker: "electrodes",
   "sticky pads": "electrodes",
 
   // Lead wire synonyms
-  "wires": "lead wires",
-  "wire": "lead wires",
-  "lead": "lead wires",
-  "leads": "lead wires",
-  "cable": "lead wires",
-  "cables": "lead wires",
-  "cord": "lead wires",
-  "cords": "lead wires",
-  "connector": "lead wires",
-  "connectors": "lead wires",
+  wires: "lead wires",
+  wire: "lead wires",
+  lead: "lead wires",
+  leads: "lead wires",
+  cable: "lead wires",
+  cables: "lead wires",
+  cord: "lead wires",
+  cords: "lead wires",
+  connector: "lead wires",
+  connectors: "lead wires",
 
   // Intensity / strength synonyms
-  "strength": "intensity",
-  "level": "intensity",
-  "amplitude": "intensity",
-  "volume": "intensity",
-  "strong": "intensity",
-  "stronger": "intensity",
-  "weaker": "intensity",
-  "weak": "intensity",
+  strength: "intensity",
+  level: "intensity",
+  amplitude: "intensity",
+  volume: "intensity",
+  strong: "intensity",
+  stronger: "intensity",
+  weaker: "intensity",
+  weak: "intensity",
 
   // Frequency / pulse rate synonyms
-  "rate": "frequency",
-  "speed": "frequency",
-  "hz": "frequency",
-  "hertz": "frequency",
-  "pulses": "frequency",
+  rate: "frequency",
+  speed: "frequency",
+  hz: "frequency",
+  hertz: "frequency",
+  pulses: "frequency",
   "pulse rate": "frequency",
 
   // Pulse width synonyms
-  "width": "pulse width",
-  "microseconds": "pulse width",
-  "us": "pulse width",
+  width: "pulse width",
+  microseconds: "pulse width",
+  us: "pulse width",
 
   // Time / relief synonyms (paraphrase support)
-  "soon": "quickly",
-  "fast": "quickly",
-  "rapid": "quickly",
-  "quickly": "quickly",
-  "difference": "relief",
-  "benefit": "relief",
-  "helping": "relief",
-  "improvement": "relief",
-  "notice": "feel",
+  soon: "quickly",
+  fast: "quickly",
+  rapid: "quickly",
+  quickly: "quickly",
+  difference: "relief",
+  benefit: "relief",
+  helping: "relief",
+  improvement: "relief",
+  notice: "feel",
 
   // Medical term synonyms (paraphrase support)
   "surgical hardware": "metal implants",
-  "surgical": "metal implants",
-  "hardware": "metal implants",
-  "screw": "metal implants",
-  "plate": "metal implants",
-  "rod": "metal implants",
+  surgical: "metal implants",
+  hardware: "metal implants",
+  screw: "metal implants",
+  plate: "metal implants",
+  rod: "metal implants",
   "joint replacement": "metal implants",
   "red marks": "redness",
   "red mark": "redness",
-  "redness": "redness",
-  "irritation": "redness",
-  "drug": "medication",
-  "drugs": "medication",
-  "medicine": "medication",
-  "medicines": "medication",
-  "interaction": "contraindication",
-  "interactions": "contraindication",
+  redness: "redness",
+  irritation: "redness",
+  drug: "medication",
+  drugs: "medication",
+  medicine: "medication",
+  medicines: "medication",
+  interaction: "contraindication",
+  interactions: "contraindication",
 
   // Placement / position synonyms
-  "placement": "position",
-  "place": "position",
-  "location": "position",
-  "put": "position",
-  "apply": "position",
-  "stick": "position",
-  "attach": "position",
+  placement: "position",
+  place: "position",
+  location: "position",
+  put: "position",
+  apply: "position",
+  stick: "position",
+  attach: "position",
   "where to put": "position",
 
   // Pain / discomfort synonyms
-  "ache": "pain",
-  "soreness": "pain",
-  "discomfort": "pain",
-  "stiffness": "pain",
-  "hurt": "pain",
-  "hurts": "pain",
-  "hurting": "pain",
-  "spasm": "pain",
-  "spasms": "pain",
-  "cramp": "pain",
-  "cramps": "pain",
-  "cramping": "pain",
-  "tingling": "pain",
-  "numbness": "pain",
-  "numb": "pain",
-  "burning": "pain",
-  "throbbing": "pain",
-  "sore": "pain",
+  ache: "pain",
+  soreness: "pain",
+  discomfort: "pain",
+  stiffness: "pain",
+  hurt: "pain",
+  hurts: "pain",
+  hurting: "pain",
+  spasm: "pain",
+  spasms: "pain",
+  cramp: "pain",
+  cramps: "pain",
+  cramping: "pain",
+  tingling: "pain",
+  numbness: "pain",
+  numb: "pain",
+  burning: "pain",
+  throbbing: "pain",
+  sore: "pain",
 
   // Body part synonyms
   "lower back": "back pain",
-  "lumbar": "back pain",
-  "lumbago": "back pain",
-  "sciatica": "back pain",
-  "sciatic": "back pain",
-  "kneecap": "knee",
-  "knees": "knee",
-  "shoulders": "shoulder",
-  "cervical": "neck",
-  "feet": "foot",
-  "ankle": "foot",
-  "wrist": "hand",
-  "elbow": "arm",
-  "hip": "joint",
-  "hips": "joint",
-  "arthritis": "joint pain",
-  "neuropathy": "nerve pain",
+  lumbar: "back pain",
+  lumbago: "back pain",
+  sciatica: "back pain",
+  sciatic: "back pain",
+  kneecap: "knee",
+  knees: "knee",
+  shoulders: "shoulder",
+  cervical: "neck",
+  feet: "foot",
+  ankle: "foot",
+  wrist: "hand",
+  elbow: "arm",
+  hip: "joint",
+  hips: "joint",
+  arthritis: "joint pain",
+  neuropathy: "nerve pain",
 
   // Battery / power synonyms
-  "power": "battery",
-  "batteries": "battery",
-  "rechargeable": "battery",
-  "charging": "battery",
-  "charge": "battery",
-  "charger": "battery",
-  "aa": "battery",
-  "lithium": "battery",
+  power: "battery",
+  batteries: "battery",
+  rechargeable: "battery",
+  charging: "battery",
+  charge: "battery",
+  charger: "battery",
+  aa: "battery",
+  lithium: "battery",
 
   // Mode / program synonyms
-  "setting": "mode",
-  "settings": "mode",
-  "program": "mode",
-  "programs": "mode",
-  "channel": "mode",
-  "channels": "mode",
-  "burst": "burst mode",
-  "normal": "normal mode",
-  "modulation": "modulation mode",
-  "continuous": "continuous mode",
-  "waveform": "wave form",
-  "waveforms": "wave form",
+  setting: "mode",
+  settings: "mode",
+  program: "mode",
+  programs: "mode",
+  channel: "mode",
+  channels: "mode",
+  burst: "burst mode",
+  normal: "normal mode",
+  modulation: "modulation mode",
+  continuous: "continuous mode",
+  waveform: "wave form",
+  waveforms: "wave form",
 
   // Therapy type synonyms
-  "ems": "electrical muscle stimulation",
-  "ifc": "interferential",
-  "interferential": "interferential therapy",
-  "galvanic": "galvanic stimulation",
-  "russian": "russian stimulation",
-  "microcurrent": "micro current",
-  "mens": "micro current",
+  ems: "electrical muscle stimulation",
+  ifc: "interferential",
+  interferential: "interferential therapy",
+  galvanic: "galvanic stimulation",
+  russian: "russian stimulation",
+  microcurrent: "micro current",
+  mens: "micro current",
 
   // Safety / contraindication synonyms
   "side effect": "safety",
   "side effects": "safety",
-  "adverse": "safety",
-  "risk": "safety",
-  "risks": "safety",
-  "dangers": "safety",
-  "danger": "safety",
-  "harmful": "safety",
-  "safe": "safety",
-  "precaution": "safety",
-  "precautions": "safety",
-  "caution": "safety",
-  "warning": "safety",
+  adverse: "safety",
+  risk: "safety",
+  risks: "safety",
+  dangers: "safety",
+  danger: "safety",
+  harmful: "safety",
+  safe: "safety",
+  precaution: "safety",
+  precautions: "safety",
+  caution: "safety",
+  warning: "safety",
 
   // Contraindication synonyms
-  "pacemaker": "contraindications",
-  "implant": "contraindications",
-  "implants": "contraindications",
-  "pregnant": "contraindications",
-  "pregnancy": "contraindications",
-  "diabetes": "contraindications",
-  "diabetic": "contraindications",
-  "heart": "contraindications",
-  "cardiac": "contraindications",
-  "epilepsy": "contraindications",
-  "seizure": "contraindications",
+  pacemaker: "contraindications",
+  implant: "contraindications",
+  implants: "contraindications",
+  pregnant: "contraindications",
+  pregnancy: "contraindications",
+  diabetes: "contraindications",
+  diabetic: "contraindications",
+  heart: "contraindications",
+  cardiac: "contraindications",
+  epilepsy: "contraindications",
+  seizure: "contraindications",
 
   // Warranty / return synonyms
-  "guarantee": "warranty",
-  "replacement": "warranty",
-  "repair": "warranty",
-  "return": "warranty",
-  "refund": "warranty",
-  "defective": "warranty",
-  "broken": "warranty",
+  guarantee: "warranty",
+  replacement: "warranty",
+  repair: "warranty",
+  return: "warranty",
+  refund: "warranty",
+  defective: "warranty",
+  broken: "warranty",
 
   // Prescription / insurance synonyms
-  "rx": "prescription",
-  "doctor": "prescription",
-  "physician": "prescription",
-  "prescribed": "prescription",
-  "coverage": "insurance",
-  "reimbursement": "insurance",
-  "va": "insurance",
-  "veteran": "insurance",
-  "medicare": "insurance",
-  "medicaid": "insurance",
+  rx: "prescription",
+  doctor: "prescription",
+  physician: "prescription",
+  prescribed: "prescription",
+  coverage: "insurance",
+  reimbursement: "insurance",
+  va: "insurance",
+  veteran: "insurance",
+  medicare: "insurance",
+  medicaid: "insurance",
 
   // Manual / guide synonyms
-  "guide": "user manual",
-  "instructions": "user manual",
-  "manual": "user manual",
-  "pdf": "user manual",
-  "documentation": "user manual",
-  "booklet": "user manual",
+  guide: "user manual",
+  instructions: "user manual",
+  manual: "user manual",
+  pdf: "user manual",
+  documentation: "user manual",
+  booklet: "user manual",
   "quick start": "user manual",
 
   // Contact / support synonyms
@@ -506,42 +544,42 @@ const synonyms = {
   "email address": "contact info",
   "customer service": "contact info",
   "reach out": "contact info",
-  "fax": "contact info",
+  fax: "contact info",
 
   // Pricing synonyms
-  "cost": "pricing",
-  "price": "pricing",
-  "pay": "pricing",
-  "buy": "pricing",
-  "purchase": "pricing",
-  "order": "pricing",
-  "affordable": "pricing",
-  "expensive": "pricing",
-  "cheap": "pricing",
+  cost: "pricing",
+  price: "pricing",
+  pay: "pricing",
+  buy: "pricing",
+  purchase: "pricing",
+  order: "pricing",
+  affordable: "pricing",
+  expensive: "pricing",
+  cheap: "pricing",
 
   // Company synonyms
-  "seller": "pmt",
-  "company": "pmt",
-  "manufacturer": "pmt",
-  "brand": "pmt",
+  seller: "pmt",
+  company: "pmt",
+  manufacturer: "pmt",
+  brand: "pmt",
   "pain management technologies": "pmt",
-  "paintechnology": "pmt",
+  paintechnology: "pmt",
   "pain technology": "pmt",
 
   // Accessory synonyms
   "carrying case": "case",
-  "pouch": "case",
+  pouch: "case",
   "belt clip": "clip",
-  "clip": "clip",
+  clip: "clip",
 
   // Troubleshooting synonyms
   "not working": "troubleshooting",
-  "broken": "troubleshooting",
-  "malfunction": "troubleshooting",
-  "problem": "troubleshooting",
-  "issue": "troubleshooting",
-  "fix": "troubleshooting",
-  "reset": "troubleshooting"
+  broken: "troubleshooting",
+  malfunction: "troubleshooting",
+  problem: "troubleshooting",
+  issue: "troubleshooting",
+  fix: "troubleshooting",
+  reset: "troubleshooting",
 };
 
 // ================= STOPWORDS =================
@@ -820,7 +858,9 @@ function combinedScore(input, target) {
 let bestScore = 0;
 let bestIndex = -1;
 
-const sheetQuestionsSet = new Set(sheetQuestions.map(q => q.toLowerCase().trim()));
+const sheetQuestionsSet = new Set(
+  sheetQuestions.map((q) => q.toLowerCase().trim()),
+);
 
 for (let i = 0; i < predefinedQuestions.length; i++) {
   const q = predefinedQuestions[i];
@@ -866,7 +906,32 @@ if (isProhibited) {
 }
 
 // ================= PRODUCT OVERRIDE =================
-const products = ["tens", "ultima", "ultima 1", "ultima 5", "ultima 11", "ultima 20", "ultima 3t", "ultima neo", "electrodes", "lead wires", "battery", "pmt", "thermotech", "thermacycle", "soft cycle", "ucombo", "thermorelief", "theralamp", "aqua relief", "polar vortex", "arctic ice", "theratrac", "jstim", "qfiber"];
+const products = [
+  "tens",
+  "ultima",
+  "ultima 1",
+  "ultima 5",
+  "ultima 11",
+  "ultima 20",
+  "ultima 3t",
+  "ultima neo",
+  "electrodes",
+  "lead wires",
+  "battery",
+  "pmt",
+  "thermotech",
+  "thermacycle",
+  "soft cycle",
+  "ucombo",
+  "thermorelief",
+  "theralamp",
+  "aqua relief",
+  "polar vortex",
+  "arctic ice",
+  "theratrac",
+  "jstim",
+  "qfiber",
+];
 
 if (matchFound && bestScore < 0.85) {
   const normQ = userQuestion.toLowerCase();
@@ -897,9 +962,9 @@ if (!matchFound || bestScore < 0.7) {
     {
       patterns: [
         /(pacemaker|cardiac device|defibrillator|icd|implanted cardiac)/i,
-        /tens with a pacemaker/i
+        /tens with a pacemaker/i,
       ],
-      target: "Can I use TENS with a pacemaker?"
+      target: "Can I use TENS with a pacemaker?",
     },
     // 2. Relief onset & timeline
     {
@@ -908,18 +973,27 @@ if (!matchFound || bestScore < 0.7) {
         /when.*(start|begin|feel|notice|kick in|take effect)/i,
         /(time|duration).*(relief|help|feel|notice|benefit)/i,
         /(start|begin).*help/i,
-        /notice.*(difference|relief|benefit|improvement)/i
+        /notice.*(difference|relief|benefit|improvement)/i,
       ],
-      target: "How long does it take to feel relief?"
+      target: "How long does it take to feel relief?",
+    },
+    // 2a. TENS mechanism / how it works
+    {
+      patterns: [
+        /how do (these things|tens units?|tens machines?|tens devices?|they) actually work/i,
+        /(explain|what is|what's).*(science|mechanism).*(tens|machine|unit|device)/i,
+        /(science|mechanism).*(behind|of).*(tens|machine|unit|device)/i,
+      ],
+      target: "How does a TENS unit work?",
     },
     // 3. Metal implants / surgical hardware / titanium
     {
       patterns: [
         /(surgical|metal|hardware|joint replacement|knee replacement|hip replacement|titanium|screw|plate|rod).*(tens|safe|use|ok|device|problem)/i,
         /tens.*(surgical|metal|implant|hardware|joint replacement|knee replacement|hip replacement|titanium|screw|plate|rod)/i,
-        /use.*(over|with|near).*(surgical|metal|implant|hardware|titanium)/i
+        /use.*(over|with|near).*(surgical|metal|implant|hardware|titanium)/i,
       ],
-      target: "Can I use a TENS unit if I have metal implants?"
+      target: "Can I use a TENS unit if I have metal implants?",
     },
     // 4. Skin redness & irritation / breaking out
     {
@@ -927,18 +1001,18 @@ if (!matchFound || bestScore < 0.7) {
         /(red|redness|mark|marks|irritat|rash|burn|itchy|break|breaking out|skin).*(after|session|treatment|use|every|under|where the pad|where the electrode)/i,
         /skin.*(red|mark|marks|irritat|rash|itchy|break|color)/i,
         /(breaking out|break out).*(electrode|pad|skin)/i,
-        /(red mark|red spot|redness).*(bad|normal|worried|concern|ok|okay)/i
+        /(red mark|red spot|redness).*(bad|normal|worried|concern|ok|okay)/i,
       ],
-      target: "Why does my skin turn red after treatment?"
+      target: "I am experiencing skin irritation -- why is that?",
     },
     // 5. Treatment / session duration
     {
       patterns: [
         /(recommend|typical|ideal|proper|best|suggested|optimal).*(duration|length|time|long|minute|session)/i,
         /(duration|length|time).*(treatment|session|therapy|recommend)/i,
-        /how (long|many minute).*(session|treatment|use|per)/i
+        /how (long|many minute).*(session|treatment|use|per)/i,
       ],
-      target: "How many minutes should I do per session?"
+      target: "How many minutes should I do per session?",
     },
     // 6. Drug / medication interactions
     {
@@ -946,304 +1020,346 @@ if (!matchFound || bestScore < 0.7) {
         /(drug|medication|medicine|pharma|prescription).*(interact|contradict|conflict|combine|mix|safe|interfere)/i,
         /(interact|contradict|conflict|interfere).*(drug|medication|medicine|prescription)/i,
         /drug interaction/i,
-        /medication.*(safe|ok|concern|worry|interact)/i
+        /medication.*(safe|ok|concern|worry|interact)/i,
       ],
-      target: "Is there contradictions with medication?"
+      target: "Is there contradictions with medication?",
     },
     // 7. U5 Waveform options
     {
       patterns: [
         /(wave|waveform).*(option|type|kind|offer|have|available).*(u5|ultima 5)/i,
         /(u5|ultima 5).*(wave|waveform).*(option|type|kind|offer|have)/i,
-        /(wave|waveform).*(option|type).*(u5|ultima 5|ultima5)/i
+        /(wave|waveform).*(option|type).*(u5|ultima 5|ultima5)/i,
       ],
-      target: "What wave forms does the Ultima 5 offer, and which one should I use?"
+      target:
+        "What wave forms does the Ultima 5 offer, and which one should I use?",
     },
     // 8. Pad size (small vs big / 2 inch vs 4 inch)
     {
       patterns: [
         /(small pads?|big (ones|pads?)|pad sizes?|size.*(pad|electrode)|which pad.*best|2 inch.*4 inch)/i,
-        /(difference|between).*(2 inch|4 inch|small.*big).*pad/i
+        /(difference|between).*(2 inch|4 inch|small.*big).*pad/i,
       ],
-      target: "What's the difference between 2 inch and 4 inch pads?"
+      target: "What's the difference between 2 inch and 4 inch pads?",
     },
     // 9. First time use & step by step
     {
       patterns: [
         /(walk me through|how (do|to) use|steps to (set up|run)|first time (user|session|using)|get started).*(tens|device|unit|session|this)/i,
-        /(step by step|how to set up).*(tens|session|unit)/i
+        /(step by step|how to set up).*(tens|session|unit)/i,
       ],
-      target: "How do I use a TENS unit, step by step?"
+      target: "How do I use a TENS unit, step by step?",
     },
     // 10. Does TENS work / Evidence / Placebo
     {
       patterns: [
         /(do tens units? actually (help|work)|real evidence|placebo|actually (help|work) people)/i,
-        /(evidence|proof).*(works|effective|placebo)/i
+        /(evidence|proof).*(works|effective|placebo)/i,
       ],
-      target: "Does TENS actually work?"
+      target: "Does TENS actually work?",
     },
     // 11. Intensity setting & pain/hurt
     {
       patterns: [
         /(right|proper|correct|ideal|recommended).*(intensity|level|strength|knob)/i,
         /(how high|what intensity|intensity level).*(turn up|set|use)/i,
-        /(supposed|meant|should).*(hurt|painful)/i
       ],
-      target: "How high should I turn up the intensity?"
+      target: "How high should I turn up the intensity?",
+    },
+    // 11a. Expected sensation / should not hurt
+    {
+      patterns: [
+        /(supposed|meant|should).*(hurt|painful|pain)/i,
+        /(is|are).*(tens|unit|device|stimulation).*(supposed to|meant to).*(hurt|painful)/i,
+      ],
+      target: "What does a TENS unit feel like?",
     },
     // 12. Pad Contact Interruption Alarm (U5 beeps)
     {
       patterns: [
         /(beep|beeps|beeping|alert|alarm).*(pad|contact|u5|ultima 5)/i,
-        /pad contact (alert|alarm|interruption|beep)/i
+        /pad contact (alert|alarm|interruption|beep)/i,
       ],
-      target: "What does the Pad Contact Interruption Alarm do on my Ultima 5?"
+      target: "What does the Pad Contact Interruption Alarm do on my Ultima 5?",
     },
     // 13. Usage frequency & schedule
     {
       patterns: [
         /(how often|how many times|how many session|frequency|how many hours).*(day|week|month|daily|weekly|use|using|session)/i,
         /(reasonable|recommended|typical|proper|schedule|usage).*(frequency|times a week|times per week|per day|per week)/i,
+        /(reasonable|recommended|typical|proper).*(usage\s*)?schedule/i,
         /(can|safe|ok).*(use|wear).*(tens|device|unit|this|it).*(every ?day|daily)/i,
-        /(every ?day|daily|weekly).*(use|wear).*(tens|device|unit|this|it)/i
+        /(every ?day|daily|weekly).*(use|wear).*(tens|device|unit|this|it)/i,
       ],
-      target: "How often should I use a TENS unit?"
+      target: "How often should I use a TENS unit?",
     },
     // 14. Stinging / Sharp / Uncomfortable sensation
     {
       patterns: [
         /(sting|stinging|bite|biting|sharp|uncomfortable|prick|pricking|pinch).*(instead of|tingle|tingling|feel|stimulation)/i,
-        /(sharp|uncomfortable).*(stimulation|sensation|feel)/i
+        /(sharp|uncomfortable).*(stimulation|sensation|feel)/i,
       ],
-      target: "Stimulation feels sharp or uncomfortable"
+      target: "Stimulation feels sharp or uncomfortable",
     },
     // 15. Sleep / Overnight use
     {
       patterns: [
         /(overnight|all night|fall asleep|sleeping|while (i|we) sleep).*(tens|device|unit|leave|wear|on|safe|okay)/i,
-        /(safe|okay).*(sleep|sleeping|overnight|all night)/i
+        /(safe|okay).*(sleep|sleeping|overnight|all night)/i,
+        /(leave|keep|wear).*(it|tens|device|unit)?\s*(on)?.*(overnight|all night|while.*sleep|sleeping|sleep)/i,
       ],
-      target: "Is it safe to use a TENS unit while sleeping?"
+      target: "Is it safe to use a TENS unit while sleeping?",
     },
     // 16. What's in the box / U5 kit contents
     {
       patterns: [
         /(what('s| is) (included|in the box|in my kit)|what do i get (when|if) i buy).*(ultima 5|u5|kit)/i,
-        /(comes in|included with).*(ultima 5|u5)/i
+        /(comes in|included with).*(ultima 5|u5)/i,
       ],
-      target: "What comes in my Ultima 5 kit?"
+      target: "What comes in my Ultima 5 kit?",
     },
     // 17. Placing directly over sore spot / pain area
     {
       patterns: [
         /(directly|right|on top of).*(pain|painful|sore spot|sore area|hurt)/i,
-        /pads.*(on top of|over).*(pain|sore spot)/i
+        /pads.*(on top of|over).*(pain|sore spot)/i,
+        /(pads?|electrodes?).*(sit|go|placed?|on top of|over).*(painful area|pain area|pain|sore spot|sore area)/i,
       ],
-      target: "Can I place the pads directly over where the pain is?"
+      target: "Can I place the pads directly over where the pain is?",
     },
     // 18. Unit shuts off / powers down mid session
     {
       patterns: [
         /(shuts|turns|powers).*(itself|down|off).*(mid|during|own|automatically)/i,
-        /(device|unit).*(turn off|shut off|power down|stops).*(by itself|on its own|mid-session)/i
+        /(device|unit).*(turn off|shut off|power down|stops).*(by itself|on its own|mid-session)/i,
       ],
-      target: "Why does my unit keep turning off?"
+      target: "Why does my unit keep turning off?",
     },
     // 19. Swelling & inflammation
     {
       patterns: [
         /(bring down|reduce|help).*(swelling|inflammation|edema)/i,
-        /tens.*(swelling|inflammation|edema)/i
+        /tens.*(swelling|inflammation|edema)/i,
       ],
-      target: "Does TENS help reduce inflammation?"
+      target: "Does TENS help reduce inflammation?",
     },
     // 20. One pad / one side working
     {
       patterns: [
         /(one (side|channel|pad|lead) works.*(other|second) doesn't|only one (pad|channel|side) (is )?working)/i,
-        /one pad working/i
+        /one pad working/i,
       ],
-      target: "Why is only one pad working?"
+      target: "Why is only one pad working?",
     },
     // 21. Sensation fading / adaptation / tingling goes away
     {
       patterns: [
         /(tingling|sensation).*(goes away|fades|stops|less|disappear).*(partway|during|after a few minute|normal)/i,
         /(after a few minute.*stop feeling|stop feeling.*after a few minute)/i,
-        /(stop working|get used to).*if i use.*(too much|often)/i
       ],
-      target: "Why does the sensation fade after a few minutes?"
+      target: "Why does the sensation fade after a few minutes?",
+    },
+    // 21a. Habituation / body getting used to TENS
+    {
+      patterns: [
+        /(stop working|get used to|body adapt|habituation).*(use|using).*(too much|often|a lot)/i,
+        /(will|can).*(it|tens|unit|device).*(stop working|work less).*(too much|often|a lot)/i,
+      ],
+      target: "Will my body get used to TENS?",
     },
     // 22. Pads touching / overlapping / separated
     {
       patterns: [
         /(electrodes|pads).*(stay separated|touch|touching|overlap|overlapping)/i,
         /can.*(pads|electrodes).*touch/i,
-        /(pads|electrodes).*(separated|overlap)/i
+        /(pads|electrodes).*(separated|overlap)/i,
       ],
-      target: "Can the pads touch each other?"
+      target: "Can the pads touch each other?",
     },
     // 23. Prescription / Doctor's note
     {
       patterns: [
         /(doctor('s)? note|rx|prescription.*only|require.*prescription|need a prescription|prescription required)/i,
-        /prescription-only/i
+        /prescription-only/i,
       ],
-      target: "Is a prescription required?"
+      target: "Is a prescription required?",
     },
     // 24. Dead / won't power up / power button does nothing
     {
       patterns: [
         /(power button.*does nothing|won't (turn|power)|completely dead|won't power up|not powering up|won't turn on)/i,
-        /why won't.*turn on/i
+        /why won't.*turn on/i,
       ],
-      target: "Why won't my TENS unit turn on?"
+      target: "Why won't my TENS unit turn on?",
     },
     // 25. Neck & shoulder electrode placement
     {
       patterns: [
         /(stiff neck|neck and shoulder|neck pain).*(where|stick|place|pad|electrode|position)/i,
-        /(pads?|electrodes?).*(neck|shoulder tension|neck pain)/i
+        /(pads?|electrodes?).*(neck|shoulder tension|neck pain)/i,
       ],
-      target: "Where do I put the pads for neck pain?"
+      target: "Where do I put the pads for neck pain?",
     },
     // 26. All four pads / both channels together
     {
       patterns: [
         /(all four pads|both channels|2 channels|multiple channels).*(at once|together|simultaneously|run both)/i,
-        /use more than one channel/i
+        /use more than one channel/i,
       ],
-      target: "Can I use more than one channel at a time?"
+      target: "Can I use more than one channel at a time?",
     },
     // 27. Driving / Commute / Behind the wheel
     {
       patterns: [
         /(behind the wheel|commute|drive to work|while driving|operating a vehicle|running on my commute)/i,
-        /can i drive/i
+        /can i drive/i,
       ],
-      target: "Can I drive while using a TENS unit?"
+      target: "Can I drive while using a TENS unit?",
     },
     // 28. Pad spacing / gap between pads
     {
       patterns: [
         /(how much gap|gap.*between|spacing between|how far apart|right spacing).*(pads|electrodes)/i,
-        /how far apart/i
+        /how far apart/i,
+        /(pad|pads|electrode|electrodes)\s*spacing/i,
       ],
-      target: "How far apart should the pads be?"
+      target: "How far apart should the pads be?",
     },
     // 29. Pregnancy / Expecting
     {
       patterns: [
         /(while expecting|pregnant|pregnancy|trimester|weeks pregnant|belly at \d+ weeks)/i,
-        /safe.*during pregnancy/i
+        /safe.*during pregnancy/i,
       ],
-      target: "Is a TENS unit safe to use during pregnancy?"
+      target: "Is a TENS unit safe to use during pregnancy?",
     },
     // 30. What is U5 / Device type
     {
       patterns: [
-        /(what kind of device is (the )?(u5|ultima 5)|tell me about (the )?(u5|ultima 5)|what is (the )?ultima 5)/i
+        /(what kind of device is (the )?(u5|ultima 5)|tell me about (the )?(u5|ultima 5)|what is (the )?ultima 5)/i,
       ],
-      target: "What is the Ultima 5 (U5)?"
+      target: "What is the Ultima 5 (U5)?",
     },
     // 31. Diabetes / Diabetic
     {
       patterns: [
         /(type 2 diabetic|type 1 diabetic|diabetes|diabetic|with diabetes)/i,
-        /tens.*if i have diabetes/i
+        /tens.*if i have diabetes/i,
       ],
-      target: "Can I use a TENS unit if I have diabetes?"
+      target: "Can I use a TENS unit if I have diabetes?",
     },
     // 32. First session setup for U5
     {
       patterns: [
-        /(starting setup|first.*session setup|recommended settings).*(u5|ultima 5|new.*user)/i
+        /(starting setup|first.*session setup|recommended settings).*(u5|ultima 5|new.*user)/i,
+        /(what settings|which settings|settings).*(first|very first|initial).*(u5|ultima 5|session)/i,
+        /(first|very first|initial).*(u5|ultima 5).*(settings|session)/i,
       ],
-      target: "What settings should I use for my very first Ultima 5 session?"
+      target: "What settings should I use for my very first Ultima 5 session?",
     },
     // 33. Intensity knobs on U5
     {
       patterns: [
-        /(intensity controls|intensity knobs|knobs work).*(u5|ultima 5)/i
+        /(intensity controls|intensity knobs|knobs work).*(u5|ultima 5)/i,
       ],
-      target: "How do the intensity knobs work on my Ultima 5?"
+      target: "How do the intensity knobs work on my Ultima 5?",
     },
     // 34. Turned on but no sensation / feel nothing
     {
       patterns: [
         /(turned it on.*feel (absolutely )?nothing|running.*no sensation at all|not feeling (any )?sensation|no sensation)/i,
-        /producing sensation/i
+        /producing sensation/i,
       ],
-      target: "Why isn't my TENS unit producing sensation?"
+      target: "Why isn't my TENS unit producing sensation?",
     },
     // 35. Pad lifespan / How many uses
     {
       patterns: [
         /(how many uses|how long.*last).*(pads|electrodes|set of pads)/i,
-        /how long do tens pads last/i
+        /how long do tens pads last/i,
+        /(typical|average|usual|expected).*(lifespan|life span|life|lasting).*(pads|electrodes)/i,
+        /(pads|electrodes).*(typical|average|usual|expected).*(lifespan|life span|life|last)/i,
       ],
-      target: "How long do TENS pads last?"
+      target: "How long do TENS pads last?",
     },
     // 36. Acute pain / Fresh injury / Hurt yesterday
     {
       patterns: [
         /(fresh injury|hurt.*yesterday|acute pain|new injury|recent strain).*(frequency|hz|setting)/i,
-        /(which hz|what frequency).*(fresh|acute|recent|new injury|yesterday)/i
+        /(which hz|what frequency).*(fresh|acute|recent|new injury|yesterday)/i,
       ],
-      target: "What frequency works best for acute pain?"
+      target: "What frequency works best for acute pain?",
     },
     // 37. Chronic pain frequency / SMS slang
     {
       patterns: [
         /(wat freqency|chronik pane|chronic pain)/i,
-        /what frequency is best for chronic/i
+        /what frequency is best for chronic/i,
       ],
-      target: "What frequency is best for chronic pain?"
+      target: "What frequency is best for chronic pain?",
     },
     // 38. Sticky again / Tackiness / Revive old pads / Pads won't stick
     {
       patterns: [
         /(tackiness back|sticky again|revive (old )?pads|restore.*adhes)/i,
-        /how do i make my pads sticky/i
+        /how do i make my pads sticky/i,
       ],
-      target: "How do I make my pads sticky again?"
+      target: "How do I make my pads sticky again?",
     },
     {
       patterns: [
-        /(pads? (lost their grip|won't stick|aren't sticking|wont stick)|electrodes? won't stay|pads wont stick)/i
+        /(pads? (lost their grip|won't stick|aren't sticking|wont stick)|electrodes? won't stay|pads wont stick)/i,
       ],
-      target: "Why won't my pads stick anymore?"
+      target: "Why won't my pads stick anymore?",
     },
     // 39. Lumbar / Lower back placement
     {
       patterns: [
         /(lumbar|lower back).*(pad positions?|placement|where|stick|put)/i,
-        /pads for lower back/i
+        /pads for lower back/i,
       ],
-      target: "Where should I place the pads for lower back pain?"
+      target: "Where should I place the pads for lower back pain?",
     },
     // 40. Auto power-off on U5
     {
       patterns: [
-        /(auto power-off|automatic(ally)? shut off|auto-off).*(u5|ultima 5)/i
+        /(auto power-off|automatic(ally)? shut off|auto-off).*(u5|ultima 5)/i,
       ],
-      target: "Does my Ultima 5 automatically shut off if I forget to turn it off?"
+      target:
+        "Does my Ultima 5 automatically shut off if I forget to turn it off?",
     },
     // 41. All-day continuous wear
     {
       patterns: [
-        /(continuous all-day wear|wear.*all day|wear.*continuously)/i
+        /(continuous all-day wear|wear.*all day|wear.*continuously)/i,
+        /(keep|leave|wear).*(it|tens|device|unit)?\s*(on)?.*(whole|all|entire).*(workday|work day|day)/i,
       ],
-      target: "Can I wear a TENS unit all day?"
-    }
+      target: "Can I wear a TENS unit all day?",
+    },
+    // 42. Battery life / replacement timing
+    {
+      patterns: [
+        /(how long|when|how soon|how often).*(need|before|get|replace|new).*(batteries|battery)/i,
+        /(batteries|battery).*(last|lifespan|life span|replace|new)/i,
+      ],
+      target: "How long does the battery last?",
+    },
+    // 43. TENS vs EMS
+    {
+      patterns: [
+        /(ems).*(same|different|difference).*(tens)/i,
+        /(tens).*(same|different|difference).*(ems)/i,
+        /is ems the same thing as tens/i,
+      ],
+      target: "What's the difference between TENS and EMS?",
+    },
   ];
 
   for (const entry of paraphraseMap) {
     for (const pattern of entry.patterns) {
       if (pattern.test(normQ)) {
         const paraphraseIndex = predefinedQuestions.findIndex(
-          (q) => q === entry.target
+          (q) => q === entry.target,
         );
         if (paraphraseIndex !== -1) {
           matchFound = true;
@@ -1264,7 +1380,9 @@ if (bestScore < 0.85) {
   // Specific Override for timeline question
   if (
     normQ.includes("how quickly") &&
-    (normQ.includes("tens") || normQ.includes("pmt") || normQ.includes("spark")) &&
+    (normQ.includes("tens") ||
+      normQ.includes("pmt") ||
+      normQ.includes("spark")) &&
     normQ.includes("work")
   ) {
     const timelineIndex = predefinedQuestions.findIndex(
@@ -1281,7 +1399,9 @@ if (bestScore < 0.85) {
   if (
     !normQ.includes("quickly") &&
     normQ.includes("how") &&
-    (normQ.includes("tens") || normQ.includes("pmt") || normQ.includes("spark")) &&
+    (normQ.includes("tens") ||
+      normQ.includes("pmt") ||
+      normQ.includes("spark")) &&
     normQ.includes("work")
   ) {
     const workIndex = predefinedQuestions.findIndex(
@@ -1346,9 +1466,7 @@ if (bestScore < 0.85) {
     /(where is|location of|situated|address of|headquarter|physical office|office location).*?(pmt|company|your)/.test(
       normQ,
     ) ||
-    /(pmt|company).*?(where|location|situated|address|headquarter)/.test(
-      normQ,
-    );
+    /(pmt|company).*?(where|location|situated|address|headquarter)/.test(normQ);
   if (isCompanyLocation) {
     const locationIndex = predefinedQuestions.findIndex(
       (q) => q === "contact info",
@@ -1364,7 +1482,10 @@ if (bestScore < 0.85) {
   const isContactSupport =
     /(contact (pmt|us|support|company|team)|customer (support|service)|reach (out to|pmt|support)|phone number|email address|how (can|do) i contact|how to (contact|reach)|support team|help desk)/i.test(
       normQ,
-    ) && !/(joint health support|support kit|gut support|sleep support|pad contact|help (people|with|me|reduce)|actually help)/i.test(normQ);
+    ) &&
+    !/(joint health support|support kit|gut support|sleep support|pad contact|help (people|with|me|reduce)|actually help)/i.test(
+      normQ,
+    );
   if (isContactSupport) {
     const supportIndex = predefinedQuestions.findIndex(
       (q) => q === "contact info",
@@ -1381,51 +1502,141 @@ if (bestScore < 0.85) {
 // Only apply ambiguity override for weak score matches (< 0.9). High confidence and paraphrase matches are preserved!
 if (matchFound && bestScore < 0.9) {
   const normQ = userQuestion.toLowerCase();
-  
+
   // Domain-specific words that indicate a valid TENS/electrotherapy question
   const domainContextWords = [
-    "session", "treatment", "therapy", "stimulation", "electrode",
-    "relief", "frequency", "intensity", "waveform", "implant",
-    "placement", "chronic", "acute", "pain", "nerve",
-    "muscle", "skin", "redness", "irritation", "medication",
-    "drug", "interaction", "duration", "minutes", "surgical",
-    "hardware", "pacemaker", "pregnancy", "diabetes", "healing",
-    "red", "marks", "mark", "helping", "difference", "notice",
-    "wave", "waveforms", "implants", "metal", "pads", "pad"
+    "session",
+    "treatment",
+    "therapy",
+    "stimulation",
+    "electrode",
+    "relief",
+    "frequency",
+    "intensity",
+    "waveform",
+    "implant",
+    "placement",
+    "chronic",
+    "acute",
+    "pain",
+    "nerve",
+    "muscle",
+    "skin",
+    "redness",
+    "irritation",
+    "medication",
+    "drug",
+    "interaction",
+    "duration",
+    "minutes",
+    "surgical",
+    "hardware",
+    "pacemaker",
+    "pregnancy",
+    "diabetes",
+    "healing",
+    "red",
+    "marks",
+    "mark",
+    "helping",
+    "difference",
+    "notice",
+    "wave",
+    "waveforms",
+    "implants",
+    "metal",
+    "pads",
+    "pad",
   ];
   const hasDomainContext = domainContextWords.some((w) => normQ.includes(w));
-  
+
   // Generic terms that usually imply a missing subject
-  const genericTerms = ["unit", "device", "machine", "wrap", "system", "it", "this", "these", "they", "them"];
-  
+  const genericTerms = [
+    "unit",
+    "device",
+    "machine",
+    "wrap",
+    "system",
+    "it",
+    "this",
+    "these",
+    "they",
+    "them",
+  ];
+
   // Check if they used a standalone generic term
-  const hasGeneric = genericTerms.some((t) => new RegExp(`\\b${t}\\b`).test(normQ));
+  const hasGeneric = genericTerms.some((t) =>
+    new RegExp(`\\b${t}\\b`).test(normQ),
+  );
   const hasSpecificProduct = products.some((p) => normQ.includes(p));
-  const hasCompany = (normQ.includes("tens") || normQ.includes("pmt") || normQ.includes("spark")) || normQ.includes("pmt");
+  const hasCompany =
+    normQ.includes("tens") ||
+    normQ.includes("pmt") ||
+    normQ.includes("spark") ||
+    normQ.includes("pmt");
   const isClearContext = hasSpecificProduct || hasCompany || hasDomainContext;
 
   // 1. If it has a generic term but no clear product/company/domain context, AND score is weak
   if (hasGeneric && !isClearContext && bestScore < 0.65) {
     matchFound = false;
   }
-  
-  // 2. If the query is very short (e.g. <= 3 words) and lacks context, treat as ambiguous 
+
+  // 2. If the query is very short (e.g. <= 3 words) and lacks context, treat as ambiguous
   // to force LLM clarification (e.g., "cost?", "help?", "why?")
-  const wordCount = normQ.split(/\s+/).filter(w => w.length > 0).length;
+  const wordCount = normQ.split(/\s+/).filter((w) => w.length > 0).length;
   if (wordCount <= 3 && !isClearContext) {
     matchFound = false;
   }
 }
 
+// U5-specific pad spacing should use the Quick Start Guide spacing, not the generic pad-spacing answer.
+if (
+  matchFound &&
+  /(?:u5|ultima\s*5|ultima5)/i.test(userQuestion) &&
+  /(?:pad|pads|electrode|electrodes).*(?:spacing|gap|distance|far apart)|(?:spacing|gap|distance).*(?:pad|pads|electrode|electrodes)/i.test(
+    userQuestion,
+  )
+) {
+  const u5SpacingIndex = predefinedQuestions.findIndex(
+    (q) => q === "How far apart should the electrode pads be on my Ultima 5?",
+  );
+  if (u5SpacingIndex !== -1) {
+    bestIndex = u5SpacingIndex;
+    bestScore = 1.0;
+  }
+}
+
+// Placement answers must stay history-aware because prior contraindications change the safe response.
+if (matchFound) {
+  const matchedQuestion = predefinedQuestions[bestIndex] || "";
+  const isPlacementAnswer =
+    /place the pads|put the pads|pads directly over|electrode placement|lower back pain|neck pain/i.test(
+      matchedQuestion,
+    );
+  if (isPlacementAnswer) {
+    matchFound = false;
+  }
+}
+
 // ================= CONTEXT FOLLOW-UP OVERRIDE =================
-// If the user's query is highly likely to be a follow-up answer to "Which product?" 
+// If the user's query is highly likely to be a follow-up answer to "Which product?"
 // (e.g., "I mean the NerveBath", "Talking about the power wrap", "For the Knee Pro"),
 // we MUST force it to the LLM so the LLM can combine it with the conversation history.
 if (matchFound && bestScore < 0.9) {
   const normQ = userQuestion.toLowerCase().trim();
-  const isContextFollowUp = /^(i mean|i am asking about|i'm asking about|talking about|for|specifically)?\s*(the|just the|it is the|it's the)?\s*(ultima|tens|u5|u20|u11|u1|neo|thermotech|thermacycle|soft cycle|ucombo|thermorelief|theralamp|aqua relief|polar vortex|arctic ice|theratrac|jstim|qfiber)/.test(normQ);
-  
-  if (isContextFollowUp && !normQ.includes("how") && !normQ.includes("what") && !normQ.includes("why") && !normQ.includes("where") && !normQ.includes("when")) {
+  const isContextFollowUp =
+    /^(i mean|i am asking about|i'm asking about|talking about|for|specifically)?\s*(the|just the|it is the|it's the)?\s*(ultima|tens|u5|u20|u11|u1|neo|thermotech|thermacycle|soft cycle|ucombo|thermorelief|theralamp|aqua relief|polar vortex|arctic ice|theratrac|jstim|qfiber)/.test(
+      normQ,
+    );
+
+  if (
+    isContextFollowUp &&
+    !normQ.includes("how") &&
+    !normQ.includes("what") &&
+    !normQ.includes("why") &&
+    !normQ.includes("where") &&
+    !normQ.includes("when")
+  ) {
     matchFound = false;
   }
 }
@@ -1456,8 +1667,10 @@ return [
         cacheSource: cacheSource,
         sheetQuestionsCount: sheetQuestions.length,
         totalQuestionsCount: predefinedQuestions.length,
-        hasMatchInSheet: matchFound ? sheetQuestionsSet.has(bestMatch.toLowerCase().trim()) : false
-      }
+        hasMatchInSheet: matchFound
+          ? sheetQuestionsSet.has(bestMatch.toLowerCase().trim())
+          : false,
+      },
     },
   },
 ];
