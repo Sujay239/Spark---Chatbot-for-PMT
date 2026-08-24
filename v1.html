@@ -1190,6 +1190,13 @@
         let isFullscreen = false;
         let isMinimized = false;
 
+        // Session-level asked questions tracking
+        let askedQuestionsSet = new Set();
+
+        function normalizeQ(str) {
+          return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+        }
+
         const elShell = document.getElementById("pmtShell");
         const elLauncher = document.getElementById("pmtLauncher");
         const elScreen = document.getElementById("screen");
@@ -1225,6 +1232,84 @@
         }
         function getCategoryQuestionCount(key) {
           return getQuestionsForCategory(key).length;
+        }
+
+        function getRelatedQuestions(userQuery, llmRelatedQuestions = []) {
+          const normUserQuery = normalizeQ(userQuery);
+          const candidates = [];
+          const addedNorms = new Set();
+
+          function addCandidate(q) {
+            if (!q || typeof q !== "string") return;
+            const trimmed = q.trim();
+            const norm = normalizeQ(trimmed);
+            if (!norm) return;
+            if (askedQuestionsSet.has(norm)) return;
+            if (addedNorms.has(norm)) return;
+            candidates.push(trimmed);
+            addedNorms.add(norm);
+          }
+
+          // 1. Add LLM-provided related questions first
+          if (Array.isArray(llmRelatedQuestions)) {
+            for (const q of llmRelatedQuestions) {
+              addCandidate(q);
+            }
+          }
+
+          // 2. Determine best matching category for userQuery
+          let bestCategoryKey = null;
+          let highestScore = 0;
+          const userWords = userQuery.toLowerCase().split(/\W+/).filter((w) => w.length > 2);
+
+          for (const catKey of Object.keys(CATEGORY_QUESTIONS)) {
+            const questions = CATEGORY_QUESTIONS[catKey];
+            let score = 0;
+            const catObj = CATEGORIES.find((c) => c.key === catKey);
+            if (catObj) {
+              if (
+                userQuery.toLowerCase().includes(catObj.title.toLowerCase()) ||
+                userQuery.toLowerCase().includes(catKey.toLowerCase())
+              ) {
+                score += 5;
+              }
+            }
+            for (const q of questions) {
+              const qLower = q.toLowerCase();
+              for (const w of userWords) {
+                if (qLower.includes(w)) {
+                  score += 1;
+                }
+              }
+            }
+            if (score > highestScore) {
+              highestScore = score;
+              bestCategoryKey = catKey;
+            }
+          }
+
+          if (!bestCategoryKey) {
+            bestCategoryKey = "basics";
+          }
+
+          // Add questions from best matching category
+          if (CATEGORY_QUESTIONS[bestCategoryKey]) {
+            for (const q of CATEGORY_QUESTIONS[bestCategoryKey]) {
+              addCandidate(q);
+            }
+          }
+
+          // Top up from all other categories if needed to reach 3
+          for (const catKey of Object.keys(CATEGORY_QUESTIONS)) {
+            if (candidates.length >= 3) break;
+            if (catKey === bestCategoryKey) continue;
+            for (const q of CATEGORY_QUESTIONS[catKey]) {
+              addCandidate(q);
+              if (candidates.length >= 3) break;
+            }
+          }
+
+          return candidates.slice(0, 3);
         }
 
         function createAskBoxMarkup() {
@@ -1314,6 +1399,12 @@
         function formatMessageText(text) {
           if (!text) return "";
           let clean = escapeHtml(text);
+          // Convert Markdown bullet asterisks (* item) at line start to bullet symbol •
+          clean = clean.replace(/^[\s]*\*\s+/gm, "• ");
+          // Convert Markdown bold **text** to <strong>text</strong>
+          clean = clean.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+          // Convert Markdown italic *text* to <em>text</em>
+          clean = clean.replace(/\*([^*]+)\*/g, "<em>$1</em>");
           // Convert Markdown links [label](url) into target="_blank" HTML links
           clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, (match, label, url) => {
             return `<a href="${url}" target="_blank" rel="noopener" style="color: #00aca0; text-decoration: underline; font-weight: 500;">${label}</a>`;
@@ -1344,6 +1435,24 @@
             <div class="bubbleWrap">
               <div class="bubbleLabel">Spark</div>
               <div class="bubble"><div class="richAnswer">${formatMessageText(item.text)}</div></div>
+              ${
+                item.relatedQuestions && item.relatedQuestions.length > 0
+                  ? `
+                <div class="assistantActions" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 10px;">
+                  <div style="font-size: 11px; font-weight: 700; color: var(--pmt-dim); padding-left: 2px;">Related questions</div>
+                  <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                    ${item.relatedQuestions
+                      .map(
+                        (rq) => `
+                      <button class="microPill" onclick="window.pmtWidgetActions.ask('${escapeHtml(rq)}')">${escapeHtml(rq)}</button>
+                    `,
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
             </div>
           </div>`,
           )
@@ -1363,6 +1472,7 @@
         async function ask(q) {
           if (!q || !q.trim()) return;
           const userQuery = q.trim();
+          askedQuestionsSet.add(normalizeQ(userQuery));
           thread.push({ role: "user", text: userQuery });
           isTyping = true;
           renderThread();
@@ -1383,22 +1493,60 @@
 
             const data = await response.json();
             let replyText = "";
+            let llmRelatedQuestions = [];
 
+            let targetObj = data;
             if (Array.isArray(data) && data.length > 0) {
-              replyText = data[0].text || data[0].output || data[0].message || data[0].response || (typeof data[0] === "string" ? data[0] : JSON.stringify(data[0]));
-            } else if (typeof data === "object" && data !== null) {
-              replyText = data.text || data.output || data.message || data.response || JSON.stringify(data);
-            } else if (typeof data === "string") {
-              replyText = data;
-            } else {
-              replyText = "Sorry, I couldn't retrieve an answer at this time.";
+              targetObj = data[0];
             }
 
-            thread.push({ role: "assistant", text: replyText });
+            if (typeof targetObj === "string") {
+              try {
+                const parsed = JSON.parse(targetObj);
+                targetObj = parsed;
+              } catch (e) {}
+            }
+
+            if (typeof targetObj === "object" && targetObj !== null) {
+              replyText = targetObj.text || targetObj.output || targetObj.message || targetObj.response || targetObj.answer || "";
+              if (Array.isArray(targetObj.relatedQuestions)) {
+                llmRelatedQuestions = targetObj.relatedQuestions;
+              } else if (Array.isArray(targetObj.related_questions)) {
+                llmRelatedQuestions = targetObj.related_questions;
+              } else if (Array.isArray(targetObj.related)) {
+                llmRelatedQuestions = targetObj.related;
+              }
+            } else if (typeof targetObj === "string") {
+              replyText = targetObj;
+            }
+
+            // Check if replyText is an embedded JSON string containing relatedQuestions
+            if (!llmRelatedQuestions.length && typeof replyText === "string") {
+              const jsonMatch = replyText.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || replyText.match(/(\{[\s\S]*"relatedQuestions"[\s\S]*\})/i);
+              if (jsonMatch) {
+                try {
+                  const parsed = JSON.parse(jsonMatch[1]);
+                  if (parsed.answer || parsed.text || parsed.output) {
+                    replyText = parsed.answer || parsed.text || parsed.output;
+                  }
+                  if (Array.isArray(parsed.relatedQuestions)) {
+                    llmRelatedQuestions = parsed.relatedQuestions;
+                  }
+                } catch (e) {}
+              }
+            }
+
+            if (!replyText) {
+              replyText = typeof data === "string" ? data : "Sorry, I couldn't retrieve an answer at this time.";
+            }
+
+            const relatedQs = getRelatedQuestions(userQuery, llmRelatedQuestions);
+            thread.push({ role: "assistant", text: replyText, relatedQuestions: relatedQs });
           } catch (error) {
             console.error("Spark Webhook Fetch Error:", error);
             const fallbackAnswer = KB_ANSWERS[userQuery] || "Sorry, I couldn't connect to Spark right now. Please try again or contact support directly at info@paintechnology.com";
-            thread.push({ role: "assistant", text: fallbackAnswer });
+            const relatedQs = getRelatedQuestions(userQuery, []);
+            thread.push({ role: "assistant", text: fallbackAnswer, relatedQuestions: relatedQs });
           } finally {
             isTyping = false;
             renderThread();
@@ -1453,6 +1601,7 @@
         });
         btnClear.addEventListener("click", () => {
           thread = [];
+          askedQuestionsSet.clear();
           sessionId = "spark_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now();
           sessionStorage.setItem("spark_session_id", sessionId);
           renderHome();
