@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Support Ticket — Spark PMT Chatbot</title>
+  </head>
+  <body
+    style="
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background-color: #f4f7fa;
+      font-family: &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif;
+      color: #041c3d;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    "
+  >
+    <!-- Outer Wrapper -->
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      width="100%"
+      style="
+        background-color: #f4f7fa;
+        padding: 30px 0 40px 0;
+        border-collapse: collapse;
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      "
+    >
+      <tr>
+        <td align="center" style="padding: 0; margin: 0">
+          <!-- Main Email Card (Max 600px) -->
+          <table
+            border="0"
+            cellpadding="0"
+            cellspacing="0"
+            width="100%"
+            style="
+              max-width: 600px;
+              background-color: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 10px 30px rgba(4, 28, 61, 0.08);
+              border: 1px solid #e6ecf2;
+              border-collapse: separate;
+              mso-table-lspace: 0pt;
+              mso-table-rspace: 0pt;
+            "
+          >
+            <!-- Header Banner -->
+            <tr>
+              <td
+                style="
+                  background: #00aca0;
+                  background: linear-gradient(
+                    120deg,
+                    #00aca0 0%,
+                    #007fac 55%,
+                    #041c3d 100%
+                  );
+                  padding: 32px 28px;
+                  text-align: left;
+                "
+              >
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="100%"
+                  style="
+                    border-collapse: collapse;
+                    mso-table-lspace: 0pt;
+                    mso-table-rspace: 0pt;
+                  "
+                >
+                  <tr>
+                    <td style="padding: 0">
+                      <span
+                        style="
+                          display: inline-block;
+                          background: rgba(255, 255, 255, 0.18);
+                          color: #ffffff;
+                          font-size: 11px;
+                          font-weight: 700;
+                          text-transform: uppercase;
+                          letter-spacing: 1px;
+                          padding: 4px 10px;
+                          border-radius: 20px;
+                          margin-bottom: 12px;
+                        "
+                      >
+                        Spark Support Ticket
+                      </span>
+                      <h1
+                        style="
+                          margin: 0;
+                          color: #ffffff;
+                          font-size: 24px;
+                          font-weight: 700;
+                          line-height: 1.2;
+                        "
+                      >
+                        New Contact Form Request
+                      </h1>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Body Content -->
+            <tr>
+              <td style="padding: 32px 28px 24px 28px">
+                <!-- Intro Notification -->
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="100%"
+                  style="
+                    background-color: #f0fdfa;
+                    border: 1px solid #ccfbf1;
+                    border-radius: 12px;
+                    margin-bottom: 24px;
+                    border-collapse: separate;
+                    mso-table-lspace: 0pt;
+                    mso-table-rspace: 0pt;
+                  "
+                >
+                  <tr>
+                    <td
+                      style="
+                        padding: 14px 16px;
+                        font-size: 14px;
+                        color: #0f766e;
+                        line-height: 1.5;
+                      "
+                    >
+                      <strong style="color: #0d9488">⚡ New Lead:</strong> A
+                      website visitor filled out the
+                      <strong>"Talk to a Human"</strong> form in the Spark
+                      Chatbot widget. Details below:
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Customer Info Grid / Card -->
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="100%"
+                  style="
+                    background-color: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    margin-bottom: 24px;
+                    border-collapse: separate;
+                    mso-table-lspace: 0pt;
+                    mso-table-rspace: 0pt;
+                  "
+                >
+                  <!-- Name Row (2 Columns) -->
+                  <tr>
+                    <td
+                      style="
+                        padding: 16px 20px;
+                        border-bottom: 1px solid #e2e8f0;
+                      "
+                    >
+                      <table
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        width="100%"
+                        style="
+                          border-collapse: collapse;
+                          mso-table-lspace: 0pt;
+                          mso-table-rspace: 0pt;
+                        "
+                      >
+                        <tr>
+                          <td
+                            width="50%"
+                            style="vertical-align: top; padding-right: 10px"
+                          >
+                            <div
+                              style="
+                                font-size: 11px;
+                                font-weight: 700;
+                                text-transform: uppercase;
+                                color: #64748b;
+                                letter-spacing: 0.5px;
+                                margin-bottom: 4px;
+                              "
+                            >
+                              First Name
+                            </div>
+                            <div
+                              style="
+                                font-size: 15px;
+                                font-weight: 600;
+                                color: #0f172a;
+                              "
+                            >
+                              {{ $json.body.firstName }}
+                            </div>
+                          </td>
+                          <td width="50%" style="vertical-align: top">
+                            <div
+                              style="
+                                font-size: 11px;
+                                font-weight: 700;
+                                text-transform: uppercase;
+                                color: #64748b;
+                                letter-spacing: 0.5px;
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Last Name
+                            </div>
+                            <div
+                              style="
+                                font-size: 15px;
+                                font-weight: 600;
+                                color: #0f172a;
+                              "
+                            >
+                              {{ $json.body.lastName }}
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Contact Info Row (Email & Phone) -->
+                  <tr>
+                    <td
+                      style="
+                        padding: 16px 20px;
+                        border-bottom: 1px solid #e2e8f0;
+                      "
+                    >
+                      <table
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                        width="100%"
+                        style="
+                          border-collapse: collapse;
+                          mso-table-lspace: 0pt;
+                          mso-table-rspace: 0pt;
+                        "
+                      >
+                        <tr>
+                          <td
+                            width="50%"
+                            style="vertical-align: top; padding-right: 10px"
+                          >
+                            <div
+                              style="
+                                font-size: 11px;
+                                font-weight: 700;
+                                text-transform: uppercase;
+                                color: #64748b;
+                                letter-spacing: 0.5px;
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Email Address
+                            </div>
+                            <div
+                              style="
+                                font-size: 14px;
+                                font-weight: 600;
+                                color: #007fac;
+                              "
+                            >
+                              <a
+                                href="mailto:{{ $json.body.email }}"
+                                style="color: #007fac; text-decoration: none"
+                                >{{ $json.body.email }}</a
+                              >
+                            </div>
+                          </td>
+                          <td width="50%" style="vertical-align: top">
+                            <div
+                              style="
+                                font-size: 11px;
+                                font-weight: 700;
+                                text-transform: uppercase;
+                                color: #64748b;
+                                letter-spacing: 0.5px;
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Phone Number
+                            </div>
+                            <div
+                              style="
+                                font-size: 14px;
+                                font-weight: 600;
+                                color: #0f172a;
+                              "
+                            >
+                              <a
+                                href="tel:{{ $json.body.phone }}"
+                                style="color: #0f172a; text-decoration: none"
+                                >{{ $json.body.phone }}</a
+                              >
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Message Row -->
+                  <tr>
+                    <td style="padding: 16px 20px">
+                      <div
+                        style="
+                          font-size: 11px;
+                          font-weight: 700;
+                          text-transform: uppercase;
+                          color: #64748b;
+                          letter-spacing: 0.5px;
+                          margin-bottom: 6px;
+                        "
+                      >
+                        User Message
+                      </div>
+                      <div
+                        style="
+                          font-size: 14px;
+                          line-height: 1.6;
+                          color: #1e293b;
+                          background-color: #ffffff;
+                          padding: 14px 16px;
+                          border-radius: 8px;
+                          border: 1px solid #e2e8f0;
+                          white-space: pre-wrap;
+                        "
+                      >
+                        {{ $json.body.message }}
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Quick Action Button -->
+                <table
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  width="100%"
+                  style="
+                    border-collapse: collapse;
+                    mso-table-lspace: 0pt;
+                    mso-table-rspace: 0pt;
+                  "
+                >
+                  <tr>
+                    <td align="center" style="padding: 8px 0 16px 0">
+                      <a
+                        href="mailto:{{ $json.body.email }}"
+                        target="_blank"
+                        style="
+                          display: inline-block;
+                          background: #007fac;
+                          background: linear-gradient(135deg, #00aca0, #007fac);
+                          color: #ffffff;
+                          font-size: 14px;
+                          font-weight: 700;
+                          text-decoration: none;
+                          padding: 12px 28px;
+                          border-radius: 999px;
+                          box-shadow: 0 4px 14px rgba(0, 127, 172, 0.25);
+                        "
+                      >
+                        Reply to {{ $json.body.firstName }}
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background-color: #f8fafc;
+                  border-top: 1px solid #e2e8f0;
+                  padding: 20px 28px;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #94a3b8;
+                  line-height: 1.5;
+                "
+              >
+                This support ticket was automatically generated by
+                <strong>Spark — PMT Assistant</strong>.<br />
+                © Pain Management Technologies. All rights reserved.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

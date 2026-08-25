@@ -1,0 +1,2292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Spark — Smart Pain Assistance and Recovery Knowledge | PMT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --pmt-header-gradient: linear-gradient(
+          120deg,
+          #00aca0 0%,
+          #007fac 55%,
+          #041c3d 100%
+        );
+        --font:
+          "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        --font-display: "Roboto Condensed", var(--font);
+        --pmt-accent: #00aca0;
+        --pmt-primary: #007fac;
+        --shadow-1: 0 10px 30px rgba(0, 0, 0, 0.18);
+        --shadow-2: 0 24px 80px rgba(2, 6, 23, 0.28);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      :root {
+        --pmt-bg: #ffffff;
+        --pmt-surface: rgba(255, 255, 255, 0.94);
+        --pmt-surface-2: rgba(4, 28, 61, 0.03);
+        --pmt-text: #041c3d;
+        --pmt-muted: rgba(4, 28, 61, 0.72);
+        --pmt-dim: rgba(4, 28, 61, 0.56);
+        --border-soft: rgba(4, 28, 61, 0.08);
+        --input-bg: rgba(255, 255, 255, 0.98);
+        --input-border: rgba(4, 28, 61, 0.12);
+        --input-focus: rgba(0, 172, 160, 0.28);
+        --chip-bg: rgba(4, 28, 61, 0.03);
+        --card-bg: rgba(4, 28, 61, 0.025);
+        --card-hover: rgba(4, 28, 61, 0.05);
+        --assistant-bubble: rgba(4, 28, 61, 0.04);
+        --user-bubble: linear-gradient(135deg, #00aca0, #007fac);
+        --success-bg: rgba(34, 197, 94, 0.08);
+        --warning-bg: rgba(245, 158, 11, 0.1);
+      }
+      body.pmt-theme-dark {
+        --pmt-bg: #041224;
+        --pmt-surface: rgba(8, 24, 48, 0.78);
+        --pmt-surface-2: rgba(255, 255, 255, 0.03);
+        --pmt-text: #f3f6fb;
+        --pmt-muted: rgba(226, 234, 245, 0.78);
+        --pmt-dim: rgba(226, 234, 245, 0.54);
+        --border-soft: rgba(255, 255, 255, 0.08);
+        --input-bg: rgba(8, 24, 48, 0.88);
+        --input-border: rgba(148, 180, 214, 0.28);
+        --input-focus: rgba(0, 172, 160, 0.3);
+        --chip-bg: rgba(255, 255, 255, 0.04);
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-hover: rgba(255, 255, 255, 0.06);
+        --assistant-bubble: rgba(255, 255, 255, 0.04);
+        --success-bg: rgba(34, 197, 94, 0.12);
+        --warning-bg: rgba(245, 158, 11, 0.14);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font);
+        background: transparent;
+        color: var(--pmt-text);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      .pmt-launcher {
+        position: fixed;
+        right: 18px;
+        bottom: calc(18px + var(--safe-bottom));
+        z-index: 999999;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px 12px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(4, 28, 61, 0.08);
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: var(--shadow-1);
+        color: #041c3d;
+        cursor: pointer;
+        user-select: none;
+        backdrop-filter: blur(14px);
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease;
+      }
+      body.pmt-theme-dark .pmt-launcher {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(4, 18, 36, 0.86);
+        color: #fff;
+      }
+      .pmt-launcher:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+      }
+      .pmt-launcher:active {
+        transform: scale(0.99);
+      }
+      .pmt-launcher .label {
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.1px;
+        white-space: nowrap;
+        font-family: var(--font-display);
+      }
+      .pmt-shell {
+        position: fixed;
+        right: 18px;
+        bottom: calc(78px + var(--safe-bottom));
+        z-index: 999999;
+        width: 430px;
+        max-width: calc(100vw - 36px);
+        height: min(82dvh, 760px);
+        min-height: 600px;
+        min-width: 340px;
+        max-height: 95dvh;
+        background: var(--pmt-surface);
+        border: 1px solid var(--border-soft);
+        border-radius: 24px;
+        box-shadow: var(--shadow-2);
+        overflow: hidden;
+        display: none;
+        backdrop-filter: blur(20px);
+        container-type: inline-size;
+      }
+      .pmt-shell.open {
+        display: block !important;
+      }
+      .pmt-shell.fullscreen {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw !important;
+        height: 100dvh !important;
+        max-width: none !important;
+        max-height: none !important;
+        border-radius: 0;
+        min-width: 100vw;
+        min-height: 100dvh;
+      }
+      .pmt-shell.minimized {
+        height: 72px !important;
+        min-height: 72px !important;
+        width: 360px;
+        overflow: hidden;
+      }
+      .pmt-shell.minimized .pmt-body {
+        display: none;
+      }
+      .pmt-shell.minimized .pmt-topbar {
+        min-height: 72px;
+      }
+      .pmt-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 10px 10px 16px;
+        background: var(--pmt-header-gradient);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        min-height: 70px;
+      }
+      .pmt-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+      .pmt-logo {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+        display: block;
+      }
+      .pmt-beta-badge {
+        font-size: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.2),
+          rgba(255, 255, 255, 0.05)
+        );
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 100px;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        display: inline-flex;
+        align-items: center;
+        height: fit-content;
+        margin-left: 0;
+        user-select: none;
+        flex-shrink: 0;
+      }
+      .pmt-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+        margin-left: auto;
+      }
+      .btn-primary,
+      .btn-secondary,
+      .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: var(--font);
+        transition:
+          transform 0.15s ease,
+          opacity 0.15s ease,
+          background 0.15s ease;
+        user-select: none;
+        text-decoration: none;
+      }
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(0, 127, 172, 0.25);
+        padding: 10px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .btn-secondary {
+        color: var(--pmt-text);
+        background: var(--chip-bg);
+        border: 1px solid var(--border-soft);
+        padding: 10px 14px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border: 1px solid rgba(226, 232, 240, 0.22);
+        background: rgba(4, 28, 61, 0.18);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .btn-primary:active,
+      .btn-secondary:active,
+      .btn-icon:active {
+        transform: scale(0.98);
+      }
+      .pmt-body {
+        height: calc(100% - 70px);
+        display: flex;
+        flex-direction: column;
+        background: var(--pmt-bg);
+      }
+      body.pmt-theme-dark .pmt-body {
+        background: radial-gradient(
+          circle at top,
+          rgba(8, 24, 48, 0.92),
+          #041224 70%
+        );
+      }
+      .pmt-screen {
+        padding: 18px 16px 16px;
+        overflow: auto;
+        flex: 1 1 auto;
+        scroll-behavior: smooth;
+      }
+      .thread {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        animation: pmtFadeIn 0.22s ease-out;
+      }
+      @keyframes pmtFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .hero {
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        border-radius: 22px;
+        padding: 18px 16px;
+        box-shadow: 0 10px 24px rgba(4, 28, 61, 0.06);
+      }
+      .heroBadge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--chip-bg);
+        border: 1px solid var(--border-soft);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--pmt-dim);
+        margin-bottom: 14px;
+      }
+      .heroTitle {
+        margin: 0 0 8px;
+        font-family: var(--font-display);
+        font-size: 28px;
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .heroText {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--pmt-muted);
+        max-width: 34ch;
+      }
+      .quickSectionTitle {
+        margin: 6px 2px 2px;
+        color: var(--pmt-dim);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .chip {
+        border: 1px solid var(--border-soft);
+        background: transparent;
+        color: var(--pmt-text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font);
+        transition:
+          background 0.15s ease,
+          transform 0.15s ease;
+        text-align: left;
+        white-space: normal;
+        line-height: 1.3;
+      }
+      .chip:hover {
+        background: var(--card-hover);
+        transform: translateY(-1px);
+      }
+      .cardRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .homeCard {
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        background: var(--card-bg);
+        padding: 14px;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          background 0.15s ease;
+      }
+      .homeCard:hover {
+        background: var(--card-hover);
+        transform: translateY(-1px);
+      }
+      .homeCardTitle {
+        margin: 0 0 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pmt-text);
+        font-family: var(--font-display);
+      }
+      .homeCardSub {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+        color: var(--pmt-muted);
+      }
+      .ctaPanel {
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        padding: 14px;
+        background: linear-gradient(180deg, var(--success-bg), transparent);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .ctaPanelTitle {
+        margin: 0 0 4px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .ctaPanelText {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--pmt-muted);
+      }
+      .message {
+        display: flex;
+        width: 100%;
+        gap: 10px;
+        animation: pmtFadeIn 0.18s ease-out;
+      }
+      .message.assistant {
+        justify-content: flex-start;
+      }
+      .message.user {
+        justify-content: flex-end;
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        box-shadow: 0 8px 20px rgba(0, 127, 172, 0.28);
+        margin-top: 2px;
+        overflow: hidden;
+      }
+      .avatar img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 999px;
+      }
+      .bubbleWrap {
+        max-width: min(84%, 320px);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .pmt-shell.fullscreen .bubbleWrap {
+        max-width: min(84%, 800px);
+      }
+      .message.user .bubbleWrap {
+        align-items: flex-end;
+      }
+      .bubbleLabel {
+        font-size: 11px;
+        color: var(--pmt-dim);
+        font-weight: 700;
+        padding: 0 2px;
+      }
+      .bubble {
+        border-radius: 18px;
+        padding: 13px 14px;
+        border: 1px solid var(--border-soft);
+        background: var(--assistant-bubble);
+        color: var(--pmt-text);
+        line-height: 1.55;
+        font-size: 13px;
+        overflow-wrap: anywhere;
+      }
+      .message.user .bubble {
+        background: var(--user-bubble);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 10px 28px rgba(0, 127, 172, 0.25);
+      }
+      .assistantActions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .microPill {
+        border-radius: 999px;
+        padding: 8px 11px;
+        border: 1px solid var(--border-soft);
+        background: var(--chip-bg);
+        color: var(--pmt-text);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: var(--font);
+        text-align: left;
+        white-space: normal;
+        line-height: 1.3;
+      }
+      .microPill:hover {
+        background: var(--card-hover);
+      }
+      .typingBubble {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 18px;
+      }
+      .typingBubble span {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--pmt-dim);
+        display: block;
+        animation: pmtBlink 1.2s infinite ease-in-out;
+      }
+      .typingBubble span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .typingBubble span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes pmtBlink {
+        0%,
+        80%,
+        100% {
+          opacity: 0.35;
+          transform: translateY(0);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(-1px);
+        }
+      }
+      .richAnswer p {
+        margin: 0 0 10px;
+      }
+      .richAnswer p:last-child {
+        margin-bottom: 0;
+      }
+      .richAnswer ul,
+      .richAnswer ol {
+        margin: 0 0 10px 18px;
+        padding: 0;
+      }
+      .richAnswer li {
+        margin: 0 0 6px;
+      }
+      .richAnswer strong {
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .message.user .richAnswer strong {
+        color: #fff;
+      }
+      .richAnswer .callout {
+        display: block;
+        margin: 10px 0;
+        padding: 10px 11px;
+        border-radius: 14px;
+        background: var(--warning-bg);
+        border: 1px solid var(--border-soft);
+        font-size: 12px;
+      }
+      .metaRow {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .metaTag {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--pmt-dim);
+        background: var(--chip-bg);
+        border: 1px solid var(--border-soft);
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+      .stuckCard {
+        margin-top: 2px;
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        border-radius: 18px;
+        padding: 14px;
+      }
+      .stuckTitle {
+        margin: 0 0 5px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .stuckText {
+        margin: 0 0 10px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: var(--pmt-muted);
+      }
+      @container (max-width: 480px) {
+        .support-btn-text {
+          display: none !important;
+        }
+      }
+      @media (max-width: 600px) {
+        .support-btn-text {
+          display: none;
+        }
+        .pmt-topbar {
+          padding: 8px 10px;
+          min-height: 56px;
+        }
+        .pmt-logo {
+          height: 32px;
+        }
+        .pmt-topbar-left {
+          gap: 6px;
+        }
+        .pmt-topbar-right {
+          gap: 2px;
+        }
+        .btn-icon {
+          width: 28px;
+          height: 28px;
+          font-size: 13px;
+        }
+        #btnResize {
+          display: none !important;
+        }
+        .pmt-shell:not(.minimized) {
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100dvh !important;
+          max-width: none !important;
+          max-height: none !important;
+          border-radius: 0 !important;
+          min-width: 100vw !important;
+          min-height: 100dvh !important;
+        }
+        .pmt-shell.minimized {
+          right: 12px !important;
+          left: 12px !important;
+          bottom: calc(18px + var(--safe-bottom)) !important;
+          width: calc(100vw - 24px) !important;
+        }
+        .heroTitle {
+          font-size: 26px;
+        }
+        .cardRow {
+          grid-template-columns: 1fr;
+        }
+        .bubbleWrap {
+          max-width: 88%;
+        }
+      }
+      .pmt-launcher-note {
+        position: fixed;
+        right: 18px;
+        bottom: calc(76px + var(--safe-bottom));
+        z-index: 999998;
+        background: #fff;
+        color: var(--pmt-text);
+        padding: 10px 16px;
+        border-radius: 14px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-1);
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(10px) scale(0.95);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-origin: bottom right;
+        cursor: pointer;
+      }
+      .pmt-launcher-note.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0) scale(1);
+      }
+      .pmt-launcher-note::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        right: 24px;
+        width: 10px;
+        height: 10px;
+        background: #fff;
+        border-right: 1px solid var(--border-soft);
+        border-bottom: 1px solid var(--border-soft);
+        transform: rotate(45deg);
+      }
+      body.pmt-theme-dark .pmt-launcher-note {
+        background: rgba(4, 18, 36, 0.92);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .composer {
+        padding: 12px 14px 16px 14px;
+        border-top: 1px solid var(--border-soft);
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        background: var(--pmt-surface);
+        z-index: 10;
+      }
+      .composerMain {
+        flex: 1 1 auto;
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        border-radius: 20px;
+        padding: 8px 14px;
+      }
+      .composerMain:focus-within {
+        border-color: var(--pmt-primary);
+        box-shadow: 0 0 0 1px rgba(0, 127, 172, 0.2);
+      }
+      .composer textarea {
+        width: 100%;
+        min-height: 26px;
+        max-height: 110px;
+        resize: none;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 13px;
+        font-family: var(--font);
+        padding: 5px 0;
+        margin: 0;
+        color: var(--pmt-text);
+        line-height: 1.45;
+      }
+      .composer textarea:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .send {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.15s ease,
+          opacity 0.15s ease;
+        flex: 0 0 auto;
+        box-shadow: 0 10px 24px rgba(0, 127, 172, 0.25);
+      }
+      .send:active {
+        transform: scale(0.95);
+      }
+      .send:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .footerHint {
+        font-size: 11px;
+        color: var(--pmt-dim);
+        text-align: center;
+        margin: 0 24px 12px;
+      }
+      .pmt-screen.home-search-mode {
+        display: flex;
+        flex-direction: column;
+      }
+      .googleHomeHero {
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        padding: 34px 16px 10px;
+        text-align: center;
+      }
+      .googleHomeHero .heroBadge {
+        margin: 0 auto 12px;
+        justify-content: center;
+      }
+      .googleHomeHero .heroTitle {
+        margin: 0 auto 10px;
+        font-size: clamp(30px, 5vw, 46px);
+        text-align: center;
+        letter-spacing: -0.02em;
+      }
+      .googleHomeHero .heroText {
+        margin: 0 auto;
+        max-width: 560px;
+        text-align: center;
+      }
+      .googleAskWrap {
+        width: 100%;
+        max-width: 760px;
+        margin: 10px auto 4px;
+      }
+      .googleAskBox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 54px;
+        border: 1px solid rgba(4, 28, 61, 0.14);
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 999px;
+        padding: 9px 10px 9px 18px;
+        box-shadow: 0 8px 26px rgba(4, 28, 61, 0.07);
+        transition:
+          box-shadow 0.15s ease,
+          border-color 0.15s ease;
+      }
+      body.pmt-theme-dark .googleAskBox {
+        background: rgba(8, 24, 48, 0.78);
+        border-color: rgba(148, 180, 214, 0.24);
+      }
+      .googleAskBox:focus-within {
+        border-color: var(--pmt-primary);
+        box-shadow: 0 16px 46px rgba(0, 127, 172, 0.2);
+      }
+      .googleAskBox textarea {
+        width: 100%;
+        min-height: 28px;
+        max-height: 96px;
+        resize: none;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--pmt-text);
+        font-size: 14px;
+        line-height: 1.45;
+        font-family: var(--font);
+        padding: 4px 0;
+        margin: 0;
+      }
+      .googleAskBox textarea::placeholder {
+        color: var(--pmt-dim);
+      }
+      .googleAskSend {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        border: 0;
+        background: linear-gradient(
+          135deg,
+          var(--pmt-accent),
+          var(--pmt-primary)
+        );
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex: 0 0 auto;
+        box-shadow: 0 10px 22px rgba(0, 127, 172, 0.25);
+      }
+      .googleAskActions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .googleGhostBtn {
+        border: 1px solid var(--border-soft);
+        background: var(--chip-bg);
+        color: var(--pmt-text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font);
+        cursor: pointer;
+      }
+      .googleBrowseWrap {
+        max-width: 760px;
+        width: 100%;
+        margin: 16px auto 0;
+      }
+      .googleBrowseWrap .quickSectionTitle {
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      @media (max-width: 520px) {
+        .googleAskBox {
+          min-height: 50px;
+          border-radius: 24px;
+        }
+      }
+      .pmt-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0 2px;
+      }
+      .pmt-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 14px 7px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border-soft);
+        background: var(--pmt-surface-2);
+        color: var(--pmt-text);
+        font-size: 12px;
+        font-weight: 700;
+        font-family: var(--font);
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          transform 0.1s ease;
+        white-space: nowrap;
+      }
+      .pmt-nav-btn:hover {
+        background: var(--card-hover);
+        transform: translateY(-1px);
+      }
+      .pmt-nav-btn:active {
+        transform: scale(0.97);
+      }
+      .pmt-nav-home {
+        margin-left: auto;
+      }
+      .pmt-q-list {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--card-bg);
+      }
+      .pmt-q-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 13px 14px;
+        border: none;
+        border-bottom: 1px solid var(--border-soft);
+        background: transparent;
+        color: var(--pmt-text);
+        font-size: 13px;
+        font-weight: 500;
+        font-family: var(--font);
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.12s ease;
+        line-height: 1.4;
+      }
+      .pmt-q-row:last-child {
+        border-bottom: none;
+      }
+      .pmt-q-row:hover {
+        background: var(--card-hover);
+      }
+      .pmt-q-row:active {
+        background: var(--chip-bg);
+      }
+      .pmt-q-text {
+        flex: 1;
+      }
+      .pmt-q-arrow {
+        flex: 0 0 auto;
+        color: var(--pmt-dim);
+      }
+      .pmt-spark-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 999px;
+        display: block;
+        margin: 0 auto 14px;
+        box-shadow: 0 14px 34px rgba(0, 127, 172, 0.22);
+      }
+      /* ── Contact Form Modal ── */
+      .pmt-contact-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        background: rgba(4, 28, 61, 0.45);
+        backdrop-filter: blur(6px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        animation: pmtFadeIn 0.2s ease-out;
+      }
+      .pmt-contact-overlay.open { display: flex; }
+      .pmt-contact-card {
+        width: 100%;
+        max-width: 400px;
+        max-height: calc(100% - 24px);
+        overflow-y: auto;
+        background: var(--pmt-surface);
+        border: 1px solid var(--border-soft);
+        border-radius: 22px;
+        padding: 24px 20px 20px;
+        box-shadow: var(--shadow-2);
+      }
+      .pmt-contact-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+      }
+      .pmt-contact-header h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--pmt-text);
+      }
+      .pmt-contact-close {
+        width: 30px; height: 30px;
+        border-radius: 999px;
+        border: 1px solid var(--border-soft);
+        background: var(--chip-bg);
+        color: var(--pmt-text);
+        font-size: 16px; font-weight: 700;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s ease;
+      }
+      .pmt-contact-close:hover { background: var(--card-hover); }
+      .pmt-contact-form { display: flex; flex-direction: column; gap: 14px; }
+      .pmt-form-row { display: flex; gap: 10px; }
+      .pmt-form-row > .pmt-form-group { flex: 1; }
+      .pmt-form-group { display: flex; flex-direction: column; gap: 4px; }
+      .pmt-form-group label {
+        font-size: 12px; font-weight: 700;
+        color: var(--pmt-dim);
+        letter-spacing: 0.02em;
+      }
+      .pmt-form-group input,
+      .pmt-form-group textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        color: var(--pmt-text);
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      .pmt-form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .pmt-form-group input:focus,
+      .pmt-form-group textarea:focus {
+        border-color: var(--pmt-primary);
+        box-shadow: 0 0 0 3px var(--input-focus);
+      }
+      .pmt-form-group input.pmt-invalid,
+      .pmt-form-group textarea.pmt-invalid {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+      }
+      .pmt-form-error {
+        font-size: 11px;
+        color: #e74c3c;
+        min-height: 14px;
+        line-height: 1.3;
+      }
+      .pmt-contact-submit {
+        width: 100%;
+        padding: 12px;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(135deg, var(--pmt-accent), var(--pmt-primary));
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: var(--font-display);
+        cursor: pointer;
+        box-shadow: 0 10px 24px rgba(0, 127, 172, 0.25);
+        transition: transform 0.15s ease, opacity 0.15s ease;
+      }
+      .pmt-contact-submit:active { transform: scale(0.98); }
+      .pmt-contact-submit:disabled {
+        opacity: 0.6; cursor: not-allowed;
+      }
+      .pmt-contact-success {
+        text-align: center;
+        padding: 28px 10px;
+      }
+      .pmt-contact-success .pmt-success-icon {
+        width: 56px; height: 56px;
+        border-radius: 999px;
+        background: var(--success-bg);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 14px;
+        font-size: 28px;
+      }
+      .pmt-contact-success h3 {
+        margin: 0 0 6px;
+        font-family: var(--font-display);
+        font-size: 18px;
+        color: var(--pmt-text);
+      }
+      .pmt-contact-success p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--pmt-muted);
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body class="pmt-theme-light">
+    <div class="pmt-launcher-note" id="pmtLauncherNote">Ask Spark</div>
+
+    <div
+      class="pmt-launcher"
+      id="pmtLauncher"
+      aria-label="Open Spark, the Pain Management Technologies Assistant"
+    >
+      <img
+        src="https://res.cloudinary.com/din7hkzcq/image/upload/v1786026169/Untitled_design_74_jyvfu3.png"
+        alt="Spark"
+        width="40"
+        height="40"
+        style="
+          display: block;
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          object-fit: cover;
+          box-shadow: 0 6px 16px rgba(0, 127, 172, 0.28);
+        "
+      />
+      <span class="label">Ask Spark</span>
+    </div>
+
+    <div
+      class="pmt-shell"
+      id="pmtShell"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Spark, the Pain Management Technologies Assistant"
+    >
+      <div class="pmt-topbar">
+        <div class="pmt-topbar-left">
+          <img
+            class="pmt-logo"
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPIAAAB0CAYAAAC/gW9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA3xpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpiMWIxNDMyZi1jMzA4LTQ5OGItOTA0Yi1mNjZkYzNjODliNjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NUE5MjUzMjhBNzFDMTFFQUEzOTdDODlEQjZCQzg5MUMiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NUE5MjUzMjdBNzFDMTFFQUEzOTdDODlEQjZCQzg5MUMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3QzdCQjc2NTFBQTdFQTExOUJGRkIyMUNBMjU5OUZBOSIgc3RSZWY6ZG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjZhZjViMjMxLTg3NTItM2E0ZS04MGM1LWJkMTBjY2Rm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"
+            alt="Pain Management Technologies"
+          />
+          <span
+            class="pmt-beta-badge"
+            title="Spark is the beta support assistant."
+            >Beta</span
+          >
+        </div>
+        <div class="pmt-topbar-right">
+          <button class="btn-icon" id="btnClear" title="Clear chat">⌫</button>
+          <button class="btn-icon" id="btnResize" title="Toggle full screen">
+            ⤢
+          </button>
+          <button class="btn-icon" id="btnMinimize" title="Minimize">—</button>
+          <button
+            class="btn-icon"
+            style="
+              width: auto;
+              padding: 0 12px;
+              gap: 1px;
+              font-size: 13px;
+              font-weight: 700;
+              align-items: center;
+            "
+            onclick="window.pmtWidgetActions.openContact()"
+            title="Talk to a Human"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+              <path
+                d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"
+              ></path>
+            </svg>
+            <span class="support-btn-text">Talk to a Human</span>
+          </button>
+          <button class="btn-icon" id="btnTheme" title="Toggle theme">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
+          <button class="btn-icon" id="btnClose" title="Close">✕</button>
+        </div>
+      </div>
+      <div class="pmt-body">
+        <div class="pmt-screen" id="screen" role="log" aria-live="polite"></div>
+        <div class="composer">
+          <div class="composerMain">
+            <textarea
+              id="chatInput"
+              rows="1"
+              placeholder="Ask Spark a question"
+            ></textarea>
+          </div>
+          <button class="send" id="btnSend" title="Send message">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              style="transform: translateX(-1px)"
+            >
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contact Form Modal -->
+      <div class="pmt-contact-overlay" id="pmtContactOverlay">
+        <div class="pmt-contact-card">
+          <div class="pmt-contact-header">
+            <h2>Talk to a Human</h2>
+            <button class="pmt-contact-close" id="pmtContactClose" title="Close">✕</button>
+          </div>
+          <form class="pmt-contact-form" id="pmtContactForm" novalidate>
+            <div class="pmt-form-row">
+              <div class="pmt-form-group">
+                <label for="pmtFirstName">First Name</label>
+                <input type="text" id="pmtFirstName" placeholder="John" autocomplete="given-name" />
+                <span class="pmt-form-error" id="errFirstName"></span>
+              </div>
+              <div class="pmt-form-group">
+                <label for="pmtLastName">Last Name</label>
+                <input type="text" id="pmtLastName" placeholder="Doe" autocomplete="family-name" />
+                <span class="pmt-form-error" id="errLastName"></span>
+              </div>
+            </div>
+            <div class="pmt-form-group">
+              <label for="pmtEmail">Email</label>
+              <input type="email" id="pmtEmail" placeholder="john@example.com" autocomplete="email" />
+              <span class="pmt-form-error" id="errEmail"></span>
+            </div>
+            <div class="pmt-form-group">
+              <label for="pmtPhone">Phone Number</label>
+              <input type="tel" id="pmtPhone" placeholder="(555) 123-4567" autocomplete="tel" />
+              <span class="pmt-form-error" id="errPhone"></span>
+            </div>
+            <div class="pmt-form-group">
+              <label for="pmtMessage">Message</label>
+              <textarea id="pmtMessage" rows="3" placeholder="How can we help you?"></textarea>
+              <span class="pmt-form-error" id="errMessage"></span>
+            </div>
+            <button type="submit" class="pmt-contact-submit" id="pmtContactSubmit">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const CATEGORIES = [
+          {
+            key: "basics",
+            title: "TENS Basics",
+            sub: "How TENS works, what it feels like, and general use",
+          },
+          {
+            key: "placement",
+            title: "Pad Placement & Programs",
+            sub: "Where to place pads, channels, modes, and settings",
+          },
+          {
+            key: "safety",
+            title: "Safety & Precautions",
+            sub: "Medical conditions, pacemakers, pregnancy, and cautions",
+          },
+          {
+            key: "troubleshooting",
+            title: "Troubleshooting",
+            sub: "No sensation, skin irritation, and device issues",
+          },
+          {
+            key: "electrodes",
+            title: "Electrodes, Batteries & Care",
+            sub: "Pad life, compatibility, cleaning, batteries, and accessories",
+          },
+          {
+            key: "ultima5",
+            title: "Ultima 5 Device Guide",
+            sub: "Features, controls, settings, and support for your Ultima 5",
+          },
+        ];
+
+        const CATEGORY_QUESTIONS = {
+          basics: [
+            "How does a TENS unit work?",
+            "What does a TENS unit feel like?",
+            "What does a TENS unit actually do?",
+            "Does TENS help reduce inflammation?",
+            "How long does it take to feel relief?",
+            "Can I use a TENS unit every day?",
+            "How often should I use a TENS unit?",
+            "What pain conditions does TENS help with?",
+            "What's the difference between TENS and EMS?",
+            "Can one device do both TENS and EMS?",
+            "Does TENS actually work?",
+            "Is pain relief immediate or temporary?",
+            "Will my body get used to TENS?",
+            "Can TENS help me avoid pain medication?",
+            "Can TENS speed up healing or does it only mask pain?",
+            "What TENS unit is best for home use?",
+            "Is a prescription required?",
+            "How many minutes should I do per session?",
+            "Can I use TENS more than once a day?",
+            "How do I maximize pain relief?",
+            "What are the theories behind how TENS units work?",
+            "How do I use a TENS unit, step by step?",
+          ],
+          placement: [
+            "Where should I place the pads for lower back pain?",
+            "Where do I put the pads for neck pain?",
+            "Can I place the pads directly over where the pain is?",
+            "Can the pads touch each other?",
+            "How far apart should the pads be?",
+            "Can I use more than one channel at a time?",
+            "Which mode should I use?",
+            "What frequency is best for chronic pain?",
+            "What frequency works best for acute pain?",
+            "How high should I turn up the intensity?",
+            "Should the stimulation feel strong or gentle?",
+            "Why does the sensation fade after a few minutes?",
+            "What program should I use for my condition?",
+            "How should I approach electrode placement?",
+          ],
+          safety: [
+            "Is it safe to use a TENS unit while sleeping?",
+            "Can I wear a TENS unit all day?",
+            "Can I use TENS with a pacemaker?",
+            "Is a TENS unit safe to use during pregnancy?",
+            "Can I use a TENS unit if I have diabetes?",
+            "Can I use a TENS unit if I have metal implants?",
+            "Where should I never place TENS pads?",
+            "Can I drive while using a TENS unit?",
+            "Is there contradictions with medication?",
+          ],
+          troubleshooting: [
+            "Why isn't my TENS unit producing sensation?",
+            "Why is only one pad working?",
+            "Why does the stimulation feel sharp instead of comfortable?",
+            "Why does my skin turn red after treatment?",
+            "Why does my unit keep turning off?",
+            "Why does the intensity suddenly decrease?",
+            "Why am I not feeling sensation?",
+            "Why does the stimulation seem weak?",
+            "Stimulation feels sharp or uncomfortable",
+            "Why does intensity drop during use?",
+            "Why won't my TENS unit turn on?",
+            "I am experiencing skin irritation -- why is that?",
+            "What are typical troubleshooting issues with TENS units?",
+          ],
+          electrodes: [
+            "How long do TENS pads last?",
+            "Why won't my pads stick anymore?",
+            "How do I make my pads sticky again?",
+            "Can I wash or clean electrode pads?",
+            "Are generic pads compatible with my unit?",
+            "What pads are compatible with my unit?",
+            "What's the difference between 2 inch and 4 inch pads?",
+            "How do I know which pads are best for me?",
+            "How long does the battery last?",
+            "Should I buy a rechargable batteries?",
+            "What accessories should I buy with a TENS unit?",
+            "When should I replace the pads?",
+            "How do I clean and store the unit?",
+            "What are Soft-Touch electrodes, and why do they matter?",
+            "What's the difference between the Soft-Touch Silver and Clinical Grade electrode lines?",
+          ],
+          ultima5: [
+            "What is the Ultima 5 (U5)?",
+            "What comes in my Ultima 5 kit?",
+            "What's different between the current Ultima 5 and the earlier model?",
+            "What does the Pad Contact Interruption Alarm do on my Ultima 5?",
+            "What does the Compliance Monitor track, and why does it matter?",
+            "What wave forms does the Ultima 5 offer, and which one should I use?",
+            "How do I turn my Ultima 5 on and off?",
+            "Why does the intensity reset to zero when I switch modes?",
+            "Does my Ultima 5 remember my last settings when I turn it back on?",
+            "What is the auto-repeat feature when adjusting pulse rate or pulse width?",
+            "How do the intensity knobs work on my Ultima 5?",
+            "How do I read the battery level indicator on my Ultima 5?",
+            "Does my Ultima 5 automatically shut off if I forget to turn it off?",
+            "What is the Lock/Unlock feature, and how do I use it?",
+            "What settings should I use for my very first Ultima 5 session?",
+            "How far apart should the electrode pads be on my Ultima 5?",
+            "Where can I learn more about my Ultima 5?",
+          ],
+        };
+
+        const KB_ANSWERS = {
+          "How does a TENS unit work?":
+            "A Transcutaneous Electrical Nerve Stimulation (TENS) unit is a small, battery-powered device that helps relieve pain by sending low-voltage electrical pulses through electrode pads placed on the skin. These gentle electrical impulses stimulate the nerves beneath the skin and can help reduce the way your body perceives pain.",
+          "What does a TENS unit feel like?":
+            "Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.",
+          "What does a TENS unit actually do?":
+            "A TENS unit helps relieve pain by sending gentle electrical pulses through electrode pads placed on the skin. These pulses stimulate the nerves, helping block pain signals before they reach the brain, while also encouraging the release of endorphins - your body's natural pain relievers. A TENS unit is designed to manage pain, not cure underlying conditions. It can provide temporary relief from discomfort caused by conditions such as back pain, arthritis, sciatica, muscle soreness, and joint pain, making it easier to stay active and complete everyday tasks.",
+          "Does TENS help reduce inflammation?":
+            "TENS is not designed to directly reduce inflammation. Its primary purpose is to help manage pain by interrupting pain signals and stimulating the body's natural pain-relief response.",
+          "How long does it take to feel relief?":
+            "Many users will experience relief within 5 to 15 minutes of starting a TENS session, while others may need several treatments before noticing consistent results. The amount of relief varies depending on the person, the type of pain, and the TENS setting being used. Some users will experience relief during treatment, while others may continue to feel the effects afterward.",
+          "Can I use a TENS unit every day?":
+            "Yes, many people can use a TENS unit daily for pain management. Treatment frequency depends on your specific needs, the type of pain you are experiencing, and the recommendations provided with your device. For the best results, follow the reommended session times and avoid using TENS on irritated skin or the same area for extended periods without breaks.",
+          "How often should I use a TENS unit?":
+            "The frequency of TENS use depends on your pain level, condition, and personal response. Many users use a TENS unit once or multiple times per day for short sessions, typically lasting 20-30 minutes. For best results, use your TENS unit as needed and follow the recommended settings and guidelines provided with your device.",
+          "Where should I place the pads for lower back pain?":
+            "For lower back pain, place the TENS pads on either side of the painful area, near the muscles surrounding the spine. Avoid placing pads directly over the spine or on bony areas. Common placements include: Two pads on each side of the lower back, above the hips or surrounding the area where you feel pain.",
+          "Where do I put the pads for neck pain?":
+            "For neck pain, place the TENS pads on the muscles along the sides and back of the neck, near the area of discomfort. Avoid placing pads directly on the front or sides of the throat, the head, or over the spine. Common placements include: one pad on each side of the neck muscles, or putting the pads above and below the painful area along the upper shoulders and neck.",
+          "Can I place the pads directly over where the pain is?":
+            "Yes. Tens PADS can often be placed near or around the area of pain to help target discomfort. However, avoid placing pads directly over the areas where they are not recommended, such as the front of the neck, head, open wounds, irritated skin, or directly over bony areas. For the best results, try placing the pads around the painful area rather than directly on the most sensitive spot.",
+          "Can the pads touch each other?":
+            "No. TENS pads should not touch each other during use. Keep the pads separated to allow the electrical stimulation to flow properly through the targeted area. For the best results, place pads a few inches apart and avoid overlapping or placing them directly on top of one another.",
+          "How far apart should the pads be?":
+            "TENS pads should generally be placed about 1-3 inches apart, depending on the treatment area and the size of the pads. The pads should be close enough to target the area of discomfort but far enough apart to allow the electrical stimulation to travel effectively. For larger areas of pain, such as the lower back or shoulder, pads may be placed farther apart to cover more space.",
+          "Can I use more than one channel at a time?":
+            "Yes, if your TENS unit has multiple channels, you can typically use more than one channel at the time. This allows you to treat multiple areas of discomfort or use additional electrode pads for a larger treatment area. For example, one channel can be used on the lower back while another targets the hip or leg area. Always follow your device instructions and keep the intensity at a comfortable level.",
+          "Which mode should I use?":
+            "The best TENS mode depends on your type of pain and personal comfort level. Most users start with a normal or continuous mode and adjust based on how their body responds. Common modes include Normal/Continuous Mode: Provides a steady stimulation is commonly used for general pain relief and everyday discomfort. Burst Mode: Delivers pulses in groups and may be helpful for stronger or more persistent pain. Modulation Mode: Automatically varies the stimulation pattern to help prevent your body from getting used to the sensation.",
+          "What frequency is best for chronic pain?":
+            "For chronic pain, many TENS users find relief within lower frequencies (around 1-10 Hz), which may encourage the release of natural pain-relieving chemicals like endorphins. Some users also benefit from higher frequencies (around 50-120Hz), which may help block pain signals and provide more immediate relief.",
+          "What frequency works best for acute pain?":
+            "For acute pain (new or short-term pain from an injury, procedure, or strain), many users find higher frequencies around 50-120 Hz helpful. These settings may provide faster relief by helping interrupt pain signals traveling to the brain. Lower frequencies may also be used depending on the type of pain and individual response.",
+          "How high should I turn up the intensity?":
+            "Set the intensity to a level that feels strong but comfortable. You should feel a noticeable tingling, pulsing, or buzzing sensation, but it should never be painful or cause discomfort. Start at a low setting and gradually increase the intensity until you feel a strong sensation without muscle strain, sharpness, or irritation.",
+          "Should the stimulation feel strong or gentle?":
+            "TENS stimulation should feel strong but comfortable. You should notice a clear tingling, buzzing, or pulsing sensation without pain, burning, or excessive muscle discomfort. The goal is to provide enough stimulation to be effective while keeping the treatment comfortable throughout the session.",
+          "Why does the sensation fade after a few minutes?":
+            "It is common for the TENS sensation to feel less noticeable after a few minutes. This happens because your nerves can adapt to the stimulation, making the sensation feel weaker over time. If this happens, you can try slightly increasing the intensity, adjusting the pad placement, or using a modulation mode (if available) to vary the stimulation pattern.",
+          "What pain conditions does TENS help with?":
+            "TENS can help with multiple conditions such as Sciatica, Plantar Fasciitis, Arthritis, Knee Pain, Shoulder Pain, Neck Pain, Tennis Elbow, Carpal Tunnel, Fibromyalgia, Neuropathy, Muscle Spasms, Menstrual Cramps, and Post-Surgical Pain.",
+          "Is it safe to use a TENS unit while sleeping?":
+            "It is generally not recommended to use a TENS unit while sleeping unless specifically instructed by a healthcare professional. While TENS is considered safe for many people, you may not notice skin irritation, discomfort, or changes in sensation while sleeping. For best results, use your TENS unit while you are awake and able to monitor the stimulation level and skin condition.",
+          "Can I wear a TENS unit all day?":
+            "It is generally not recommended to wear a TENS unit continuously all day without breaks. While TENS can often be used multiple times throughout the day, extended use may increase the risk of skin irritation, reduced effectiveness, or discomfort. For best results: Use TENS in scheduled sessions as needed. Give your skin breaks between treatments. Move electrode placement if using the same area frequently. Follow your device's recommended usage guidelines.",
+          "Can I use TENS with a pacemaker?":
+            "If you have a pacemaker or implanted electronic device, you should consult your healthcare provider before using a TENS unit. Electrical stimulation may potentially interfere with some implanted devices.",
+          "Is a TENS unit safe to use during pregnancy?":
+            "TENS may be used during pregnancy in some cases, but it is best to consult with your healthcare provider before use. Many providers recommend avoiding certain areas, especially the abdomen, lower back, pelvis, and acupuncture points that may stimulate contractions. When approved by a healthcare professional, TENS is sometimes used during pregnancy for issues such as back discomfort or labor related pain.",
+          "Can I use a TENS unit if I have diabetes?":
+            "Many people with diabetes can use a TENS unit, but it is important to check with your healthcare provider first, especially if you have diabetic neuropathy or reduced sensation. If you have decreased feeling in an area, you may not notice skin irritation or discomfort from the stimulation. Always check your skin before and after use and avoid placing pads over damaged skin, sores, or areas with poor circulation.",
+          "Can I use a TENS unit if I have metal implants?":
+            "In many cases, yes, TENS can be used with metal implants, such as joint replacements or surgical hardware. The electrical stimulation from a TENS unit typically does not affect non-electronic metal implants. However, you should check with your healthcare provider before use, especially if the implant is near the treatment area or if you have any type of electronic implant (such as a pacemaker, defibrillator, or nerve stimulator).",
+          "Where should I never place TENS pads?":
+            "TENS pads should never be placed on certain areas where stimulation could be unsafe, including: front or sides of neck (near the throat or carotid arteries). Across the chest or directly over the heart. On the head, face, or near the eyes. Inside the mouth or on broken skin. Over open wounds, sores, infections, or irritated skin. Directly over the spine or major bony areas. Across the abdomen or lower back during pregnancy UNLESS approved by a healthcare provider. Near implanted electronic devices (such as pacemakers or defibrillators).",
+          "Can I drive while using a TENS unit?":
+            "It is not recommended to drive or operate heavy machinery while using a TENS unit. The stimulation can be distracting, and changes in intensity or muscle responses may affect your ability to drive safely. For your safety, use your TENS unit before or after driving rather than while operating a vehicle.",
+          "How long do TENS pads last?":
+            "TENS electrodes typically last 10-30 uses,depending on the quality of the pads, how often they are used, skin condition, and how well they are cared for. To help extend the lifespan of an electrode: Apply pads to clean, dry skin. Store them properly on the provided backing sheet. Avoid using lotions or oils before application. Replace pads when they lose stickiness or stimulation becomes uneven.",
+          "Why won't my pads stick anymore?":
+            "TENS pads can lose their stickiness over time due to repeated use, moisture, oils, lotions, dirt, or improper storage. As the gel dries out or the pads are used, the pads may not make proper contact with the skin, which will reduce stimulation quality. Once you are noticing that your pads are sticking less, or are starting to fall off the skin, it is recommended to swap out your pads for new. To improve pad life: Clean and dry your skin before applying pads. Avoid using lotions, oils, or creams before treatment. Store pads on their backing sheet in a sealed bag or container. Replace pads when the gel becomes dry, dirty, or no longer adheres well.",
+          "How do I make my pads sticky again?":
+            "TENS pads cannot usually be made fully sticky again, as once the conductive gel has dried out, it is not recommended to try and make them sticky again. This can cause burns or rash due to the gel drying out. Once pads have started to lose their adhesive, it is recommended to swap out with new electrodes for proper use and safety purposes.",
+          "Can I wash or clean electrode pads?":
+            "No, TENS electrode pads should not be washed or soaked in water. Cleaning them can damage the conductive gel and reduce their ability to stick and deliver consistent stimulation.",
+          "Are generic pads compatible with my unit?":
+            "In most cases, yes, generic TENS pads are compatible as long as they use the same standard pin size for connection and are designed for TENS/EMS devices. Before purchasing, check the following: The connector type (most use a standard 2mm pin or snap connection). The pad size and shape are the correct size for your treatment area. The manufacturer's recommendations for your specific device. Higher-quality electrodes often provide better adhesion, comfort, and consistent stimulation compared to lower-quality alternatives.",
+          "What pads are compatible with my unit?":
+            "Most TENS units work with standard snap-style electrode pads, but compatibility depends on your device's connector type. Most units follow a standard 2mm pin or snap connector size for electrodes. Before purchasing, check the following: The connector style on your TENS unit. The recommended pad size from your device manufacturer. Whether the pads are labeled for TENS use (not just other stimulation devices).",
+          "What's the difference between 2 inch and 4 inch pads?":
+            "The main difference is coverage area. Larger pads spread stimulation over a wider area, while smaller pads provide more targeted treatment. 2 Inch Pads: Best for smaller or more precise areas like the wrist, ankle, neck muscles, or smaller joints. 4 Inch Pads: Better for larger muscle groups, like the lower back, shoulders, thighs, or areas with broader discomfort. Larger pads may also feel more comfortable because the stimulation is distributed across a bigger surface area.",
+          "How do I know which pads are best for me?":
+            "The best TENS pads depend on where you are treating, the size of the area, and your comfort preference. Consider: Small pads: Best for targeted areas like wrists, ankles, elbows, or smaller joints. Large pads: Best for larger areas like the lower back, shoulders, hips or thighs. Longer Lasting Pads: Better for frequent users who need more repeated sessions. Flexible Pads: Helpful for areas that move often, like knees, shoulders, or joints. For the best results, choose pads that provide good skin contact,comfortable stimulation, and proper coverage for your treatment area.",
+          "Why isn't my TENS unit producing sensation?":
+            "If you don't feel any simulation from your TENS unit, check these common causes; Intensity is too low: Gradually increase the intensity until you feel a comfortable tingling or pulsing sensation. Pads are not making good contact: Make sure pads are fully attached to clean, dry skin. Electrodes are worn out: Old or dry pads may not transfer stimulation properly. Pad placement needs adjustment: Try moving the pads closer to the area of treatment or adjusting their postion. Cable or connection issue: Make sure the leads are securely connected to both the unit and the pads. Low Battery: Replace or recharge the battery if the device is not powering correctly.",
+          "Why is only one pad working?":
+            "If only one pad seems to be producing a sensation, the issue is usually related to pad contact, connections, or the electrode itself. Try these steps: Check the pad connection: Make sure both lead wires are firmly connected to the TENS unit and electrode pads. Test the pads: Swap the pads or cables to see if the issue follows the pad or the channel. Replace the pad: A worn or dried-out electrode may not conduct properly. Improve the skin contact: Clean and dry the skin, then reapply the pads firmly. Check the channel settings: Make sure both channels are turned on if your unit has multiple channels.",
+          "Why does the stimulation feel sharp instead of comfortable?":
+            "TENS stimulation should feel like a comfortable tingling, pulsing, or buzzing sensation - not shart or painful. A sharp sensation usually means the stimulation is too intense or the pads are not making proper contact. Try: Lowering the intensity until the sensation becomes comfortable. Checking pad placement and moving pads away from bony areas or sensitive spots. Replacing old pads that may have dried out or lost even contact. Cleaning and drying your skin before applying electrodes.",
+          "Why does my skin turn red after treatment?":
+            "Mild redness after using a TENS unit can be normal and is often caused by increased circulation, pressure from the electrode, or mild skin sensitivity. It should typically fade shortly after removing the pads. To reduce skin irritation: Make sure your skin is clean and dry before use. Avoid placing pads on irritated or damaged skin. Rotate pad placement between treatments. Reduce treatment intensity if the sensation feels uncomfortable. Replace electrodes when the gel becomes old or irritating.",
+          "Why does my unit keep turning off?":
+            "If your TENS unit keeps shutting off, it is usually caused by a power, connection, or safety feature issue. Common issues include: Low battery: Replace or recharge the batteries to ensure the unit has enough power. Automatic Shutoff Timer: Many TENS units turn off automatically after a set treatment time. Loose connections: Check that the lead wires are fully connected to the unit and electrode pads. Poor pad contact: If the pads lose contact with the skin, some units may pause or stop stimulation. Damaged cables or electrodes: Worn pads or faulty wires can interrupt the connection. Intensity set too high: Some devices may stop if they detect an issue with the electrical connection.",
+          "Why does the intensity suddenly decrease?":
+            "A sudden drop in intensity is usually caused by changes in pad contact, skin resistance, or the unit's built-in adjustments. Common causes include: Your body adapting to the stimulation: Nerve can become less sensitive to the sensation over time. Pads losting contact: Sweat, movement, or worn adhesive can reduce conductivity. Automatic modulation: Some TENS modes adjust the stimulation level or pattern to keep the sensation comfortable. Low battery: Reduced power can affect stimulation strength. Loose connections: Check that the lead wires and pads are securely attached.",
+          "How long does the battery last?":
+            "Battery life depends on the type of battery, intensity setting, and how often you use your TENS unit. Rechargable batteries: Typically provide 8-20 hours per charge. Disposable batteries: Can often last 20-50 hours of treatment, depending on the device and settings. Higher intensity levels and longer treatment sessions may shorten battery life.",
+          "Should I buy a rechargable batteries?":
+            "If your TENS unit is compatible, rechargable batteries are a great option for frequent users. They can save money over time, reduce waste, and provide consistent performance. Disposable batteries may be a better choice if you use your TENS unit only on occasion or need a quick replacement while traveling.",
+          "What's the difference between TENS and EMS?":
+            "Although they both use electrical stimulation, TENS and EMS are designed for different purposes. TENS: Primarily used to help relieve pain by stimulating the nerves and reducing pain signals. EMS: Designed to stimulate muscles, helping with muscle strengthening, recovery, re-education, and reducing muscle atrophy. Some devices combine both TENS and EMS modes, allowing you to switch between pain relief and muscle stimulation.",
+          "Can one device do both TENS and EMS?":
+            "Yes. Many modern electrotherapy devices combine both TENS and EMS in a single unit, allowing you to switch between pain relief and muscle stimulation. If you device includes both functions, you can select the mode that best fits your treatment goals.",
+          "Does TENS actually work?":
+            "Yes. TENS has been proven to help relieve pain for many people, although results can vary depending on the individual and the condition being treated. It works by stimulating the nerves, which may help reduce pain signals and encourage the relese of the body's natural pain-relieving chemicals. For best results, use the TENS unit as directed with proper pad placement and comfortable intensity settings.",
+          "Is pain relief immediate or temporary?":
+            "TENS relief can be immediate for some users, while others may need several sessions to notice improvement. The effects are often temporary, lasting anywhere from minutes to several hours after treatment. Some people experience longer-lasting benefits when TENS is used consistently as part of a broader pain management routine.",
+          "Will my body get used to TENS?":
+            "Yes, your body can adapt to TENS stimulation over time, which may make the sensation feel less noticeable. This a normal response called habituation. To help maintain effectiveness: Increase the intensity slightly as needed (while keeping it comfortable), Adjust pad placement between sessions, Use different modes or settings if your device offers them, Avoid using the same exact settings every time.",
+          "Can TENS help me avoid pain medication?":
+            "TENS may help some people reduce their reliance on pain medication by providing a drug-free option for managing discomfort. However, it does not replace prescribed medications for everyone or treat the underlying cause of pain. Many people use TENS as part of a broader pain management plan alongside other treatments recommended by their healthcare provider.",
+          "Can TENS speed up healing or does it only mask pain?":
+            "TENS is primarily used for pain relief, not to directly heal injuries. It helps by changing how pain signals are processed by the nervous system, which can make discomfort more manageable. By reducing pain, TENS may help some people move more comfortable, particupate in physical therapy, and stay active, which can support the overall recovery process. However, it does not repair damaged tissue or speed up healing on its own.",
+          "What TENS unit is best for home use?":
+            "The best TENS unit for home use depends on your needs, but a good home unit should have: Adjustable intensity levels, multiple modes, dual channels, rechargable batteries, easy controls and a clear display. For most home users, a reliable dual channel TENS unit with adjustable programs is a good choice because it offers flexibility for areas like the back, neck, shoulders, knees, and joints.",
+          "Is a prescription required?":
+            "No, most TENS units do not require a prescription and are available for purchase without one. Many people use TENS at home as a drug-free option for managing pain. However, it is recommended to consult a healthcare provider before use if you have certain conditions, such as an implanted electronic device (like a pacemaker), pregnancy, epilepsy, or significant loss of sensation.",
+          "What accessories should I buy with a TENS unit?":
+            "The most useful accessories depend on how often you use your TENS unit, but these are the most common add-ons: Extra electrode pads, Different Pad Sizes, Replacement Lead Wires, Carrying Case, Rechargable batteries or charging cable, Electrode storage bag or container.",
+          "What program should I use for my condition?":
+            "The best TENS program depends on your type of pain, where it is located, and how your body responds to stimulation. There is no single setting that works best for everyone. Start with a comfortable setting and adjust based on how your body responds.",
+          "How many minutes should I do per session?":
+            "Most TENS sessions typically last 15-60 minutes, depending on your comfort level, the device settings, and your specific needs. General guidelines: Start with 15-30 minutes to see how your body responds. Common session lengths: 30-60 minutes. Repeat Sessions: Many people use TENS multiple times throughout the day if needed, allowing breaks between treatments. Avoid using TENS for extended periods without breaks, and always follow your device's instructions.",
+          "Can I use TENS more than once a day?":
+            "Yes, many people use a TENS unit more than once per day if needed. Multiple short sessions may be more comfortable and effective than using it continuously for long periods. Important notes: Allow your skin to rest between sessions. Avoid placing pads on the exact same spot for too many hours. Adjust intensity if the sensation becomes uncomfortable. Follow your device's recommended usage guidelines.",
+          "When should I replace the pads?":
+            "Replace your TENS pads when they no longer provide good skin contact or consistent stimulation. Signs it's time for new pads: They stop sticking well to your skin. The edges begin to lift or curl. Stimulation feels uneven, weak, or uncomfortable. The gel looks dry, dirty, or damaged. Skin irritation occurs after use. With proper care, reusable electrode pads typically last 10-30 uses, but lifespan varies based on skin type, storage, and frequency of use.",
+          "How do I clean and store the unit?":
+            "Proper cleaning and storage can help extend the life of your TENS unit, cables, and electrode pads. To clean your unit: Turn the device off. Wipe the unit and cables with a soft, dry, or slightly damp cloth. Avoid getting water or cleaning liquids inside the device. Do not submerge the unit or rinse it with water. To store the unit: Remove electrodes from your skin gently after use. Return pads to their original backing sheet. Store pads in a sealed bag or container to prevent drying out. Keep the unit in a cool, dry place away from heat direct sunlight. Store cables neatly to prevent bending or damage.",
+          "How do I maximize pain relief?":
+            "To get the best results from your TENS unit, focus on proper placement, comfortable settings, and consistent use. Tips to maximize relief: Place pads correctly: Position electrodes around the painful area or along the related nerve pathways as recommended. Use a comfortable intensity: The sensation should feel strong but comfortable - not painful or irritating. Adjust settings: Try different modes, pulse rates, and durations to find what works best for you. Use fresh electrodes - Good pad contact helps deliver consistent stimulation. Keep skin clean and dry: Remove oils, lotions, and sweat before applying pads. Use consistently: Regular sessions may provide better results than occasional use.",
+          "What are the theories behind how TENS units work?":
+            'There are two leading theories that explain why TENS provides relief, and understanding them can help you get more out of your device. The first is the Gate Control Theory of Pain. It suggests that the electrical pulses from your TENS unit travel along nerve fibers faster than pain signals do, effectively closing a "gate" in your spinal cord so fewer pain signals reach your brain. This is generally associated with higher frequency settings and tends to provide faster, more immediate relief. The second is the Endorphin Release Theory, which suggests that certain settings, typically lower frequencies, encourage your body to release endorphins, its own natural pain-relieving chemicals. This effect tends to build more gradually and can last longer after your session ends. Many people find that combining both approaches, or simply experimenting with frequency over a few sessions, helps them find what works best for their body.',
+          "How should I approach electrode placement?":
+            "Proper electrode placement can make a big difference in how comfortable and effective your TENS treatment feels. The goal is to place pads where they can best influence the area of discomfort. Helpful Guidelines: Place pads around the painful area: Position electrodes on either side of the pain or along the surrounding muscles. Avoid placing pads directly over irritated or damaged skin. Keep pads evenly spaced: Proper spacing helps create a consistent stimulation pathway. Use both channels when available: This allows you to treat larger areas or multiple areas at the same time. Adjust placement if needed: Small changes in the pad location can improve comfort and sensation. Follow your device's instructions: Some conditions may have recommended placement patterns.",
+          "Is there contradictions with medication?":
+            "TENS generally does not interact with most medications because it works through electrical stimulation rather than through the bloodstream. However, your health condition and medications may still be important to discuss with a healthcare provider. Use caution and seek medical guidance if you: Take medications that affect sensation, nerve function, or heart rhythm. Have reduced ability to feel stimulation. Use medications that increase skin sensitivity or irritation risk. TENS should also be used carefully with certain medical conditions, such as: Implanted electronic devices (like pacemakers or defibrillators), Pregnancy, Epilepsy, Seizure Disorders, Areas with reduced sensation or damaged skin.",
+          "Why am I not feeling sensation?":
+            "If you are not feeling any stimulation, the issue is usually related to settings, connections, or electrode contact. Try these steps: increase the intensity slowly: The setting may simply be too low to feel. Check electrode placement: Move the pads slightly closer together or reposition them around the treatment area. Make sure pads are fully attached; Poor contact can prevent stimulation from being felt. Clean and dry your skin: Oils, lotions, or sweat can interfere with conductivity. Replace old electrode pads: Dry or worn pads may not transfer stimulation properly. Check cables and connections: Ensure lead wires are securely connected to the unit and pads. Confirm the correct mode/channel is active: Some programs have different sensation levels.",
+          "Why does the stimulation seem weak?":
+            "If your TENS unit feels weaker than usual, it is often caused by pad contact, settings, or power issues. Common causes include: Intensity is set too low: Gradually increase the intensity to a strong but comfortable level. Electrode pads are worn: Older pads may lose conductivity and reduce stimulation strength. Poor skin contact: Clean and dry your skin, then firmly apply the pads. Loose connections: Check that lead wires are securely attached to both the unit and pads. Low battery: Replace or recharge the battery if the device is losing power. Your body has adapted: Over time, you may notice the sensation less as your nerves become accustomed to the stimulation.",
+          "Stimulation feels sharp or uncomfortable":
+            "TENS stimulation should feel like a comfortable tingling, pulsing, or buzzing sensation - not sharp or painful. A sharp sensation usually means the stimulation is too intense or the pads are not making proper contact. Try: Lowering the intensity until the sensation becomes comfortable. Checking pad placement and moving pads away from bony areas or sensitive spots. Replacing old pads that may have dried out or lost even contact. Cleaning and drying your skin before applying electrodes.",
+          "Why does intensity drop during use?":
+            "A decrease in intensity during a session is usually caused by your body adapting to the stimulation, changes in skin contact, or device settings. Common causes include: Your body is adjusting to the sensation: It is normal to notice the stimulation less over time as your nerves become accustomed to it. Pads are losing contact: Movement, sweat, or drying electrodes can reduce conductivity. Automatic adjustment features: Some TENS programs change the stimulation pattern or strength to keep treatment comfortable. Low battery: Reduce power can affect stimulation strength. Loose connections: Check that the lead wires are securely attached.",
+          "Why won't my TENS unit turn on?":
+            "If your TENS unit will not power on, the issue is usually related to the battery, charging, or a connection problem. Try these steps: Check the battery: Replace disposable batteries or fully charge the device if it is rechargable. Confirm proper battery placement: Make sure batteries are inserted correctly and making contact. Try a different charger or cable: If rechargable, check that the charging cable and power source are working. Hold the power button: Some units require pressing and holding the button for a few seconds. Check for damage: Look for cracks, loose parts, or signs of moisture exposure. Disconnect accessories: Remove lead wires and pads, then try turning the unit on again. Review the user manual: Some devices have specific startup steps or safety locks.",
+          "I am experiencing skin irritation -- why is that?":
+            "Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.",
+          "How do I use a TENS unit, step by step?":
+            "Start with clean, dry skin. Connect the lead wires to the pads, then plug them into the unit. Place the pads around the painful area, a few inches apart. Turn on the device, choose a mode, and slowly raise intensity until you feel a strong but comfortable tingling. Run the session 15-60 minutes, then power down and store the pads on their backing.",
+          "What are typical troubleshooting issues with TENS units?":
+            'Most issues come down to power, connections, pad contact, or settings. No sensation? Check the lead wires are seated and pads are on clean skin with intensity turned up. Weak or uneven feel? Replace worn electrodes. Unexpected shutoff? Usually the timer, low battery, or a safety response to poor contact. Your Ultima 5\'s Pad Contact Alarm flashes "CH1"/"CH2" if a connection starts failing.',
+          "What is the Ultima 5 (U5)?":
+            "The Ultima 5 is PMT's dual-channel digital TENS unit, built for robust relief at home, work, or on the go. It offers 10 intensity levels, 9 preset modes (27 combinations), 3 wave forms, and a timer up to 60 minutes. A built-in Compliance Monitor and Pad Contact Alarm add extra confidence.",
+          "What comes in my Ultima 5 kit?":
+            'Your kit includes the TENS device, manual, Quick Start Guide, one pack of 2" square electrodes, an AA charger, two pairs of leadwires, two rechargeable Li-ion batteries, a soft carrying case, and an instruction card, everything you need for your first session.',
+          "What's different between the current Ultima 5 and the earlier model?":
+            "Core performance is unchanged: dual channel, up to 130 mA, the same pulse width and rate range, 3 wave forms, and 9 modes. What's improved: more timer options (15-90 minutes plus continuous), a compliance lock feature, an upgraded carrying case, a manual with an electrode placement chart, and five color options instead of one.",
+          "What are Soft-Touch electrodes, and why do they matter?":
+            "Soft-Touch electrodes are PMT's premium reusable line: a non-porous tricot backing, conductive wire-mount layer, high-quality carbon layer, and extra-thick gel, with a snug pigtail connector. Oval corners minimize edge curl, and every pad uses latex-free USA gel in a resealable bag to stay fresh. They work well across TENS, EMS, interferential, microcurrent, and galvanic devices.",
+          "What's the difference between the Soft-Touch Silver and Clinical Grade electrode lines?":
+            'Both are premium reusable electrodes. The Silver series (SPS) uses a silver backing with ultra-low impedance and a gentle blue gel, great for sensitive skin, in sizes from 1.25" round up to 3" round. The Clinical Grade series (SP) uses a carbon backing with low-impedance blue gel and the widest size range, from a 1" round up to a 3.3"x6" butterfly pad.',
+          "What does the Pad Contact Interruption Alarm do on my Ultima 5?":
+            'It watches your connection for you. If contact weakens, "CH1" and/or "CH2" flashes on the display. After 3 seconds of poor contact, intensity automatically drops to 60%. If contact returns within 30 seconds, it climbs back to your original setting; if not, intensity resets to zero. It\'s off by default, hold "PR+" and "MODE" together to turn it on.',
+          "What does the Compliance Monitor track, and why does it matter?":
+            "It keeps a running total of your usage time, a simple way to track how consistently you're following your treatment plan. Press and hold the timer button to view your total; it clears from the display after about 2 seconds. To reset the count to zero, hold MODE and TIMER together.",
+          "What wave forms does the Ultima 5 offer, and which one should I use?":
+            'You get three: asymmetrical, symmetrical, and monophasic. Switch between them by pressing "PR-" and "PW-" together. For your first session, start with asymmetrical bi-phasic rectangular, the most comfortable default for most people. From there, try symmetrical for a more even feel during longer sessions, or monophasic for smaller, more sensitive areas.',
+          "How do I turn my Ultima 5 on and off?":
+            "Press and hold the power button for about 3 seconds to turn your Ultima 5 on. You'll see the green LED light up along with the display, and intensity always starts at zero so you can ease in comfortably. To power down, press and hold the same button again for 3 seconds.",
+          "Why does the intensity reset to zero when I switch modes?":
+            "This is expected behavior, not a malfunction. Any time you change modes on your Ultima 5, the intensity automatically drops back to zero as a safety measure, so you don't accidentally jump into a new mode at a high setting. Just turn the intensity knob back up to a comfortable level once you've selected your mode.",
+          "Does my Ultima 5 remember my last settings when I turn it back on?":
+            "Yes. When you power your Ultima 5 back on, it automatically returns to the mode it was running in before you turned it off, so you don't have to reconfigure everything each time. Intensity will still start at zero, as it does on every power-up.",
+          "What is the auto-repeat feature when adjusting pulse rate or pulse width?":
+            'Once you make your first adjustment to pulse rate or pulse width, an auto-repeat function kicks in. If you press and hold the "PR+", "PR-", "PW+", or "PW-" key for about 1 second, the value will keep increasing or decreasing automatically, one step every quarter-second, so you can dial in your setting faster without repeatedly tapping the button.',
+          "How do the intensity knobs work on my Ultima 5?":
+            "Your Ultima 5 has two knobs on top of the unit, one for each channel. Turn a knob clockwise to increase intensity on that channel, or counterclockwise to decrease it. This lets you fine-tune each channel independently if you're treating two different areas at once.",
+          "How do I read the battery level indicator on my Ultima 5?":
+            "The battery icon on your display uses a simple 2-bar system. Both bars showing means your battery is fully charged. One bar means you're at a mid-level charge. If the battery symbol starts flashing, that's your cue that the batteries are running low and should be recharged or replaced soon.",
+          "Does my Ultima 5 automatically shut off if I forget to turn it off?":
+            "Yes. If the intensity on both channels is set to zero and the unit hasn't been used for 5 minutes, it will automatically power down on its own, so you don't have to worry about it running down the battery if you step away.",
+          "What is the Lock/Unlock feature, and how do I use it?":
+            "The Lock/Unlock feature lets you hold your current intensity steady so it can't be accidentally bumped up or down mid-session, handy if the unit is clipped to your belt or moving around while you're active. With the unit on, give the power button a short press to lock it; your intensity level will be held in place. Give it another short press to unlock and resume adjusting normally.",
+          "What settings should I use for my very first Ultima 5 session?":
+            "Your Quick Start Guide recommends a simple starting point: set the frequency to 150Hz, the pulse width to 250us, and the mode to Constant. Turn the intensity up to a level that feels strong but comfortable, and use the unit for 30-45 minutes, or as long as needed. For your wave form, start with the Asymmetrical Bi-Phasic Rectangular setting, it's the recommended starting point for initial treatment. From there, feel free to adjust based on comfort and results.",
+          "How far apart should the electrode pads be on my Ultima 5?":
+            "Per the Quick Start Guide, place the pads from each channel so they're straddling the area of pain, making sure the pads from each channel aren't touching one another and aren't more than 6 inches apart. This spacing helps the stimulation flow properly between the pads on each channel.",
+          "Where can I learn more about my Ultima 5?":
+            "For additional resources and information beyond your manual and Quick Start Guide, you can visit paintechnology.com.",
+        };
+
+        const CONTACT_EMAIL = "info@paintechnology.com";
+        const WARRANTY_URL =
+          "https://paintechnology.com/resources#warranty-info";
+
+        let thread = [];
+        let isTyping = false;
+        const storedFullscreen = localStorage.getItem("spark_widget_fullscreen");
+        let isFullscreen = storedFullscreen !== null ? storedFullscreen === "true" : true;
+        let isMinimized = false;
+        let activeCategoryKey = null;
+        let answerReturnCategoryKey = null;
+
+        // Session-level asked questions tracking
+        let askedQuestionsSet = new Set();
+
+        function normalizeQ(str) {
+          return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+        }
+
+        const elShell = document.getElementById("pmtShell");
+        const elLauncher = document.getElementById("pmtLauncher");
+        const elScreen = document.getElementById("screen");
+        const btnResize = document.getElementById("btnResize");
+        const btnMinimize = document.getElementById("btnMinimize");
+        const btnClear = document.getElementById("btnClear");
+        const btnTheme = document.getElementById("btnTheme");
+        const btnClose = document.getElementById("btnClose");
+        const elFreeText = document.getElementById("chatInput");
+        const btnSend = document.getElementById("btnSend");
+
+        // Manage Session ID
+        let sessionId = sessionStorage.getItem("spark_session_id");
+        if (!sessionId) {
+          sessionId = "spark_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now();
+          sessionStorage.setItem("spark_session_id", sessionId);
+        }
+
+        function createSparkBotSvg(size = 20) {
+          const safeSize = Number.isFinite(Number(size)) ? Number(size) : 20;
+          return `<img
+      src="https://res.cloudinary.com/din7hkzcq/image/upload/v1786026169/Untitled_design_74_jyvfu3.png"
+      alt="Spark"
+      width="${safeSize}"
+      height="${safeSize}"
+      style="display:block; width:${safeSize}px; height:${safeSize}px; border-radius:999px; object-fit:cover;"
+    />`;
+        }
+
+        function escapeHtml(s) {
+          return String(s ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+        }
+
+        function getQuestionsForCategory(key) {
+          return CATEGORY_QUESTIONS[key] || [];
+        }
+        function getCategoryQuestionCount(key) {
+          return getQuestionsForCategory(key).length;
+        }
+
+        function getRelatedQuestions(userQuery, llmRelatedQuestions = []) {
+          const normUserQuery = normalizeQ(userQuery);
+          const candidates = [];
+          const addedNorms = new Set();
+
+          function addCandidate(q) {
+            if (!q || typeof q !== "string") return;
+            const trimmed = q.trim();
+            const norm = normalizeQ(trimmed);
+            if (!norm) return;
+            if (askedQuestionsSet.has(norm)) return;
+            if (addedNorms.has(norm)) return;
+            candidates.push(trimmed);
+            addedNorms.add(norm);
+          }
+
+          // 1. Add LLM-provided related questions first
+          if (Array.isArray(llmRelatedQuestions)) {
+            for (const q of llmRelatedQuestions) {
+              addCandidate(q);
+            }
+          }
+
+          // 2. Determine best matching category for userQuery
+          let bestCategoryKey = null;
+          let highestScore = 0;
+          const userWords = userQuery.toLowerCase().split(/\W+/).filter((w) => w.length > 2);
+
+          for (const catKey of Object.keys(CATEGORY_QUESTIONS)) {
+            const questions = CATEGORY_QUESTIONS[catKey];
+            let score = 0;
+            const catObj = CATEGORIES.find((c) => c.key === catKey);
+            if (catObj) {
+              if (
+                userQuery.toLowerCase().includes(catObj.title.toLowerCase()) ||
+                userQuery.toLowerCase().includes(catKey.toLowerCase())
+              ) {
+                score += 5;
+              }
+            }
+            for (const q of questions) {
+              const qLower = q.toLowerCase();
+              for (const w of userWords) {
+                if (qLower.includes(w)) {
+                  score += 1;
+                }
+              }
+            }
+            if (score > highestScore) {
+              highestScore = score;
+              bestCategoryKey = catKey;
+            }
+          }
+
+          if (!bestCategoryKey) {
+            bestCategoryKey = "basics";
+          }
+
+          // Add questions from best matching category
+          if (CATEGORY_QUESTIONS[bestCategoryKey]) {
+            for (const q of CATEGORY_QUESTIONS[bestCategoryKey]) {
+              addCandidate(q);
+            }
+          }
+
+          // Top up from all other categories if needed to reach 3
+          for (const catKey of Object.keys(CATEGORY_QUESTIONS)) {
+            if (candidates.length >= 3) break;
+            if (catKey === bestCategoryKey) continue;
+            for (const q of CATEGORY_QUESTIONS[catKey]) {
+              addCandidate(q);
+              if (candidates.length >= 3) break;
+            }
+          }
+
+          return candidates.slice(0, 3);
+        }
+
+        function formatMessageText(text) {
+          if (!text) return "";
+          let clean = escapeHtml(text);
+          // Convert Markdown bullet asterisks (* item) at line start to bullet symbol •
+          clean = clean.replace(/^[\s]*\*\s+/gm, "• ");
+          // Convert Markdown bold **text** to <strong>text</strong>
+          clean = clean.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+          // Convert Markdown italic *text* to <em>text</em>
+          clean = clean.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+          // Convert Markdown links [label](url) into target="_blank" HTML links
+          clean = clean.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, (match, label, url) => {
+            return `<a href="${url}" target="_blank" rel="noopener" style="color: #00aca0; text-decoration: underline; font-weight: 500;">${label}</a>`;
+          });
+          // Convert newlines to paragraphs and breaks
+          clean = clean.replace(/\n\n+/g, "</p><p>").replace(/\n/g, "<br>");
+          return `<p>${clean}</p>`;
+        }
+
+        function createAskBoxMarkup() {
+          return `
+      <div class="googleAskWrap">
+        <div class="googleAskBox">
+          <textarea id="homePrompt" rows="1" placeholder="Ask Spark about settings, placement, safety..." aria-label="Ask Spark a question"></textarea>
+          <button class="googleAskSend" onclick="window.pmtWidgetActions.submitHomePrompt()" aria-label="Send question">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform: translateX(-1px);">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="googleAskActions">
+          <button class="googleGhostBtn" onclick="window.pmtWidgetActions.openContact()">Talk to a Human</button>
+        </div>
+      </div>`;
+        }
+
+        function renderHome() {
+          activeCategoryKey = null;
+          answerReturnCategoryKey = null;
+          document.querySelector(".composer").style.display = "none";
+          elScreen.classList.add("home-search-mode");
+          elScreen.innerHTML = `
+      <div class="thread">
+        <div class="hero googleHomeHero">
+          <div class="pmt-spark-icon" style="background: linear-gradient(135deg, #00aca0, #007fac); display: flex; align-items: center; justify-content: center;">
+            ${createSparkBotSvg(48)}
+          </div>
+          <h1 class="heroTitle">Hi, I'm Spark.</h1>
+          <p class="heroText">Smart Pain Assistance and Recovery Knowledge — your guide to TENS therapy.</p>
+        </div>
+        ${createAskBoxMarkup()}
+        <div class="googleBrowseWrap">
+          <div class="quickSectionTitle">Browse support</div>
+          <div class="cardRow">
+            ${CATEGORIES.map(
+              (c) => `
+              <div class="homeCard" onclick="window.pmtWidgetActions.renderCategory('${escapeHtml(c.key)}')">
+                <div class="homeCardTitle">${escapeHtml(c.title)}</div>
+                <p class="homeCardSub">${escapeHtml(c.sub)}</p>
+                <div class="metaRow" style="margin-top:10px;">
+                  <span class="metaTag">${getCategoryQuestionCount(c.key)} questions</span>
+                </div>
+              </div>
+            `,
+            ).join("")}
+          </div>
+        </div>
+      </div>`;
+          elScreen.scrollTop = 0;
+          attachHomePromptEvents();
+        }
+
+        function renderCategory(key) {
+          activeCategoryKey = key;
+          answerReturnCategoryKey = null;
+          const cat = CATEGORIES.find((x) => x.key === key);
+          const questions = getQuestionsForCategory(key);
+          document.querySelector(".composer").style.display = "none";
+          elScreen.classList.remove("home-search-mode");
+          elScreen.innerHTML = `
+      <div class="thread">
+        <div class="pmt-nav-bar">
+          <button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderHome()">← Back</button>
+          <button class="pmt-nav-btn pmt-nav-home" onclick="window.pmtWidgetActions.renderHome()">Home</button>
+        </div>
+        <div class="hero" style="padding:14px 16px;">
+          <h1 class="heroTitle" style="font-size:22px; margin-bottom:4px;">${escapeHtml(cat?.title || "Support")}</h1>
+          <p class="heroText" style="font-size:13px;">Tap a question or ask your own below.</p>
+        </div>
+        ${createAskBoxMarkup()}
+        <div class="quickSectionTitle">Common questions</div>
+        <div class="pmt-q-list">
+          ${questions
+            .map(
+              (q) => `
+            <button class="pmt-q-row" onclick="window.pmtWidgetActions.ask('${escapeHtml(q)}', '${escapeHtml(key)}')">
+              <span class="pmt-q-text">${escapeHtml(q)}</span>
+            </button>`,
+            )
+            .join("")}
+        </div>
+      </div>`;
+          elScreen.scrollTop = 0;
+          attachHomePromptEvents();
+        }
+
+        function renderThread() {
+          document.querySelector(".composer").style.display = "flex";
+          elScreen.classList.remove("home-search-mode");
+
+          const backTarget = answerReturnCategoryKey;
+          const backButton = backTarget
+            ? `<button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderCategory('${escapeHtml(backTarget)}')">← Back to Questions</button>`
+            : `<button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderHome()">← Back</button>`;
+
+          elScreen.innerHTML = `
+      <div class="thread">
+        <div class="pmt-nav-bar">
+          ${backButton}
+          <button class="pmt-nav-btn pmt-nav-home" onclick="window.pmtWidgetActions.renderHome()">Home</button>
+        </div>
+        ${thread
+          .map((item) =>
+            item.role === "user"
+              ? `
+          <div class="message user">
+            <div class="bubbleWrap">
+              <div class="bubbleLabel">You</div>
+              <div class="bubble richAnswer">${formatMessageText(item.text)}</div>
+            </div>
+          </div>`
+              : `
+          <div class="message assistant">
+            <div class="avatar">${createSparkBotSvg(22)}</div>
+            <div class="bubbleWrap">
+              <div class="bubbleLabel">Spark</div>
+              <div class="bubble"><div class="richAnswer">${formatMessageText(item.text)}</div></div>
+              ${
+                item.relatedQuestions && item.relatedQuestions.length > 0
+                  ? `
+                <div class="assistantActions" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 10px;">
+                  <div style="font-size: 11px; font-weight: 700; color: var(--pmt-dim); padding-left: 2px;">Related questions</div>
+                  <div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                    ${item.relatedQuestions
+                      .map(
+                        (rq) => `
+                      <button class="microPill" onclick="window.pmtWidgetActions.ask('${escapeHtml(rq)}')">${escapeHtml(rq)}</button>
+                    `,
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>`,
+          )
+          .join("")}
+        ${isTyping ? `<div class="message assistant"><div class="avatar">${createSparkBotSvg(22)}</div><div class="bubbleWrap"><div class="bubble">Thinking...</div></div></div>` : ""}
+      </div>`;
+          elScreen.scrollTop = elScreen.scrollHeight;
+        }
+
+        async function ask(q, sourceCategoryKey = null) {
+          if (!q || !q.trim()) return;
+
+          const userQuery = q.trim();
+          askedQuestionsSet.add(normalizeQ(userQuery));
+
+          if (sourceCategoryKey) {
+            answerReturnCategoryKey = sourceCategoryKey;
+            activeCategoryKey = sourceCategoryKey;
+          } else {
+            answerReturnCategoryKey = null;
+          }
+
+          thread.push({ role: "user", text: userQuery });
+          isTyping = true;
+          renderThread();
+
+          const webhookUrl = `https://n8n.srv917960.hstgr.cloud/webhook/spark-chatbot?chatInput=${encodeURIComponent(userQuery)}&question=${encodeURIComponent(userQuery)}&sessionId=${encodeURIComponent(sessionId)}`;
+
+          try {
+            const response = await fetch(webhookUrl, {
+              method: "GET",
+              headers: {
+                "Accept": "application/json"
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            let replyText = "";
+            let llmRelatedQuestions = [];
+
+            let targetObj = data;
+            if (Array.isArray(data) && data.length > 0) {
+              targetObj = data[0];
+            }
+
+            if (typeof targetObj === "string") {
+              try {
+                const parsed = JSON.parse(targetObj);
+                targetObj = parsed;
+              } catch (e) {}
+            }
+
+            if (typeof targetObj === "object" && targetObj !== null) {
+              replyText = targetObj.text || targetObj.output || targetObj.message || targetObj.response || targetObj.answer || "";
+              if (Array.isArray(targetObj.relatedQuestions)) {
+                llmRelatedQuestions = targetObj.relatedQuestions;
+              } else if (Array.isArray(targetObj.related_questions)) {
+                llmRelatedQuestions = targetObj.related_questions;
+              } else if (Array.isArray(targetObj.related)) {
+                llmRelatedQuestions = targetObj.related;
+              }
+            } else if (typeof targetObj === "string") {
+              replyText = targetObj;
+            }
+
+            // Check if replyText is an embedded JSON string containing relatedQuestions
+            if (!llmRelatedQuestions.length && typeof replyText === "string") {
+              const jsonMatch = replyText.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || replyText.match(/(\{[\s\S]*"relatedQuestions"[\s\S]*\})/i);
+              if (jsonMatch) {
+                try {
+                  const parsed = JSON.parse(jsonMatch[1]);
+                  if (parsed.answer || parsed.text || parsed.output) {
+                    replyText = parsed.answer || parsed.text || parsed.output;
+                  }
+                  if (Array.isArray(parsed.relatedQuestions)) {
+                    llmRelatedQuestions = parsed.relatedQuestions;
+                  }
+                } catch (e) {}
+              }
+            }
+
+            if (!replyText) {
+              replyText = typeof data === "string" ? data : "Sorry, I couldn't retrieve an answer at this time.";
+            }
+
+            const relatedQs = getRelatedQuestions(userQuery, llmRelatedQuestions);
+            thread.push({ role: "assistant", text: replyText, relatedQuestions: relatedQs });
+          } catch (error) {
+            console.error("Spark Webhook Fetch Error:", error);
+            const fallbackAnswer = KB_ANSWERS[userQuery] || KB_ANSWERS[Object.keys(KB_ANSWERS).find(k => k.toLowerCase() === userQuery.toLowerCase())] || "Sorry, I couldn't connect to Spark right now. Please try again or contact support directly at info@paintechnology.com";
+            const relatedQs = getRelatedQuestions(userQuery, []);
+            thread.push({ role: "assistant", text: fallbackAnswer, relatedQuestions: relatedQs });
+          } finally {
+            isTyping = false;
+            renderThread();
+          }
+        }
+
+        function submitHomePrompt() {
+          const elHome = document.getElementById("homePrompt");
+          const val = elHome ? elHome.value : elFreeText.value;
+          if (val && val.trim()) {
+            if (elHome) elHome.value = "";
+            if (elFreeText) elFreeText.value = "";
+            ask(val);
+          }
+        }
+
+        function attachHomePromptEvents() {
+          const el = document.getElementById("homePrompt");
+          if (!el) return;
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              submitHomePrompt();
+            }
+          });
+        }
+
+        function openWidget() {
+          isMinimized = false;
+          elShell.classList.remove("minimized");
+          const savedFS = localStorage.getItem("spark_widget_fullscreen");
+          isFullscreen = savedFS !== null ? savedFS === "true" : true;
+          elShell.classList.add("open");
+          elShell.classList.toggle("fullscreen", isFullscreen);
+          renderHome();
+        }
+        function closeWidget() {
+          elShell.classList.remove("open");
+        }
+
+        elLauncher.addEventListener("click", () => {
+          if (elShell.classList.contains("open")) closeWidget();
+          else openWidget();
+        });
+
+        btnClose.addEventListener("click", closeWidget);
+        btnResize.addEventListener("click", () => {
+          isFullscreen = !isFullscreen;
+          elShell.classList.toggle("fullscreen", isFullscreen);
+          localStorage.setItem("spark_widget_fullscreen", String(isFullscreen));
+        });
+        btnMinimize.addEventListener("click", () => {
+          isMinimized = !isMinimized;
+          elShell.classList.toggle("minimized", isMinimized);
+        });
+        btnClear.addEventListener("click", () => {
+          thread = [];
+          askedQuestionsSet.clear();
+          sessionId = "spark_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now();
+          sessionStorage.setItem("spark_session_id", sessionId);
+          renderHome();
+        });
+
+        // Theme toggle with SVG icons and localStorage persistence
+        const SVG_SUN = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const SVG_MOON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        const savedTheme = localStorage.getItem("spark_widget_theme");
+        if (savedTheme === "dark") {
+          document.body.classList.add("pmt-theme-dark");
+          document.body.classList.remove("pmt-theme-light");
+        } else if (savedTheme === "light") {
+          document.body.classList.add("pmt-theme-light");
+          document.body.classList.remove("pmt-theme-dark");
+        }
+
+        function updateThemeIcon() {
+          const isDark = document.body.classList.contains("pmt-theme-dark");
+          if (btnTheme) btnTheme.innerHTML = isDark ? SVG_SUN : SVG_MOON;
+        }
+
+        function toggleTheme() {
+          document.body.classList.toggle("pmt-theme-dark");
+          document.body.classList.toggle("pmt-theme-light");
+          const isDark = document.body.classList.contains("pmt-theme-dark");
+          localStorage.setItem("spark_widget_theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+        }
+
+        if (btnTheme) {
+          updateThemeIcon();
+          btnTheme.addEventListener("click", toggleTheme);
+        }
+
+        btnSend.addEventListener("click", submitHomePrompt);
+        elFreeText.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            submitHomePrompt();
+          }
+        });
+
+        window.pmtWidgetActions = {
+          ask,
+          renderHome,
+          renderCategory,
+          submitHomePrompt,
+          openContact: () => openContactForm(),
+          openWarranty: () => window.open(WARRANTY_URL, "_blank"),
+          toggleTheme,
+        };
+
+        // ── Contact Form Logic ──
+        const contactOverlay = document.getElementById('pmtContactOverlay');
+        const contactForm = document.getElementById('pmtContactForm');
+        const contactCloseBtn = document.getElementById('pmtContactClose');
+
+        function openContactForm() {
+          contactOverlay.classList.add('open');
+          resetContactForm();
+          setTimeout(() => {
+            const first = document.getElementById('pmtFirstName');
+            if (first) first.focus();
+          }, 100);
+        }
+
+        function closeContactForm() {
+          contactOverlay.classList.remove('open');
+        }
+
+        function resetContactForm() {
+          contactForm.reset();
+          contactForm.querySelectorAll('.pmt-invalid').forEach(el => el.classList.remove('pmt-invalid'));
+          contactForm.querySelectorAll('.pmt-form-error').forEach(el => el.textContent = '');
+          // Restore form fields if showing success state
+          const successEl = contactForm.querySelector('.pmt-contact-success');
+          if (successEl) {
+            contactForm.innerHTML = contactFormOriginalHTML;
+          }
+          const submitBtn = document.getElementById('pmtContactSubmit');
+          if (submitBtn) submitBtn.disabled = false;
+        }
+
+        const contactFormOriginalHTML = contactForm.innerHTML;
+
+        contactCloseBtn.addEventListener('click', closeContactForm);
+        contactOverlay.addEventListener('click', (e) => {
+          if (e.target === contactOverlay) closeContactForm();
+        });
+
+        function validateContactForm() {
+          let isValid = true;
+          const fields = [
+            {
+              id: 'pmtFirstName',
+              errId: 'errFirstName',
+              validate: (v) => {
+                if (!v.trim()) return 'First name is required';
+                if (v.trim().length < 2) return 'Must be at least 2 characters';
+                if (!/^[a-zA-Z\s\-']+$/.test(v.trim())) return 'Only letters, spaces, hyphens allowed';
+                return '';
+              }
+            },
+            {
+              id: 'pmtLastName',
+              errId: 'errLastName',
+              validate: (v) => {
+                if (!v.trim()) return 'Last name is required';
+                if (v.trim().length < 2) return 'Must be at least 2 characters';
+                if (!/^[a-zA-Z\s\-']+$/.test(v.trim())) return 'Only letters, spaces, hyphens allowed';
+                return '';
+              }
+            },
+            {
+              id: 'pmtEmail',
+              errId: 'errEmail',
+              validate: (v) => {
+                if (!v.trim()) return 'Email is required';
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())) return 'Enter a valid email address';
+                return '';
+              }
+            },
+            {
+              id: 'pmtPhone',
+              errId: 'errPhone',
+              validate: (v) => {
+                if (!v.trim()) return 'Phone number is required';
+                const digits = v.replace(/[^\d]/g, '');
+                if (digits.length < 7 || digits.length > 15) return 'Enter a valid phone number (7-15 digits)';
+                return '';
+              }
+            },
+            {
+              id: 'pmtMessage',
+              errId: 'errMessage',
+              validate: (v) => {
+                if (!v.trim()) return 'Message is required';
+                if (v.trim().length < 10) return 'Message must be at least 10 characters';
+                return '';
+              }
+            }
+          ];
+
+          for (const field of fields) {
+            const input = document.getElementById(field.id);
+            const errEl = document.getElementById(field.errId);
+            const error = field.validate(input.value);
+            if (error) {
+              isValid = false;
+              input.classList.add('pmt-invalid');
+              if (errEl) errEl.textContent = error;
+            } else {
+              input.classList.remove('pmt-invalid');
+              if (errEl) errEl.textContent = '';
+            }
+          }
+
+          return isValid;
+        }
+
+        // Clear validation on input
+        ['pmtFirstName', 'pmtLastName', 'pmtEmail', 'pmtPhone', 'pmtMessage'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener('input', () => {
+              el.classList.remove('pmt-invalid');
+              const errEl = el.parentElement.querySelector('.pmt-form-error');
+              if (errEl) errEl.textContent = '';
+            });
+          }
+        });
+
+        contactForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (!validateContactForm()) return;
+
+          const formData = {
+            firstName: document.getElementById('pmtFirstName').value.trim(),
+            lastName: document.getElementById('pmtLastName').value.trim(),
+            email: document.getElementById('pmtEmail').value.trim(),
+            phone: document.getElementById('pmtPhone').value.trim(),
+            message: document.getElementById('pmtMessage').value.trim(),
+            sessionId: sessionId
+          };
+
+          const submitBtn = document.getElementById('pmtContactSubmit');
+          if (submitBtn) submitBtn.disabled = true;
+
+          try {
+            await fetch('https://n8n.srv917960.hstgr.cloud/webhook/support-ticket-spark', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            });
+          } catch (err) {
+            console.error('Contact form webhook error:', err);
+          }
+
+          // Show success state
+          const card = contactOverlay.querySelector('.pmt-contact-card');
+          const header = card.querySelector('.pmt-contact-header');
+          contactForm.innerHTML = `
+            <div class="pmt-contact-success">
+              <div class="pmt-success-icon">✓</div>
+              <h3>Message Sent!</h3>
+              <p>Thank you, ${escapeHtml(formData.firstName)}. Our team will get back to you shortly.</p>
+            </div>
+          `;
+
+          setTimeout(() => closeContactForm(), 3000);
+        });
+
+        renderHome();
+      });
+    </script>
+  </body>
+</html>

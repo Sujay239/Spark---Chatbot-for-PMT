@@ -1056,7 +1056,9 @@
             </svg>
             <span class="support-btn-text">Talk to a Human</span>
           </button>
-          <button class="btn-icon" id="btnTheme" title="Toggle theme">☀</button>
+          <button class="btn-icon" id="btnTheme" title="Toggle theme">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </button>
           <button class="btn-icon" id="btnClose" title="Close">✕</button>
         </div>
       </div>
@@ -1187,7 +1189,8 @@
 
         let thread = [];
         let isTyping = false;
-        let isFullscreen = false;
+        const storedFullscreen = localStorage.getItem("spark_widget_fullscreen");
+        let isFullscreen = storedFullscreen !== null ? storedFullscreen === "true" : true;
         let isMinimized = false;
 
         // Session-level asked questions tracking
@@ -1203,6 +1206,7 @@
         const btnResize = document.getElementById("btnResize");
         const btnMinimize = document.getElementById("btnMinimize");
         const btnClear = document.getElementById("btnClear");
+        const btnTheme = document.getElementById("btnTheme");
         const btnClose = document.getElementById("btnClose");
         const elFreeText = document.getElementById("chatInput");
         const btnSend = document.getElementById("btnSend");
@@ -1457,7 +1461,7 @@
           </div>`,
           )
           .join("")}
-        ${isTyping ? `<div class="message assistant"><div class="avatar">${createSparkBotSvg(22)}</div><div class="bubbleWrap"><div class="bubble">Typing...</div></div></div>` : ""}
+        ${isTyping ? `<div class="message assistant"><div class="avatar">${createSparkBotSvg(22)}</div><div class="bubbleWrap"><div class="bubble">Thinking...</div></div></div>` : ""}
       </div>`;
           elScreen.scrollTop = elScreen.scrollHeight;
         }
@@ -1576,9 +1580,11 @@
 
         function openWidget() {
           isMinimized = false;
-          isFullscreen = true;
           elShell.classList.remove("minimized");
-          elShell.classList.add("open", "fullscreen");
+          const savedFS = localStorage.getItem("spark_widget_fullscreen");
+          isFullscreen = savedFS !== null ? savedFS === "true" : true;
+          elShell.classList.add("open");
+          elShell.classList.toggle("fullscreen", isFullscreen);
           renderHome();
         }
         function closeWidget() {
@@ -1594,6 +1600,7 @@
         btnResize.addEventListener("click", () => {
           isFullscreen = !isFullscreen;
           elShell.classList.toggle("fullscreen", isFullscreen);
+          localStorage.setItem("spark_widget_fullscreen", String(isFullscreen));
         });
         btnMinimize.addEventListener("click", () => {
           isMinimized = !isMinimized;
@@ -1606,6 +1613,35 @@
           sessionStorage.setItem("spark_session_id", sessionId);
           renderHome();
         });
+        const SVG_SUN = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+        const SVG_MOON = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+        const savedTheme = localStorage.getItem("spark_widget_theme");
+        if (savedTheme === "dark") {
+          document.body.classList.add("pmt-theme-dark");
+          document.body.classList.remove("pmt-theme-light");
+        } else if (savedTheme === "light") {
+          document.body.classList.add("pmt-theme-light");
+          document.body.classList.remove("pmt-theme-dark");
+        }
+
+        function updateThemeIcon() {
+          const isDark = document.body.classList.contains("pmt-theme-dark");
+          if (btnTheme) btnTheme.innerHTML = isDark ? SVG_SUN : SVG_MOON;
+        }
+
+        function toggleTheme() {
+          document.body.classList.toggle("pmt-theme-dark");
+          document.body.classList.toggle("pmt-theme-light");
+          const isDark = document.body.classList.contains("pmt-theme-dark");
+          localStorage.setItem("spark_widget_theme", isDark ? "dark" : "light");
+          updateThemeIcon();
+        }
+
+        if (btnTheme) {
+          updateThemeIcon();
+          btnTheme.addEventListener("click", toggleTheme);
+        }
         btnSend.addEventListener("click", submitHomePrompt);
         elFreeText.addEventListener("keydown", (e) => {
           if (e.key === "Enter" && !e.shiftKey) {
@@ -1621,6 +1657,7 @@
           submitHomePrompt,
           openContact: () => window.open(`mailto:${CONTACT_EMAIL}`),
           openWarranty: () => window.open(WARRANTY_URL, "_blank"),
+          toggleTheme,
         };
 
         renderHome();
