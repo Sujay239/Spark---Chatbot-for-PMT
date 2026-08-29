@@ -1329,7 +1329,8 @@ if (match && bestScore < 0.85) {
 
   const mentionedProduct = products.find((p) => normQ.includes(p));
 
-  if (mentionedProduct) {
+  const genericTerms = new Set(["tens", "electrodes", "lead wires", "battery", "pmt"]);
+  if (mentionedProduct && !genericTerms.has(mentionedProduct)) {
     const isInfoSeeking =
       /(tell me|what is|information|something about|details|explain|more about|more info|what are|how to use|how does it work)/.test(
         normQ,
@@ -1461,11 +1462,12 @@ if (!match || bestScore < 0.7) {
     // 11a. Expected sensation / should not hurt
     {
       patterns: [
-        /(supposed|meant|should).*(hurt|painful|pain)/i,
+        /\b(supposed|meant|should)\b.*?\b(hurt|painful)\b/i,
         /(is|are).*(tens|unit|device|stimulation).*(supposed to|meant to).*(hurt|painful)/i,
       ],
       target: "What does a TENS unit feel like?",
     },
+
     // 12. Pad Contact Interruption Alarm (U5 beeps)
     {
       patterns: [
@@ -1612,7 +1614,6 @@ if (!match || bestScore < 0.7) {
     {
       patterns: [
         /(how much gap|gap.*between|spacing between|how far apart|right spacing).*(pads|electrodes)/i,
-        /how far apart/i,
         /(pad|pads|electrode|electrodes)\s*spacing/i,
       ],
       target: "How far apart should the pads be?",
@@ -1635,8 +1636,8 @@ if (!match || bestScore < 0.7) {
     // 31. Diabetes / Diabetic
     {
       patterns: [
-        /(type 2 diabetic|type 1 diabetic|diabetes|diabetic|with diabetes)/i,
         /tens.*if i have diabetes/i,
+        /(can i|safe|ok).*(use|wear).*(tens|device|unit).*(diabet)/i,
       ],
       target: "Can I use a TENS unit if I have diabetes?",
     },
@@ -1682,11 +1683,11 @@ if (!match || bestScore < 0.7) {
       ],
       target: "What frequency works best for acute pain?",
     },
-    // 37. Chronic pain frequency / SMS slang
+    // 37. Chronic pain frequency
     {
       patterns: [
-        /(wat freqency|chronik pane|chronic pain)/i,
-        /what frequency is best for chronic/i,
+        /what frequency.*(best|recommended|ideal).*(chronic)/i,
+        /(chronic pain).*(frequency|hz|setting)/i,
       ],
       target: "What frequency is best for chronic pain?",
     },
@@ -1707,8 +1708,9 @@ if (!match || bestScore < 0.7) {
     // 39. Lumbar / Lower back placement
     {
       patterns: [
-        /(lumbar|lower back).*(pad positions?|placement|where|stick|put)/i,
-        /pads for lower back/i,
+        /(where|how|place|placement|put|stick|position|apply|attach).*(pad|pads|electrode|electrodes).*(lower back|back pain|lumbar)/i,
+        /(lower back|back pain|lumbar).*(pad|pads|electrode|electrodes).*(where|place|placement|put|stick|position)/i,
+        /(pad|pads|electrode|electrodes).*(placement|position).*(lower back|lumbar)/i,
       ],
       target: "Where should I place the pads for lower back pain?",
     },
@@ -1987,8 +1989,8 @@ const prohibitedKeywords = [
   "what can you do",
   "explain yourself",
   "monitor patients",
-  "do you have",
-  "do you sell",
+  // "do you have",
+  // "do you sell",
 ];
 const isProhibited = prohibitedKeywords.some((keyword) =>
   incomingQuestion.toLowerCase().includes(keyword),

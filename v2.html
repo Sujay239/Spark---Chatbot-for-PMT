@@ -7,6 +7,7 @@
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
     <title>Spark — Smart Pain Assistance and Recovery Knowledge | PMT</title>
+    <link rel="shortcut icon" href="https://res.cloudinary.com/din7hkzcq/image/upload/v1786026169/Untitled_design_74_jyvfu3.png" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -1818,7 +1819,7 @@
           <div class="cardRow">
             ${CATEGORIES.map(
               (c) => `
-              <div class="homeCard" onclick="window.pmtWidgetActions.renderCategory('${escapeHtml(c.key)}')">
+              <div class="homeCard" onclick="window.pmtWidgetActions.renderCategory(this.dataset.key)" data-key="${escapeHtml(c.key)}">
                 <div class="homeCardTitle">${escapeHtml(c.title)}</div>
                 <p class="homeCardSub">${escapeHtml(c.sub)}</p>
                 <div class="metaRow" style="margin-top:10px;">
@@ -1857,7 +1858,7 @@
           ${questions
             .map(
               (q) => `
-            <button class="pmt-q-row" onclick="window.pmtWidgetActions.ask('${escapeHtml(q)}', '${escapeHtml(key)}')">
+            <button class="pmt-q-row" onclick="window.pmtWidgetActions.ask(this.dataset.question, this.dataset.category)" data-question="${escapeHtml(q)}" data-category="${escapeHtml(key)}">
               <span class="pmt-q-text">${escapeHtml(q)}</span>
             </button>`,
             )
@@ -1874,7 +1875,7 @@
 
           const backTarget = answerReturnCategoryKey;
           const backButton = backTarget
-            ? `<button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderCategory('${escapeHtml(backTarget)}')">← Back to Questions</button>`
+            ? `<button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderCategory(this.dataset.key)" data-key="${escapeHtml(backTarget)}">← Back to Questions</button>`
             : `<button class="pmt-nav-btn" onclick="window.pmtWidgetActions.renderHome()">← Back</button>`;
 
           elScreen.innerHTML = `
@@ -1884,8 +1885,9 @@
           <button class="pmt-nav-btn pmt-nav-home" onclick="window.pmtWidgetActions.renderHome()">Home</button>
         </div>
         ${thread
-          .map((item) =>
-            item.role === "user"
+          .map((item, index) => {
+            const isLastMessage = index === thread.length - 1;
+            return item.role === "user"
               ? `
           <div class="message user">
             <div class="bubbleWrap">
@@ -1900,7 +1902,7 @@
               <div class="bubbleLabel">Spark</div>
               <div class="bubble"><div class="richAnswer">${formatMessageText(item.text)}</div></div>
               ${
-                item.relatedQuestions && item.relatedQuestions.length > 0
+                !isTyping && isLastMessage && item.relatedQuestions && item.relatedQuestions.length > 0
                   ? `
                 <div class="assistantActions" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 10px;">
                   <div style="font-size: 11px; font-weight: 700; color: var(--pmt-dim); padding-left: 2px;">Related questions</div>
@@ -1908,7 +1910,7 @@
                     ${item.relatedQuestions
                       .map(
                         (rq) => `
-                      <button class="microPill" onclick="window.pmtWidgetActions.ask('${escapeHtml(rq)}')">${escapeHtml(rq)}</button>
+                      <button class="microPill" onclick="window.pmtWidgetActions.ask(this.dataset.question)" data-question="${escapeHtml(rq)}">${escapeHtml(rq)}</button>
                     `,
                       )
                       .join("")}
@@ -1918,8 +1920,8 @@
                   : ""
               }
             </div>
-          </div>`,
-          )
+          </div>`;
+          })
           .join("")}
         ${isTyping ? `<div class="message assistant"><div class="avatar">${createSparkBotSvg(22)}</div><div class="bubbleWrap"><div class="bubble">Thinking...</div></div></div>` : ""}
       </div>`;

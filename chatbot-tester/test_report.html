@@ -1,652 +1,1328 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chatbot Test Report</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        slate: {
-                            850: '#151e2e',
-                            900: '#0f172a',
-                        }
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              slate: {
+                850: "#151e2e",
+                900: "#0f172a",
+              },
+            },
+          },
+        },
+      };
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(30, 41, 59, 0.5); 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(71, 85, 105, 0.8); 
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 116, 139, 1); 
-        }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
 
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(71, 85, 105, 0.8);
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(100, 116, 139, 1);
+      }
 
-        .glow-effect {
-            box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.15);
-        }
+      .glass-panel {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .glow-effect {
+        box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.15);
+      }
     </style>
-</head>
-<body class="antialiased min-h-screen bg-slate-900 selection:bg-indigo-500/30">
+  </head>
+  <body
+    class="antialiased min-h-screen bg-slate-900 selection:bg-indigo-500/30"
+  >
     <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px]"></div>
+      <div
+        class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px]"
+      ></div>
+      <div
+        class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px]"
+      ></div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <!-- Header Section -->
-        <header class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h1 class="text-3xl font-bold text-white tracking-tight">Chatbot Test Report</h1>
-                </div>
-                <p class="text-slate-400">Direct Question QA Evaluation Report</p>
+      <!-- Header Section -->
+      <header
+        class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6"
+      >
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <div
+              class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20"
+            >
+              <svg
+                class="w-5 h-5 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
             </div>
-            
-            <div class="flex gap-4 items-center">
-                <p class="text-sm text-slate-400">Generated on 8/21/2026, 12:35:22 PM</p>
-            </div>
-        </header>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-            <div class="glass-panel rounded-2xl p-6 glow-effect">
-                <p class="text-sm font-medium text-slate-400 mb-1">Total Questions</p>
-                <p class="text-3xl font-bold text-white">16</p>
-            </div>
-            <div class="glass-panel rounded-2xl p-6 glow-effect border-l-2 border-l-emerald-500/50 cursor-pointer" onclick="filterStatus('passed')">
-                <p class="text-sm font-medium text-emerald-400 mb-1">Successful Calls</p>
-                <div class="flex items-baseline gap-2">
-                    <p class="text-3xl font-bold text-white">16</p>
-                    <p class="text-sm font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">100.0%</p>
-                </div>
-            </div>
-            <div class="glass-panel rounded-2xl p-6 glow-effect border-l-2 border-l-rose-500/50 cursor-pointer" onclick="filterStatus('failed')">
-                <p class="text-sm font-medium text-rose-400 mb-1">Failed Calls</p>
-                <div class="flex items-baseline gap-2">
-                    <p class="text-3xl font-bold text-white">0</p>
-                    <p class="text-sm font-medium text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-full">0.0%</p>
-                </div>
-            </div>
-            <div class="glass-panel rounded-2xl p-6 glow-effect border-l-2 border-l-blue-500/50">
-                <p class="text-sm font-medium text-blue-400 mb-1">Avg Response Time</p>
-                <div class="flex items-baseline gap-2">
-                    <p class="text-3xl font-bold text-white">1040</p>
-                    <p class="text-sm font-medium text-slate-400">ms</p>
-                </div>
-            </div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">
+              Chatbot Test Report
+            </h1>
+          </div>
+          <p class="text-slate-400">Direct Question QA Evaluation Report</p>
         </div>
 
-        <!-- Toolbar Section (Filters & Search) -->
-        <div class="glass-panel rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-700/50">
-            <!-- Filter Pills -->
-            <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-                <button id="filter-btn-all" onclick="filterStatus('all')" class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-md shadow-indigo-500/10 transition-all duration-200">
-                    All (16)
-                </button>
-                <button id="filter-btn-passed" onclick="filterStatus('passed')" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-slate-700/50 transition-all duration-200">
-                    Passed (16)
-                </button>
-                <button id="filter-btn-failed" onclick="filterStatus('failed')" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 border border-slate-700/50 transition-all duration-200">
-                    Failed (0)
-                </button>
-            </div>
+        <div class="flex gap-4 items-center">
+          <p class="text-sm text-slate-400">
+            Generated on 8/21/2026, 12:35:22 PM
+          </p>
+        </div>
+      </header>
 
-            <!-- Search Input -->
-            <div class="relative w-full md:w-80">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Search questions or responses..." class="block w-full pl-9 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all">
-            </div>
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div class="glass-panel rounded-2xl p-6 glow-effect">
+          <p class="text-sm font-medium text-slate-400 mb-1">Total Questions</p>
+          <p class="text-3xl font-bold text-white">16</p>
+        </div>
+        <div
+          class="glass-panel rounded-2xl p-6 glow-effect border-l-2 border-l-emerald-500/50 cursor-pointer"
+          onclick="filterStatus('passed')"
+        >
+          <p class="text-sm font-medium text-emerald-400 mb-1">
+            Successful Calls
+          </p>
+          <div class="flex items-baseline gap-2">
+            <p class="text-3xl font-bold text-white">16</p>
+            <p
+              class="text-sm font-medium text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full"
+            >
+              100.0%
+            </p>
+          </div>
+        </div>
+        <div
+          class="glass-panel rounded-2xl p-6 glow-effect border-l-2 border-l-rose-500/50 cursor-pointer"
+          onclick="filterStatus('failed')"
+        >
+          <p class="text-sm font-medium text-rose-400 mb-1">Failed Calls</p>
+          <div class="flex items-baseline gap-2">
+            <p class="text-3xl font-bold text-white">0</p>
+            <p
+              class="text-sm font-medium text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-full"
+            >
+              0.0%
+            </p>
+          </div>
+        </div>
+        <div
+          class="glass-panel rounded-2xl p-6 glow-effect border-l-2 border-l-blue-500/50"
+        >
+          <p class="text-sm font-medium text-blue-400 mb-1">
+            Avg Response Time
+          </p>
+          <div class="flex items-baseline gap-2">
+            <p class="text-3xl font-bold text-white">1040</p>
+            <p class="text-sm font-medium text-slate-400">ms</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar Section (Filters & Search) -->
+      <div
+        class="glass-panel rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-700/50"
+      >
+        <!-- Filter Pills -->
+        <div
+          class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0"
+        >
+          <button
+            id="filter-btn-all"
+            onclick="filterStatus('all')"
+            class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-md shadow-indigo-500/10 transition-all duration-200"
+          >
+            All (16)
+          </button>
+          <button
+            id="filter-btn-passed"
+            onclick="filterStatus('passed')"
+            class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-slate-700/50 transition-all duration-200"
+          >
+            Passed (16)
+          </button>
+          <button
+            id="filter-btn-failed"
+            onclick="filterStatus('failed')"
+            class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 border border-slate-700/50 transition-all duration-200"
+          >
+            Failed (0)
+          </button>
         </div>
 
-        <!-- Showing Count Indicator -->
-        <div class="flex justify-between items-center px-2 mb-3 text-xs text-slate-400 font-medium">
-            <p>Showing <span id="visibleCount" class="text-slate-200 font-bold">16</span> of 16 results</p>
+        <!-- Search Input -->
+        <div class="relative w-full md:w-80">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <svg
+              class="h-4 w-4 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="searchInput"
+            oninput="applyFilters()"
+            placeholder="Search questions or responses..."
+            class="block w-full pl-9 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+          />
         </div>
+      </div>
 
-        <!-- Data Table -->
-        <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50">
-            <div class="overflow-x-auto">
-                <table id="resultsTable" class="min-w-full divide-y divide-slate-700/50">
-                    <thead class="bg-slate-800/80">
-                        <tr>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">ID</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Question & Response</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Latency</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-700/50 bg-transparent">
-                        
-        <tr data-status="passed" data-search="1 electrode spacing on the Ultima 5? Per the Quick Start Guide, place the pads from each channel so they&#039;re straddling the area of pain, making sure the pads from each channel aren&#039;t touching one another and aren&#039;t more than 6 inches apart. This spacing helps the stimulation flow properly between the pads on each channel.
+      <!-- Showing Count Indicator -->
+      <div
+        class="flex justify-between items-center px-2 mb-3 text-xs text-slate-400 font-medium"
+      >
+        <p>
+          Showing
+          <span id="visibleCount" class="text-slate-200 font-bold">16</span> of
+          16 results
+        </p>
+      </div>
 
-Useful Resources &amp; Links:
-📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)
-🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)
-📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#1</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">electrode spacing on the Ultima 5?</p>
-                    </div>
-                    <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (1833ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Per the Quick Start Guide, place the pads from each channel so they&#039;re straddling the area of pain, making sure the pads from each channel aren&#039;t touching one another and aren&#039;t more than 6 inches apart. This spacing helps the stimulation flow properly between the pads on each channel.
-
-Useful Resources &amp; Links:
-📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)
-🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)
-📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">1833 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="2 What&#039;s a reasonable usage schedule? The frequency of TENS use depends on your pain level, condition, and personal response. Many users use a TENS unit once or multiple times per day for short sessions, typically lasting 20-30 minutes. For best results, use your TENS unit as needed and follow the recommended settings and guidelines provided with your device. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#2</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">What&#039;s a reasonable usage schedule?</p>
-                    </div>
-                    <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (1325ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">The frequency of TENS use depends on your pain level, condition, and personal response. Many users use a TENS unit once or multiple times per day for short sessions, typically lasting 20-30 minutes. For best results, use your TENS unit as needed and follow the recommended settings and guidelines provided with your device.</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">1325 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="3 can I leave it on overnight while I sleep? It is generally not recommended to use a TENS unit while sleeping unless specifically instructed by a healthcare professional. While TENS is considered safe for many people, you may not notice skin irritation, discomfort, or changes in sensation while sleeping. For best results, use your TENS unit while you are awake and able to monitor the stimulation level and skin condition. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#3</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">can I leave it on overnight while I sleep?</p>
-                    </div>
-                    <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (879ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">It is generally not recommended to use a TENS unit while sleeping unless specifically instructed by a healthcare professional. While TENS is considered safe for many people, you may not notice skin irritation, discomfort, or changes in sensation while sleeping. For best results, use your TENS unit while you are awake and able to monitor the stimulation level and skin condition.</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">879 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="4 Should the electrodes sit on top of the painful area? Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.
-
-Useful Resources &amp; Links:
-🛠️ [Electrotherapy Device Troubleshooting Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#4</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">Should the electrodes sit on top of the painful area?</p>
-                    </div>
-                    <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (825ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.
-
-Useful Resources &amp; Links:
-🛠️ [Electrotherapy Device Troubleshooting Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx)</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">825 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="5 can I just keep it on the whole workday? It is generally not recommended to wear a TENS unit continuously all day without breaks. While TENS can often be used multiple times throughout the day, extended use may increase the risk of skin irritation, reduced effectiveness, or discomfort. For best results: Use TENS in scheduled sessions as needed. Give your skin breaks between treatments. Move electrode placement if using the same area frequently. Follow your device&#039;s recommended usage guidelines. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#5</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">can I just keep it on the whole workday?</p>
-                    </div>
-                    <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (1046ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">It is generally not recommended to wear a TENS unit continuously all day without breaks. While TENS can often be used multiple times throughout the day, extended use may increase the risk of skin irritation, reduced effectiveness, or discomfort. For best results: Use TENS in scheduled sessions as needed. Give your skin breaks between treatments. Move electrode placement if using the same area frequently. Follow your device&#039;s recommended usage guidelines.</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">1046 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="6 What settings should I use for my very first Ultima 5 session? Your Quick Start Guide recommends a simple starting point: set the frequency to 150Hz, the pulse width to 250us, and the mode to Constant. Turn the intensity up to a level that feels strong but comfortable, and use the unit for 30-45 minutes, or as long as needed. For your wave form, start with the Asymmetrical Bi-Phasic Rectangular setting, it&#039;s the recommended starting point for initial treatment. From there, feel free to adjust based on comfort and results.
+      <!-- Data Table -->
+      <div
+        class="glass-panel rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50"
+      >
+        <div class="overflow-x-auto">
+          <table
+            id="resultsTable"
+            class="min-w-full divide-y divide-slate-700/50"
+          >
+            <thead class="bg-slate-800/80">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                >
+                  ID
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                >
+                  Question & Response
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                >
+                  Latency
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700/50 bg-transparent">
+              <tr
+                data-status="passed"
+                data-search="1 electrode spacing on the Ultima 5? Per the Quick Start Guide, place the pads from each channel so they&#039;re straddling the area of pain, making sure the pads from each channel aren&#039;t touching one another and aren&#039;t more than 6 inches apart. This spacing helps the stimulation flow properly between the pads on each channel.
 
 Useful Resources &amp; Links:
 📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)
 🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)
-📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#6</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #1
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">What settings should I use for my very first Ultima 5 session?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        electrode spacing on the Ultima 5?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (1181ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Your Quick Start Guide recommends a simple starting point: set the frequency to 150Hz, the pulse width to 250us, and the mode to Constant. Turn the intensity up to a level that feels strong but comfortable, and use the unit for 30-45 minutes, or as long as needed. For your wave form, start with the Asymmetrical Bi-Phasic Rectangular setting, it&#039;s the recommended starting point for initial treatment. From there, feel free to adjust based on comfort and results.
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (1833ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Per the Quick Start Guide, place the pads from each
+                        channel so they&#039;re straddling the area of pain,
+                        making sure the pads from each channel aren&#039;t
+                        touching one another and aren&#039;t more than 6 inches
+                        apart. This spacing helps the stimulation flow properly
+                        between the pads on each channel. Useful Resources &amp;
+                        Links: 📘 [Ultima 5 User
+                        Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)
+                        🎥 [Ultima 5 Video
+                        Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU) 📄
+                        [Tips on using Ultima 5
+                        TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  1833 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="2 What&#039;s a reasonable usage schedule? The frequency of TENS use depends on your pain level, condition, and personal response. Many users use a TENS unit once or multiple times per day for short sessions, typically lasting 20-30 minutes. For best results, use your TENS unit as needed and follow the recommended settings and guidelines provided with your device. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #2
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
+                    <div>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        What&#039;s a reasonable usage schedule?
+                      </p>
+                    </div>
+                    <div class="pl-3 border-l-2 border-indigo-500/40">
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (1325ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        The frequency of TENS use depends on your pain level,
+                        condition, and personal response. Many users use a TENS
+                        unit once or multiple times per day for short sessions,
+                        typically lasting 20-30 minutes. For best results, use
+                        your TENS unit as needed and follow the recommended
+                        settings and guidelines provided with your device.
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  1325 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="3 can I leave it on overnight while I sleep? It is generally not recommended to use a TENS unit while sleeping unless specifically instructed by a healthcare professional. While TENS is considered safe for many people, you may not notice skin irritation, discomfort, or changes in sensation while sleeping. For best results, use your TENS unit while you are awake and able to monitor the stimulation level and skin condition. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #3
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
+                    <div>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        can I leave it on overnight while I sleep?
+                      </p>
+                    </div>
+                    <div class="pl-3 border-l-2 border-indigo-500/40">
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (879ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        It is generally not recommended to use a TENS unit while
+                        sleeping unless specifically instructed by a healthcare
+                        professional. While TENS is considered safe for many
+                        people, you may not notice skin irritation, discomfort,
+                        or changes in sensation while sleeping. For best
+                        results, use your TENS unit while you are awake and able
+                        to monitor the stimulation level and skin condition.
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  879 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="4 Should the electrodes sit on top of the painful area? Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.
+
+Useful Resources &amp; Links:
+🛠️ [Electrotherapy Device Troubleshooting Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #4
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
+                    <div>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        Should the electrodes sit on top of the painful area?
+                      </p>
+                    </div>
+                    <div class="pl-3 border-l-2 border-indigo-500/40">
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (825ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Most users describe the sensation as: a gentle tingling,
+                        a light buzzing, mild tapping or pulsing, or a
+                        comfortable vibration. The intensity should be strong,
+                        but comfortable. A TENS unit should never be painful. If
+                        you experience sharp, burning, or uncomfortable
+                        sensations, reduce the intensity or check that the
+                        electrode pads are properly positioned and making good
+                        contact with your skin. Useful Resources &amp; Links: 🛠️
+                        [Electrotherapy Device Troubleshooting
+                        Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx)
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  825 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="5 can I just keep it on the whole workday? It is generally not recommended to wear a TENS unit continuously all day without breaks. While TENS can often be used multiple times throughout the day, extended use may increase the risk of skin irritation, reduced effectiveness, or discomfort. For best results: Use TENS in scheduled sessions as needed. Give your skin breaks between treatments. Move electrode placement if using the same area frequently. Follow your device&#039;s recommended usage guidelines. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #5
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
+                    <div>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        can I just keep it on the whole workday?
+                      </p>
+                    </div>
+                    <div class="pl-3 border-l-2 border-indigo-500/40">
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (1046ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        It is generally not recommended to wear a TENS unit
+                        continuously all day without breaks. While TENS can
+                        often be used multiple times throughout the day,
+                        extended use may increase the risk of skin irritation,
+                        reduced effectiveness, or discomfort. For best results:
+                        Use TENS in scheduled sessions as needed. Give your skin
+                        breaks between treatments. Move electrode placement if
+                        using the same area frequently. Follow your
+                        device&#039;s recommended usage guidelines.
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  1046 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="6 What settings should I use for my very first Ultima 5 session? Your Quick Start Guide recommends a simple starting point: set the frequency to 150Hz, the pulse width to 250us, and the mode to Constant. Turn the intensity up to a level that feels strong but comfortable, and use the unit for 30-45 minutes, or as long as needed. For your wave form, start with the Asymmetrical Bi-Phasic Rectangular setting, it&#039;s the recommended starting point for initial treatment. From there, feel free to adjust based on comfort and results.
 
 Useful Resources &amp; Links:
 📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)
 🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)
-📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">1181 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="7 safety context carried across turns — I have a pacemaker. ⟶ Where should I put the pads for my lower back pain? If you have a pacemaker or implanted electronic device, you should consult your healthcare provider before using a TENS unit. Electrical stimulation may potentially interfere with some implanted devices. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#7</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #6
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">safety context carried across turns — I have a pacemaker. ⟶ Where should I put the pads for my lower back pain?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        What settings should I use for my very first Ultima 5
+                        session?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (1455ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">If you have a pacemaker or implanted electronic device, you should consult your healthcare provider before using a TENS unit. Electrical stimulation may potentially interfere with some implanted devices.</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (1181ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Your Quick Start Guide recommends a simple starting
+                        point: set the frequency to 150Hz, the pulse width to
+                        250us, and the mode to Constant. Turn the intensity up
+                        to a level that feels strong but comfortable, and use
+                        the unit for 30-45 minutes, or as long as needed. For
+                        your wave form, start with the Asymmetrical Bi-Phasic
+                        Rectangular setting, it&#039;s the recommended starting
+                        point for initial treatment. From there, feel free to
+                        adjust based on comfort and results. Useful Resources
+                        &amp; Links: 📘 [Ultima 5 User
+                        Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)
+                        🎥 [Ultima 5 Video
+                        Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU) 📄
+                        [Tips on using Ultima 5
+                        TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">1455 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="8 how do these things actually work? Yes. TENS has been proven to help relieve pain for many people, although results can vary depending on the individual and the condition being treated. It works by stimulating the nerves, which may help reduce pain signals and encourage the relese of the body&#039;s natural pain-relieving chemicals. For best results, use the TENS unit as directed with proper pad placement and comfortable intensity settings.
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  1181 ms
+                </td>
+              </tr>
 
-Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#8</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+              <tr
+                data-status="passed"
+                data-search="7 safety context carried across turns — I have a pacemaker. ⟶ Where should I put the pads for my lower back pain? If you have a pacemaker or implanted electronic device, you should consult your healthcare provider before using a TENS unit. Electrical stimulation may potentially interfere with some implanted devices. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #7
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">how do these things actually work?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        safety context carried across turns — I have a
+                        pacemaker. ⟶ Where should I put the pads for my lower
+                        back pain?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (823ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Yes. TENS has been proven to help relieve pain for many people, although results can vary depending on the individual and the condition being treated. It works by stimulating the nerves, which may help reduce pain signals and encourage the relese of the body&#039;s natural pain-relieving chemicals. For best results, use the TENS unit as directed with proper pad placement and comfortable intensity settings.
-
-Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (1455ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        If you have a pacemaker or implanted electronic device,
+                        you should consult your healthcare provider before using
+                        a TENS unit. Electrical stimulation may potentially
+                        interfere with some implanted devices.
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">823 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="9 Is a TENS unit supposed to hurt? Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  1455 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="8 how do these things actually work? Yes. TENS has been proven to help relieve pain for many people, although results can vary depending on the individual and the condition being treated. It works by stimulating the nerves, which may help reduce pain signals and encourage the relese of the body&#039;s natural pain-relieving chemicals. For best results, use the TENS unit as directed with proper pad placement and comfortable intensity settings.
 
 Useful Resources &amp; Links:
-🛠️ [Electrotherapy Device Troubleshooting Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#9</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #8
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">Is a TENS unit supposed to hurt?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        how do these things actually work?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (930ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (823ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Yes. TENS has been proven to help relieve pain for many
+                        people, although results can vary depending on the
+                        individual and the condition being treated. It works by
+                        stimulating the nerves, which may help reduce pain
+                        signals and encourage the relese of the body&#039;s
+                        natural pain-relieving chemicals. For best results, use
+                        the TENS unit as directed with proper pad placement and
+                        comfortable intensity settings. Useful Resources &amp;
+                        Links: 📋 [TENS Electrode Placement
+                        Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  823 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="9 Is a TENS unit supposed to hurt? Most users describe the sensation as: a gentle tingling, a light buzzing, mild tapping or pulsing, or a comfortable vibration. The intensity should be strong, but comfortable. A TENS unit should never be painful. If you experience sharp, burning, or uncomfortable sensations, reduce the intensity or check that the electrode pads are properly positioned and making good contact with your skin.
 
 Useful Resources &amp; Links:
-🛠️ [Electrotherapy Device Troubleshooting Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx)</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">930 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="10 how long before I need new batteries? Battery life depends on the type of battery, intensity setting, and how often you use your TENS unit. Rechargable batteries: Typically provide 8-20 hours per charge. Disposable batteries: Can often last 20-50 hours of treatment, depending on the device and settings. Higher intensity levels and longer treatment sessions may shorten battery life. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#10</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+🛠️ [Electrotherapy Device Troubleshooting Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #9
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">how long before I need new batteries?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        Is a TENS unit supposed to hurt?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (803ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Battery life depends on the type of battery, intensity setting, and how often you use your TENS unit. Rechargable batteries: Typically provide 8-20 hours per charge. Disposable batteries: Can often last 20-50 hours of treatment, depending on the device and settings. Higher intensity levels and longer treatment sessions may shorten battery life.</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (930ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Most users describe the sensation as: a gentle tingling,
+                        a light buzzing, mild tapping or pulsing, or a
+                        comfortable vibration. The intensity should be strong,
+                        but comfortable. A TENS unit should never be painful. If
+                        you experience sharp, burning, or uncomfortable
+                        sensations, reduce the intensity or check that the
+                        electrode pads are properly positioned and making good
+                        contact with your skin. Useful Resources &amp; Links: 🛠️
+                        [Electrotherapy Device Troubleshooting
+                        Guide](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Electrotherapy%20device%20TROUBLESHOOTING.docx)
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">803 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="11 will it stop working if I use it too much? Yes, your body can adapt to TENS stimulation over time, which may make the sensation feel less noticeable. This a normal response called habituation. To help maintain effectiveness: Increase the intensity slightly as needed (while keeping it comfortable), Adjust pad placement between sessions, Use different modes or settings if your device offers them, Avoid using the same exact settings every time.
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  930 ms
+                </td>
+              </tr>
 
-Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#11</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+              <tr
+                data-status="passed"
+                data-search="10 how long before I need new batteries? Battery life depends on the type of battery, intensity setting, and how often you use your TENS unit. Rechargable batteries: Typically provide 8-20 hours per charge. Disposable batteries: Can often last 20-50 hours of treatment, depending on the device and settings. Higher intensity levels and longer treatment sessions may shorten battery life. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #10
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">will it stop working if I use it too much?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        how long before I need new batteries?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (1243ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Yes, your body can adapt to TENS stimulation over time, which may make the sensation feel less noticeable. This a normal response called habituation. To help maintain effectiveness: Increase the intensity slightly as needed (while keeping it comfortable), Adjust pad placement between sessions, Use different modes or settings if your device offers them, Avoid using the same exact settings every time.
-
-Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (803ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Battery life depends on the type of battery, intensity
+                        setting, and how often you use your TENS unit.
+                        Rechargable batteries: Typically provide 8-20 hours per
+                        charge. Disposable batteries: Can often last 20-50 hours
+                        of treatment, depending on the device and settings.
+                        Higher intensity levels and longer treatment sessions
+                        may shorten battery life.
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">1243 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="12 the skin under the pads is itchy and irritated Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  803 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="11 will it stop working if I use it too much? Yes, your body can adapt to TENS stimulation over time, which may make the sensation feel less noticeable. This a normal response called habituation. To help maintain effectiveness: Increase the intensity slightly as needed (while keeping it comfortable), Adjust pad placement between sessions, Use different modes or settings if your device offers them, Avoid using the same exact settings every time.
 
 Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#12</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #11
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">the skin under the pads is itchy and irritated</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        will it stop working if I use it too much?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (939ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.
-
-Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (1243ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Yes, your body can adapt to TENS stimulation over time,
+                        which may make the sensation feel less noticeable. This
+                        a normal response called habituation. To help maintain
+                        effectiveness: Increase the intensity slightly as needed
+                        (while keeping it comfortable), Adjust pad placement
+                        between sessions, Use different modes or settings if
+                        your device offers them, Avoid using the same exact
+                        settings every time. Useful Resources &amp; Links: 📋
+                        [TENS Electrode Placement
+                        Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">939 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="13 I&#039;m breaking out where the electrodes sit Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  1243 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="12 the skin under the pads is itchy and irritated Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.
 
 Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#13</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #12
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">I&#039;m breaking out where the electrodes sit</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        the skin under the pads is itchy and irritated
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (796ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (939ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Skin irriation after using a TENS unit is usually caused
+                        by skin sensitivity, electrode adhesive, or improper pad
+                        use. Common causes include: Sensitivity to the electrode
+                        gel or adhesive: Some people may have mild skin
+                        reactions to the materials in the pads. Using pads for
+                        too long: Extended use in the same area can irritate the
+                        skin. Worn or dirty electrodes: Old pads may not
+                        distribute stimulation evenly and can increase
+                        irritation. Applying pads to unprepared skin: Lotions,
+                        oils, sweat, or dirt can affect adhesion and skin
+                        comfort. Stimulation intensity is too high: Excessive
+                        intensity may cause discomfort or irritation. To reduce
+                        irritation: Apply pads to clean, dry skin. Rotate pad
+                        placement between sessions. Avoid using pads on
+                        irritated, broken, or sensitive skin. Lower the
+                        intensity if the sensation feels uncomfortable. Replace
+                        pads when they become dry or worn. Useful Resources
+                        &amp; Links: 📋 [TENS Electrode Placement
+                        Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  939 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="13 I&#039;m breaking out where the electrodes sit Skin irriation after using a TENS unit is usually caused by skin sensitivity, electrode adhesive, or improper pad use. Common causes include: Sensitivity to the electrode gel or adhesive: Some people may have mild skin reactions to the materials in the pads. Using pads for too long: Extended use in the same area can irritate the skin. Worn or dirty electrodes: Old pads may not distribute stimulation evenly and can increase irritation. Applying pads to unprepared skin: Lotions, oils, sweat, or dirt can affect adhesion and skin comfort. Stimulation intensity is too high: Excessive intensity may cause discomfort or irritation. To reduce irritation: Apply pads to clean, dry skin. Rotate pad placement between sessions. Avoid using pads on irritated, broken, or sensitive skin. Lower the intensity if the sensation feels uncomfortable. Replace pads when they become dry or worn.
 
 Useful Resources &amp; Links:
-📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)</div>
+📋 [TENS Electrode Placement Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #13
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
+                    <div>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        I&#039;m breaking out where the electrodes sit
+                      </p>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                    <div class="pl-3 border-l-2 border-indigo-500/40">
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (796ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Skin irriation after using a TENS unit is usually caused
+                        by skin sensitivity, electrode adhesive, or improper pad
+                        use. Common causes include: Sensitivity to the electrode
+                        gel or adhesive: Some people may have mild skin
+                        reactions to the materials in the pads. Using pads for
+                        too long: Extended use in the same area can irritate the
+                        skin. Worn or dirty electrodes: Old pads may not
+                        distribute stimulation evenly and can increase
+                        irritation. Applying pads to unprepared skin: Lotions,
+                        oils, sweat, or dirt can affect adhesion and skin
+                        comfort. Stimulation intensity is too high: Excessive
+                        intensity may cause discomfort or irritation. To reduce
+                        irritation: Apply pads to clean, dry skin. Rotate pad
+                        placement between sessions. Avoid using pads on
+                        irritated, broken, or sensitive skin. Lower the
+                        intensity if the sensation feels uncomfortable. Replace
+                        pads when they become dry or worn. Useful Resources
+                        &amp; Links: 📋 [TENS Electrode Placement
+                        Chart](https://paintechnology.s3.amazonaws.com/pdf/placementchart.pdf)
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">796 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="14 Can you explain the science behind a TENS machine? A Transcutaneous Electrical Nerve Stimulation (TENS) unit is a small, battery-powered device that helps relieve pain by sending low-voltage electrical pulses through electrode pads placed on the skin. These gentle electrical impulses stimulate the nerves beneath the skin and can help reduce the way your body perceives pain.
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  796 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="14 Can you explain the science behind a TENS machine? A Transcutaneous Electrical Nerve Stimulation (TENS) unit is a small, battery-powered device that helps relieve pain by sending low-voltage electrical pulses through electrode pads placed on the skin. These gentle electrical impulses stimulate the nerves beneath the skin and can help reduce the way your body perceives pain.
 
 Useful Resources &amp; Links:
 📘 [Manual ULTIMA NEO Español](https://paintechnology.s3.amazonaws.com/pdf/Manual-ULTIMA-NEO-Espa%C3%B1ol.pdf)
 📄 [TENS IFC EMS MI Ultima Neo Guide](https://paintechnology.s3.amazonaws.com/pdf/TENS-IFC-EMS-MI-Ultima-Neo.pdf)
-🎥 [Ultima Neo Video Guide](https://youtu.be/8vhPXlfp3lc) " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#14</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+🎥 [Ultima Neo Video Guide](https://youtu.be/8vhPXlfp3lc) "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #14
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">Can you explain the science behind a TENS machine?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        Can you explain the science behind a TENS machine?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (849ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">A Transcutaneous Electrical Nerve Stimulation (TENS) unit is a small, battery-powered device that helps relieve pain by sending low-voltage electrical pulses through electrode pads placed on the skin. These gentle electrical impulses stimulate the nerves beneath the skin and can help reduce the way your body perceives pain.
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (849ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        A Transcutaneous Electrical Nerve Stimulation (TENS)
+                        unit is a small, battery-powered device that helps
+                        relieve pain by sending low-voltage electrical pulses
+                        through electrode pads placed on the skin. These gentle
+                        electrical impulses stimulate the nerves beneath the
+                        skin and can help reduce the way your body perceives
+                        pain. Useful Resources &amp; Links: 📘 [Manual ULTIMA
+                        NEO
+                        Español](https://paintechnology.s3.amazonaws.com/pdf/Manual-ULTIMA-NEO-Espa%C3%B1ol.pdf)
+                        📄 [TENS IFC EMS MI Ultima Neo
+                        Guide](https://paintechnology.s3.amazonaws.com/pdf/TENS-IFC-EMS-MI-Ultima-Neo.pdf)
+                        🎥 [Ultima Neo Video
+                        Guide](https://youtu.be/8vhPXlfp3lc)
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
+                    Success
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  849 ms
+                </td>
+              </tr>
 
-Useful Resources &amp; Links:
-📘 [Manual ULTIMA NEO Español](https://paintechnology.s3.amazonaws.com/pdf/Manual-ULTIMA-NEO-Espa%C3%B1ol.pdf)
-📄 [TENS IFC EMS MI Ultima Neo Guide](https://paintechnology.s3.amazonaws.com/pdf/TENS-IFC-EMS-MI-Ultima-Neo.pdf)
-🎥 [Ultima Neo Video Guide](https://youtu.be/8vhPXlfp3lc)</div>
-                    </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
-                    Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">849 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="15 What&#039;s the typical lifespan of electrode pads? TENS electrodes typically last 10-30 uses,depending on the quality of the pads, how often they are used, skin condition, and how well they are cared for. To help extend the lifespan of an electrode: Apply pads to clean, dry skin. Store them properly on the provided backing sheet. Avoid using lotions or oils before application. Replace pads when they lose stickiness or stimulation becomes uneven. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#15</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+              <tr
+                data-status="passed"
+                data-search="15 What&#039;s the typical lifespan of electrode pads? TENS electrodes typically last 10-30 uses,depending on the quality of the pads, how often they are used, skin condition, and how well they are cared for. To help extend the lifespan of an electrode: Apply pads to clean, dry skin. Store them properly on the provided backing sheet. Avoid using lotions or oils before application. Replace pads when they lose stickiness or stimulation becomes uneven. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #15
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">What&#039;s the typical lifespan of electrode pads?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        What&#039;s the typical lifespan of electrode pads?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (836ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">TENS electrodes typically last 10-30 uses,depending on the quality of the pads, how often they are used, skin condition, and how well they are cared for. To help extend the lifespan of an electrode: Apply pads to clean, dry skin. Store them properly on the provided backing sheet. Avoid using lotions or oils before application. Replace pads when they lose stickiness or stimulation becomes uneven.</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (836ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        TENS electrodes typically last 10-30 uses,depending on
+                        the quality of the pads, how often they are used, skin
+                        condition, and how well they are cared for. To help
+                        extend the lifespan of an electrode: Apply pads to
+                        clean, dry skin. Store them properly on the provided
+                        backing sheet. Avoid using lotions or oils before
+                        application. Replace pads when they lose stickiness or
+                        stimulation becomes uneven.
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">836 ms</td>
-        </tr>
-    
-        <tr data-status="passed" data-search="16 Is EMS the same thing as TENS? Although they both use electrical stimulation, TENS and EMS are designed for different purposes. TENS: Primarily used to help relieve pain by stimulating the nerves and reducing pain signals. EMS: Designed to stimulate muscles, helping with muscle strengthening, recovery, re-education, and reducing muscle atrophy. Some devices combine both TENS and EMS modes, allowing you to switch between pain relief and muscle stimulation. " class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono">#16</td>
-            <td class="px-6 py-4 align-top">
-                <div class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3">
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  836 ms
+                </td>
+              </tr>
+
+              <tr
+                data-status="passed"
+                data-search="16 Is EMS the same thing as TENS? Although they both use electrical stimulation, TENS and EMS are designed for different purposes. TENS: Primarily used to help relieve pain by stimulating the nerves and reducing pain signals. EMS: Designed to stimulate muscles, helping with muscle strengthening, recovery, re-education, and reducing muscle atrophy. Some devices combine both TENS and EMS modes, allowing you to switch between pain relief and muscle stimulation. "
+                class="transition-all hover:bg-slate-800/50 group border-b border-slate-700/50"
+              >
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-sm text-slate-400 align-top font-mono"
+                >
+                  #16
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div
+                    class="bg-slate-800/60 rounded-lg p-4 border border-slate-700/50 space-y-3"
+                  >
                     <div>
-                        <p class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider">Question</p>
-                        <p class="text-sm font-medium text-slate-200">Is EMS the same thing as TENS?</p>
+                      <p
+                        class="text-xs font-semibold text-indigo-400 mb-1 uppercase tracking-wider"
+                      >
+                        Question
+                      </p>
+                      <p class="text-sm font-medium text-slate-200">
+                        Is EMS the same thing as TENS?
+                      </p>
                     </div>
                     <div class="pl-3 border-l-2 border-indigo-500/40">
-                        <p class="text-xs text-slate-400 mb-1">Bot Answer (874ms)</p>
-                        <div class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans">Although they both use electrical stimulation, TENS and EMS are designed for different purposes. TENS: Primarily used to help relieve pain by stimulating the nerves and reducing pain signals. EMS: Designed to stimulate muscles, helping with muscle strengthening, recovery, re-education, and reducing muscle atrophy. Some devices combine both TENS and EMS modes, allowing you to switch between pain relief and muscle stimulation.</div>
+                      <p class="text-xs text-slate-400 mb-1">
+                        Bot Answer (874ms)
+                      </p>
+                      <div
+                        class="text-sm text-slate-300 max-h-48 overflow-y-auto custom-scrollbar whitespace-pre-wrap font-sans"
+                      >
+                        Although they both use electrical stimulation, TENS and
+                        EMS are designed for different purposes. TENS: Primarily
+                        used to help relieve pain by stimulating the nerves and
+                        reducing pain signals. EMS: Designed to stimulate
+                        muscles, helping with muscle strengthening, recovery,
+                        re-education, and reducing muscle atrophy. Some devices
+                        combine both TENS and EMS modes, allowing you to switch
+                        between pain relief and muscle stimulation.
+                      </div>
                     </div>
-                </div>
-            </td>
-            <td class="px-6 py-4 align-top">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                  </div>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
+                  >
                     Success
-                </span>
-                
-            </td>
-            <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono">874 ms</td>
-        </tr>
-    
-                    </tbody>
-                </table>
-            </div>
+                  </span>
+                </td>
+                <td
+                  class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap align-top font-mono"
+                >
+                  874 ms
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        
-        <footer class="mt-12 text-center text-sm text-slate-500">
-            <p>Spark PMT Chatbot Tester &copy; 2026</p>
-        </footer>
+      </div>
+
+      <footer class="mt-12 text-center text-sm text-slate-500">
+        <p>Spark PMT Chatbot Tester &copy; 2026</p>
+      </footer>
     </div>
 
     <!-- Filter JS -->
     <script>
-        let activeFilter = 'all';
+      let activeFilter = "all";
 
-        function filterStatus(status) {
-            activeFilter = status;
-            
-            ['all', 'passed', 'failed'].forEach(s => {
-                const btn = document.getElementById('filter-btn-' + s);
-                if (!btn) return;
-                if (s === status) {
-                    btn.className = 'px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border shadow-md ' +
-                        (s === 'passed' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-500/10' :
-                         s === 'failed' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-rose-500/10' :
-                         'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-indigo-500/10');
-                } else {
-                    btn.className = 'px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 border border-slate-700/50 transition-all duration-200';
-                }
-            });
+      function filterStatus(status) {
+        activeFilter = status;
 
-            applyFilters();
-        }
+        ["all", "passed", "failed"].forEach((s) => {
+          const btn = document.getElementById("filter-btn-" + s);
+          if (!btn) return;
+          if (s === status) {
+            btn.className =
+              "px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 border shadow-md " +
+              (s === "passed"
+                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-500/10"
+                : s === "failed"
+                  ? "bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-rose-500/10"
+                  : "bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-indigo-500/10");
+          } else {
+            btn.className =
+              "px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/80 border border-slate-700/50 transition-all duration-200";
+          }
+        });
 
-        function applyFilters() {
-            const searchVal = (document.getElementById('searchInput')?.value || '').toLowerCase();
-            const rows = document.querySelectorAll('#resultsTable tbody tr');
-            let visibleCount = 0;
+        applyFilters();
+      }
 
-            rows.forEach(row => {
-                const status = row.getAttribute('data-status');
-                const searchData = (row.getAttribute('data-search') || '').toLowerCase();
+      function applyFilters() {
+        const searchVal = (
+          document.getElementById("searchInput")?.value || ""
+        ).toLowerCase();
+        const rows = document.querySelectorAll("#resultsTable tbody tr");
+        let visibleCount = 0;
 
-                const matchesFilter = (activeFilter === 'all') || (status === activeFilter);
-                const matchesSearch = !searchVal || searchData.includes(searchVal);
+        rows.forEach((row) => {
+          const status = row.getAttribute("data-status");
+          const searchData = (
+            row.getAttribute("data-search") || ""
+          ).toLowerCase();
 
-                if (matchesFilter && matchesSearch) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+          const matchesFilter =
+            activeFilter === "all" || status === activeFilter;
+          const matchesSearch = !searchVal || searchData.includes(searchVal);
 
-            const visibleCountElem = document.getElementById('visibleCount');
-            if (visibleCountElem) visibleCountElem.innerText = visibleCount;
-        }
+          if (matchesFilter && matchesSearch) {
+            row.style.display = "";
+            visibleCount++;
+          } else {
+            row.style.display = "none";
+          }
+        });
+
+        const visibleCountElem = document.getElementById("visibleCount");
+        if (visibleCountElem) visibleCountElem.innerText = visibleCount;
+      }
     </script>
-</body>
+  </body>
 </html>
