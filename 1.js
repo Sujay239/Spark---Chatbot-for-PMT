@@ -14,6 +14,10 @@ const DOMAIN_WHITELIST = new Set([
   "galvanic",
   "transcutaneous",
   "interferential",
+  "if4d",
+  "bipolar",
+  "quadripolar",
+  "carrier",
   "electrotherapy",
   "electrodes",
   "electrode",
@@ -287,6 +291,29 @@ const hardcodedQuestions = [
   "What settings should I use for my very first Ultima 5 session?",
   "How far apart should the electrode pads be on my Ultima 5?",
   "Where can I learn more about my Ultima 5?",
+  "How do I set up the Ultima 5?",
+  "What do CH1 and CH2 mean on my Ultima 5?",
+  "Can I use only two electrode pads with my Ultima 5?",
+  "How do I change the waveform on my Ultima 5?",
+  "How do I set the treatment timer on my Ultima 5?",
+  "Why don't I feel anything when I turn on my Ultima 5?",
+  "Why is CH1 or CH2 flashing on my Ultima 5?",
+  "How do I turn Pad Contact Detection on or off?",
+  "Why can't I change the intensity on my Ultima 5?",
+  "Does the red light on the charger go out?",
+  "How do you know when the batteries are charged?",
+  "What batteries can I use in the Ultima 5?",
+  "What should I do with the electrode pads after treatment?",
+  "What is interferential therapy?",
+  "What is the difference between interferential therapy and TENS?",
+  "How long are interferential therapy sessions typically?",
+  "What is criss-cross pad application for interferential therapy?",
+  "What is the IF4D?",
+  "Can I use two or four electrodes with the IF4D?",
+  "What treatment settings does the IF4D offer?",
+  "What kind of waveform does the IF4D use?",
+  "What comes with the IF4D?",
+  "Can the IF4D run on batteries or wall power?",
 ];
 
 // Merge: Sheet questions first, then hardcoded (keeping unique ones)
@@ -319,6 +346,8 @@ const synonyms = {
   u3t: "ultima 3t",
   "u 3t": "ultima 3t",
   neo: "ultima neo",
+  "if 4d": "if4d",
+  "if-4d": "if4d",
 
   // Electrode / pad synonyms
   pads: "electrodes",
@@ -331,6 +360,8 @@ const synonyms = {
   stickers: "electrodes",
   sticker: "electrodes",
   "sticky pads": "electrodes",
+  bipolar: "two electrodes",
+  quadripolar: "four electrodes",
 
   // Lead wire synonyms
   wires: "lead wires",
@@ -461,8 +492,6 @@ const synonyms = {
   settings: "mode",
   program: "mode",
   programs: "mode",
-  channel: "mode",
-  channels: "mode",
   burst: "burst mode",
   normal: "normal mode",
   modulation: "modulation mode",
@@ -473,11 +502,48 @@ const synonyms = {
   // Therapy type synonyms
   ems: "electrical muscle stimulation",
   ifc: "interferential",
+  "ifc therapy": "interferential",
+  "ifc current": "interferential",
   interferential: "interferential therapy",
   galvanic: "galvanic stimulation",
   russian: "russian stimulation",
   microcurrent: "micro current",
   mens: "micro current",
+
+  // Setup / assembly synonyms
+  assemble: "set up",
+  assembly: "set up",
+  assembling: "set up",
+  setup: "set up",
+
+  // Display & flashing synonyms
+  blinking: "flashing",
+  blink: "flashing",
+  blinks: "flashing",
+
+  // Lock synonyms
+  locked: "lock",
+  unlock: "lock",
+  unlocked: "lock",
+  stuck: "lock",
+
+  // Storage & after-treatment pad care
+  store: "storage",
+  storing: "storage",
+  "after use": "after treatment",
+  "after session": "after treatment",
+
+  // Pattern / application synonyms
+  "x pattern": "criss cross",
+  "x shape": "criss cross",
+  "criss-cross": "criss cross",
+  crossing: "criss cross",
+
+  // Package & accessories
+  accessories: "comes with",
+  accessory: "comes with",
+  included: "comes with",
+  package: "comes with",
 
   // Safety / contraindication synonyms
   "side effect": "safety",
@@ -929,6 +995,10 @@ const products = [
   "ultima 20",
   "ultima 3t",
   "ultima neo",
+  "if4d",
+  "if 4d",
+  "if-4d",
+  "interferential",
   "electrodes",
   "lead wires",
   "battery",
@@ -970,7 +1040,7 @@ if (matchFound && bestScore < 0.85) {
 
 // ================= PARAPHRASE INTENT MATCHING =================
 // Catches natural language paraphrases that token-level matching misses
-if (!matchFound || bestScore < 0.7) {
+if (!matchFound || bestScore < 0.85) {
   const normQ = userQuestion.toLowerCase();
   const paraphraseMap = [
     // 1. Pacemaker / Cardiac implant (checked before general metal implants)
@@ -1019,6 +1089,49 @@ if (!matchFound || bestScore < 0.7) {
         /(red mark|red spot|redness).*(bad|normal|worried|concern|ok|okay)/i,
       ],
       target: "I am experiencing skin irritation -- why is that?",
+    },
+    // U5 Setup & Assembly
+    {
+      patterns: [
+        /(how (do i|to)|steps? to) (set up|setup|assemble|put together|connect).*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(set up|setup|assembly|assembling|getting started)/i,
+        /setting up (the|my)?\s*(u5|ultima 5)/i,
+        /how do i set up the ultima 5/i,
+      ],
+      target: "How do I set up the Ultima 5?",
+    },
+    // U5 Treatment Timer
+    {
+      patterns: [
+        /(how (do i|to)|set|adjust|change).*(treatment timer|timer|session time).*(u5|ultima 5)/i,
+        /(timer button|setting the timer).*(u5|ultima 5)/i,
+      ],
+      target: "How do I set the treatment timer on my Ultima 5?",
+    },
+    // IFC Session Duration
+    {
+      patterns: [
+        /how (long|many minutes?).*(interferential|ifc|if4d).*(session|treatment)/i,
+        /(interferential|ifc|if4d).*(session|treatment).*(length|duration|how long|minutes?)/i,
+      ],
+      target: "How long are interferential therapy sessions typically?",
+    },
+    // Change Waveform on U5
+    {
+      patterns: [
+        /(how (do i|to)|which buttons?|switch|change|select).*(waveform|wave form).*(u5|ultima 5)/i,
+        /(change|switch|toggle).*(waveform|wave form) on (the )?(u5|ultima 5)/i,
+      ],
+      target: "How do I change the waveform on my Ultima 5?",
+    },
+    // Turn Pad Contact Detection On/Off
+    {
+      patterns: [
+        /(turn (on|off)|enable|disable|activate|deactivate|toggle).*(pad contact|contact detection|contact alarm)/i,
+        /(pad contact detection|pad contact alarm).*(turn (on|off)|enable|disable|toggle)/i,
+        /(pr\+|mode).*(pad contact|contact detection)/i,
+      ],
+      target: "How do I turn Pad Contact Detection on or off?",
     },
     // 5. Treatment / session duration
     {
@@ -1272,12 +1385,30 @@ if (!matchFound || bestScore < 0.7) {
       ],
       target: "What settings should I use for my very first Ultima 5 session?",
     },
+    // Can't Change Intensity on U5 (Locked)
+    {
+      patterns: [
+        /(can't|cannot|won't|unable to|stuck|locked).*(change|adjust|turn up|increase).*(intensity|strength|level).*(u5|ultima 5)?/i,
+        /(intensity|knob).*(locked|stuck|not changing|won't adjust|can't turn up).*(u5|ultima 5)?/i,
+        /why can't i (change|adjust) the intensity.*(u5|ultima 5)?/i,
+      ],
+      target: "Why can't I change the intensity on my Ultima 5?",
+    },
     // 33. Intensity knobs on U5
     {
       patterns: [
         /(intensity controls|intensity knobs|knobs work).*(u5|ultima 5)/i,
       ],
       target: "How do the intensity knobs work on my Ultima 5?",
+    },
+    // Feel Nothing on U5
+    {
+      patterns: [
+        /(don't|dont|not|can't|cant).*(feel anything|feeling anything|feel sensation|any sensation).*(turn.*on|turned.*on|started)?.*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(turned on|running|power.*on).*(don't feel|no feeling|no sensation|not feeling)/i,
+        /(why don't i feel anything|why am i not feeling anything).*(u5|ultima 5)/i,
+      ],
+      target: "Why don't I feel anything when I turn on my Ultima 5?",
     },
     // 34. Turned on but no sensation / feel nothing
     {
@@ -1352,6 +1483,33 @@ if (!matchFound || bestScore < 0.7) {
       ],
       target: "Can I wear a TENS unit all day?",
     },
+    // Charger Red Light
+    {
+      patterns: [
+        /(red light|light on the charger|charger light).*(stay red|go out|turn off|turn green|change color|always red)/i,
+        /does the (charger|red light).*(turn green|go out|shut off)/i,
+        /why is (the )?charger (always red|staying red)/i,
+      ],
+      target: "Does the red light on the charger go out?",
+    },
+    // Batteries Charged / Charging Time
+    {
+      patterns: [
+        /(how do (you|i) know|when are|tell if).*(batteries|battery).*(charged|full|done charging)/i,
+        /how (long|many hours).*(charge|charging).*(batteries|battery|rechargeable)/i,
+        /(charge time|charging time).*(batteries|battery|u5|ultima 5)/i,
+      ],
+      target: "How do you know when the batteries are charged?",
+    },
+    // Batteries for Ultima 5
+    {
+      patterns: [
+        /(what|which|kind of|type of) batteries.*(use|take|put in|support|work in).*(u5|ultima 5)/i,
+        /(can i use|use).*(alkaline|rechargeable|nimh|disposable|aa).*(batteries|battery).*(u5|ultima 5)/i,
+        /(batteries|battery).*(for|in).*(u5|ultima 5)/i,
+      ],
+      target: "What batteries can I use in the Ultima 5?",
+    },
     // 42. Battery life / replacement timing
     {
       patterns: [
@@ -1368,6 +1526,118 @@ if (!matchFound || bestScore < 0.7) {
         /is ems the same thing as tens/i,
       ],
       target: "What's the difference between TENS and EMS?",
+    },
+    // Flashing / blinking CH1 or CH2 on U5
+    {
+      patterns: [
+        /(ch1|ch2|channel 1|channel 2).*(flashing|blinking)/i,
+        /(flashing|blinking).*(ch1|ch2|channel 1|channel 2)/i,
+        /why is (ch1|ch2) (flashing|blinking)/i,
+      ],
+      target: "Why is CH1 or CH2 flashing on my Ultima 5?",
+    },
+    // CH1 and CH2 channels meaning on U5
+    {
+      patterns: [
+        /(what (do|does|is)|meaning of|what are)\b.*(ch1|ch2|channel 1|channel 2)/i,
+        /(ch1|ch2|channel 1 and 2|two channels).*(mean|stand for)/i,
+        /(difference between).*(ch1 and ch2|channel 1 and channel 2)/i,
+      ],
+      target: "What do CH1 and CH2 mean on my Ultima 5?",
+    },
+    // Two pads / single channel on U5
+    {
+      patterns: [
+        /(can i use|use|run).*(only two|just 2|only 2|just two|single pair|2 pads|two pads).*(pads?|electrodes?|lead)?.*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(with only 2|with just 2|with two pads|with 2 pads)/i,
+        /(have to use 4 pads|require 4 pads).*(u5|ultima 5)/i,
+      ],
+      target: "Can I use only two electrode pads with my Ultima 5?",
+    },
+    // Pad care / storage after treatment
+    {
+      patterns: [
+        /(what (should|do) i do with|how (to|should i) (store|keep|save|put away)).*(pads|electrodes).*(after|done|finished).*(treatment|session|use)/i,
+        /(pads|electrodes).*(after treatment|after session|after use|when finished|when done)/i,
+        /store.*(pads|electrodes).*(plastic backing|bag)/i,
+      ],
+      target: "What should I do with the electrode pads after treatment?",
+    },
+    // Difference between IFC and TENS
+    {
+      patterns: [
+        /(difference between|compare|versus|\bvs\b|how is.*different).*(interferential|ifc).*(tens)/i,
+        /(difference between|compare|versus|\bvs\b|how is.*different).*(tens).*(interferential|ifc)/i,
+        /(interferential|ifc).*(versus|\bvs\b|different|difference).*(tens)/i,
+        /(tens).*(versus|\bvs\b|different|difference).*(interferential|ifc)/i,
+        /(interferential|ifc).*(better than|same as|different from).*(tens)/i,
+      ],
+      target: "What is the difference between interferential therapy and TENS?",
+    },
+    // Criss-cross / X pattern pad application for IFC
+    {
+      patterns: [
+        /(criss[- ]?cross|x[- ]?pattern|crossing|intersect).*(pad|electrode|application|placement)/i,
+        /(pad|electrode|application|placement).*(criss[- ]?cross|x[- ]?pattern|crossing)/i,
+      ],
+      target: "What is criss-cross pad application for interferential therapy?",
+    },
+    // What is Interferential / IFC therapy
+    {
+      patterns: [
+        /(what is|tell me about|explain)\s+(the\s+)?(interferential(\s+therapy)?|ifc(\s+therapy)?|interferential\s+current)(\?|$)/i,
+        /what does interferential (mean|therapy mean|current mean)/i,
+        /what is interferential/i,
+      ],
+      target: "What is interferential therapy?",
+    },
+    // What is IF4D device
+    {
+      patterns: [
+        /(what is|tell me about|explain|what kind of device is|information on) (the )?(if4d|if 4d|if-4d)/i,
+        /^(if4d|if 4d|if-4d)$/i,
+      ],
+      target: "What is the IF4D?",
+    },
+    // Two or four electrodes on IF4D (bipolar vs quadripolar)
+    {
+      patterns: [
+        /(2 or 4|two or four|how many|use 2|use two|use 4|use four|bipolar|quadripolar).*(pads?|electrodes?).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(2 or 4|two or four|how many pads|two pads or four)/i,
+      ],
+      target: "Can I use two or four electrodes with the IF4D?",
+    },
+    // IF4D treatment modes / settings
+    {
+      patterns: [
+        /(treatment settings?|settings?|modes?|programs?|sweep|frequency shift).*(offer|have|available)?.*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(settings?|modes?|programs?|sweep options?)/i,
+      ],
+      target: "What treatment settings does the IF4D offer?",
+    },
+    // IF4D sine wave waveform
+    {
+      patterns: [
+        /(waveform|wave form|sine[- ]?wave).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(waveform|wave form|carrier frequency)/i,
+      ],
+      target: "What kind of waveform does the IF4D use?",
+    },
+    // What comes with IF4D / kit contents
+    {
+      patterns: [
+        /(what('s| is) (included|in the box)|comes with|comes in|accessories).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(kit|in the box|included|package contents)/i,
+      ],
+      target: "What comes with the IF4D?",
+    },
+    // IF4D battery or wall power
+    {
+      patterns: [
+        /(batteries?|battery|wall power|wall adapter|ac adapter|plug in|power supply).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(battery|batteries|wall power|wall adapter|plug)/i,
+      ],
+      target: "Can the IF4D run on batteries or wall power?",
     },
   ];
 

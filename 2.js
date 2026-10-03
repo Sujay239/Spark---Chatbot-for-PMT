@@ -14,6 +14,10 @@ const DOMAIN_WHITELIST = new Set([
   "galvanic",
   "transcutaneous",
   "interferential",
+  "if4d",
+  "bipolar",
+  "quadripolar",
+  "carrier",
   "electrotherapy",
   "electrodes",
   "electrode",
@@ -677,13 +681,13 @@ const hardcodedQAPairs = [
   {
     question: "How do I read the battery level indicator on my Ultima 5?",
     answer:
-      "The battery icon on your display uses a simple 2-bar system. Both bars showing means your battery is fully charged. One bar means you're at a mid-level charge. If the battery symbol starts flashing, that's your cue that the batteries are running low and should be recharged or replaced soon.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)",
+      "The battery icon uses a simple 2-bar display. Both bars mean the batteries are fully charged. One bar means they're around mid-level. If the battery symbol starts flashing, the batteries are low and it's time to recharge or replace them.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)",
   },
   {
     question:
       "Does my Ultima 5 automatically shut off if I forget to turn it off?",
     answer:
-      "Yes. If the intensity on both channels is set to zero and the unit hasn't been used for 5 minutes, it will automatically power down on its own, so you don't have to worry about it running down the battery if you step away.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)",
+      "Yes. If both channels are set to zero intensity and the unit hasn't been used for 5 minutes, it automatically powers down. If you're using a treatment timer, the unit also shuts off when the timer reaches zero.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)",
   },
   {
     question: "What is the Lock/Unlock feature, and how do I use it?",
@@ -704,6 +708,98 @@ const hardcodedQAPairs = [
     question: "Where can I learn more about my Ultima 5?",
     answer:
       "For additional resources and information beyond your manual and Quick Start Guide, you can visit paintechnology.com.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)",
+  },
+  {
+    question: "How do I set up the Ultima 5?",
+    answer: "Setting up your Ultima 5 is quick and easy: 1. Install the batteries: Insert the two charged AA batteries into the battery compartment, following the +/– markings, and replace the cover. 2. Connect the lead wires: Plug the L-shaped end of the lead wire into CH1 for two pads. If using four pads, connect both CH1 and CH2. 3. Connect the pads: Attach the pin ends of the lead wires to the electrode pads. 4. Place the pads: Make sure your skin is clean and dry. Remove the pads from their plastic backing and place them around the treatment area as directed. Pads from the same channel should not touch and should be no more than 6 inches apart. 5. Turn on the unit: Press and hold the Power button for about 3 seconds. The screen will light up and the intensity will start at zero. 6. Set your treatment: For the initial setup shown in the Ultima 5 Quick Start Guide, select 150 Hz pulse rate, 250 μs pulse width, 30–45 minutes, and the Asymmetrical Bi-Phasic Rectangular waveform. 7. Adjust the intensity: Slowly turn the intensity control for each active channel until the stimulation feels strong but comfortable. After treatment, turn the unit off before removing the pads. Place the pads back on their clear plastic backing and store them in the sealed bag. Tip: If you change the treatment mode, the Ultima 5 automatically resets the intensity to zero. Simply readjust it to a comfortable level.\n\nUseful Resources & Links:\n📘 [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)\n🎥 [Ultima 5 Video Guide](https://www.youtube.com/watch?v=Evm1mGxXUMU)\n📄 [Tips on using Ultima 5 TENS](https://paintechnology.s3.us-east-1.amazonaws.com/pdf/Tips%20on%20using%20the%20Ultima%205%20TENS%20device.doc)"
+  },
+  {
+    question: "What do CH1 and CH2 mean on my Ultima 5?",
+    answer: "CH1 and CH2 are the Ultima 5's two stimulation channels. Each channel connects to one lead wire and can power two electrode pads. If you're using only two pads, connect the lead wire to CH1. If you're using four pads, connect one lead to CH1 and the other to CH2. Each channel has its own intensity control.",
+  },
+  {
+    question: "Can I use only two electrode pads with my Ultima 5?",
+    answer: "Yes. You can use the Ultima 5 with two pads. Connect one lead wire to CH1 and attach the two electrode pads to that lead. If you want to use four pads, connect a second lead wire to CH2. [Ultima 5 User Manual](https://paintechnology.s3.amazonaws.com/pdf/Ultima-5-User-Manual.pdf)",
+  },
+  {
+    question: "How do I change the waveform on my Ultima 5?",
+    answer: "Press the PR- and PW- buttons simultaneously to change the waveform. The Ultima 5 offers three waveform options. For your initial treatment, the Quick Start Guide recommends the Asymmetrical Bi-Phasic Rectangular waveform.",
+  },
+  {
+    question: "How do I set the treatment timer on my Ultima 5?",
+    answer: "Use the TIMER button to select your treatment time. Once the timer is set, it counts down in minutes. When it reaches zero, the Ultima 5 automatically stops the treatment.",
+  },
+  {
+    question: "Why don't I feel anything when I turn on my Ultima 5?",
+    answer: "This is usually normal. The Ultima 5 always starts with the stimulation intensity at zero. After turning it on and placing the pads correctly, slowly turn up the intensity knob for the active channel until you feel a strong but comfortable stimulation.",
+  },
+  {
+    question: "Why is CH1 or CH2 flashing on my Ultima 5?",
+    answer: "If Pad Contact Detection is enabled, a flashing CH1 or CH2 means the Ultima 5 has detected poor contact between the electrode pads and your skin on that channel. Check that the pads are firmly attached and that the lead wires are fully connected. If poor contact continues for 3 seconds, intensity drops to 60%. If poor contact lasts more than 30 seconds, intensity resets to zero.",
+  },
+  {
+    question: "How do I turn Pad Contact Detection on or off?",
+    answer: "Press and hold PR+ and MODE simultaneously to enable or disable Pad Contact Detection. The feature is disabled by default.",
+  },
+  {
+    question: "Why can't I change the intensity on my Ultima 5?",
+    answer: "Check whether the Lock function is active. When the Ultima 5 is locked, the current intensity is held and cannot be adjusted. With the unit on, briefly press the Power button to toggle Lock/Unlock, then try adjusting the intensity again.",
+  },
+  {
+    question: "Does the red light on the charger go out?",
+    answer: "The charger will consistently stay red. It will not change to green upon the full charge of the batteries.",
+  },
+  {
+    question: "How do you know when the batteries are charged?",
+    answer: "Our rechargable batteries work just like any other rechargable battery. You will typically want to charge these for 4-6 hours. ",
+  },
+  {
+    question: "What batteries can I use in the Ultima 5?",
+    answer: "The Ultima 5 can use two AA batteries. The manual permits 1.5V AA alkaline disposable batteries or 1.2V AA Ni-MH rechargeable batteries. Do not mix different battery types.",
+  },
+  {
+    question: "What should I do with the electrode pads after treatment?",
+    answer: "Turn the Ultima 5 off before removing the electrode pads. Carefully remove the pads from your skin, place them back on their clear plastic backing, and return them to their storage bag to help preserve the gel and adhesion.",
+  },
+  {
+    question: "What is interferential therapy?",
+    answer: "Interferential therapy, also called interferential current or IFC therapy, is a form of electrical stimulation commonly used for pain management. It uses two medium-frequency electrical currents that interact, or \"interfere,\" with each other to create a therapeutic beat frequency in the treatment area. The IF4D can provide interferential therapy using either two electrodes or four electrodes.",
+  },
+  {
+    question: "What is the difference between interferential therapy and TENS?",
+    answer: "Both interferential therapy and TENS use electrical stimulation for pain management, but they deliver stimulation differently. TENS typically applies lower-frequency electrical pulses directly through the electrodes. Interferential therapy uses medium-frequency currents that interact to create a lower therapeutic beat frequency. The IF4D uses a 4000 Hz carrier frequency and can be used with either a 2-electrode bipolar setup or a 4-electrode quadripolar setup.",
+  },
+  {
+    question: "How long are interferential therapy sessions typically?",
+    answer: "The IF4D includes selectable 15- or 30-minute treatment timers. Your treatment time should follow the instructions provided by your healthcare professional or treatment plan.",
+  },
+  {
+    question: "What is criss-cross pad application for interferential therapy?",
+    answer: "Criss-cross pad application is a four-electrode placement used for interferential therapy. Four electrodes are positioned around the treatment area so the electrical currents from the two channels cross one another in an \"X\" pattern. The area where the two currents intersect becomes the targeted interferential treatment area. Electrode placement should follow your healthcare professional's instructions and the IF4D user guide.",
+  },
+  {
+    question: "What is the IF4D?",
+    answer: "The IF4D is a dual-channel digital interferential therapy device designed for electrical stimulation treatments. It can be used with either two electrodes in a bipolar configuration or four electrodes in a quadripolar configuration. It offers adjustable frequency settings, multiple frequency sweep and shift options, a symmetrical balanced sine-wave waveform, treatment timers, setting recall, and a settings lock.",
+  },
+  {
+    question: "Can I use two or four electrodes with the IF4D?",
+    answer: "Yes. The IF4D supports both bipolar treatment using two electrodes and quadripolar treatment using four electrodes. The appropriate configuration depends on your treatment plan and electrode placement instructions.",
+  },
+  {
+    question: "What treatment settings does the IF4D offer?",
+    answer: "The IF4D offers Constant, Auto Sweep, and Frequency Shift treatment modes. It has an adjustable interference frequency from 4-160 Hz, along with preset sweep ranges and multiple frequency-shift options. Use the settings recommended by your healthcare professional for your treatment.",
+  },
+  {
+    question: "What kind of waveform does the IF4D use?",
+    answer: "The IF4D uses a symmetrical balanced sine-wave waveform. Its interferential system uses a fixed 4000 Hz carrier frequency on one channel and an adjustable 4004-4160 Hz modulating frequency on the second channel.",
+  },
+  {
+    question: "What comes with the IF4D?",
+    answer: "The IF4D includes the interferential unit, four reusable self-adhering electrodes, lead wires, a 9-volt battery, AC wall adapter, carrying case, and instruction manual.",
+  },
+  {
+    question: "Can the IF4D run on batteries or wall power?",
+    answer: "Yes. The IF4D can operate using a 9-volt battery or the supplied AC wall adapter.",
   },
 ];
 
@@ -742,6 +838,8 @@ const synonyms = {
   u3t: "ultima 3t",
   "u 3t": "ultima 3t",
   neo: "ultima neo",
+  "if 4d": "if4d",
+  "if-4d": "if4d",
 
   // Electrode / pad synonyms
   pads: "electrodes",
@@ -754,6 +852,8 @@ const synonyms = {
   stickers: "electrodes",
   sticker: "electrodes",
   "sticky pads": "electrodes",
+  bipolar: "two electrodes",
+  quadripolar: "four electrodes",
 
   // Lead wire synonyms
   wires: "lead wires",
@@ -884,8 +984,6 @@ const synonyms = {
   settings: "mode",
   program: "mode",
   programs: "mode",
-  channel: "mode",
-  channels: "mode",
   burst: "burst mode",
   normal: "normal mode",
   modulation: "modulation mode",
@@ -896,11 +994,48 @@ const synonyms = {
   // Therapy type synonyms
   ems: "electrical muscle stimulation",
   ifc: "interferential",
+  "ifc therapy": "interferential",
+  "ifc current": "interferential",
   interferential: "interferential therapy",
   galvanic: "galvanic stimulation",
   russian: "russian stimulation",
   microcurrent: "micro current",
   mens: "micro current",
+
+  // Setup / assembly synonyms
+  assemble: "set up",
+  assembly: "set up",
+  assembling: "set up",
+  setup: "set up",
+
+  // Display & flashing synonyms
+  blinking: "flashing",
+  blink: "flashing",
+  blinks: "flashing",
+
+  // Lock synonyms
+  locked: "lock",
+  unlock: "lock",
+  unlocked: "lock",
+  stuck: "lock",
+
+  // Storage & after-treatment pad care
+  store: "storage",
+  storing: "storage",
+  "after use": "after treatment",
+  "after session": "after treatment",
+
+  // Pattern / application synonyms
+  "x pattern": "criss cross",
+  "x shape": "criss cross",
+  "criss-cross": "criss cross",
+  crossing: "criss cross",
+
+  // Package & accessories
+  accessories: "comes with",
+  accessory: "comes with",
+  included: "comes with",
+  package: "comes with",
 
   // Safety / contraindication synonyms
   "side effect": "safety",
@@ -1317,14 +1452,32 @@ if (match && bestScore < 0.85) {
   const products = [
     "tens",
     "ultima",
+    "ultima 1",
     "ultima 5",
+    "ultima 11",
     "ultima 20",
     "ultima 3t",
     "ultima neo",
+    "if4d",
+    "if 4d",
+    "if-4d",
+    "interferential",
     "electrodes",
     "lead wires",
     "battery",
     "pmt",
+    "thermotech",
+    "thermacycle",
+    "soft cycle",
+    "ucombo",
+    "thermorelief",
+    "theralamp",
+    "aqua relief",
+    "polar vortex",
+    "arctic ice",
+    "theratrac",
+    "jstim",
+    "qfiber",
   ];
 
   const mentionedProduct = products.find((p) => normQ.includes(p));
@@ -1348,7 +1501,7 @@ if (match && bestScore < 0.85) {
 
 // ================= PARAPHRASE INTENT MATCHING =================
 // Catches natural language paraphrases that token-level matching misses
-if (!match || bestScore < 0.7) {
+if (!match || bestScore < 0.85) {
   const normQ = incomingQuestion.toLowerCase();
   const paraphraseMap = [
     // 1. Pacemaker / Cardiac implant (checked before general metal implants)
@@ -1397,6 +1550,49 @@ if (!match || bestScore < 0.7) {
         /(red mark|red spot|redness).*(bad|normal|worried|concern|ok|okay)/i,
       ],
       target: "I am experiencing skin irritation -- why is that?",
+    },
+    // U5 Setup & Assembly
+    {
+      patterns: [
+        /(how (do i|to)|steps? to) (set up|setup|assemble|put together|connect).*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(set up|setup|assembly|assembling|getting started)/i,
+        /setting up (the|my)?\s*(u5|ultima 5)/i,
+        /how do i set up the ultima 5/i,
+      ],
+      target: "How do I set up the Ultima 5?",
+    },
+    // U5 Treatment Timer
+    {
+      patterns: [
+        /(how (do i|to)|set|adjust|change).*(treatment timer|timer|session time).*(u5|ultima 5)/i,
+        /(timer button|setting the timer).*(u5|ultima 5)/i,
+      ],
+      target: "How do I set the treatment timer on my Ultima 5?",
+    },
+    // IFC Session Duration
+    {
+      patterns: [
+        /how (long|many minutes?).*(interferential|ifc|if4d).*(session|treatment)/i,
+        /(interferential|ifc|if4d).*(session|treatment).*(length|duration|how long|minutes?)/i,
+      ],
+      target: "How long are interferential therapy sessions typically?",
+    },
+    // Change Waveform on U5
+    {
+      patterns: [
+        /(how (do i|to)|which buttons?|switch|change|select).*(waveform|wave form).*(u5|ultima 5)/i,
+        /(change|switch|toggle).*(waveform|wave form) on (the )?(u5|ultima 5)/i,
+      ],
+      target: "How do I change the waveform on my Ultima 5?",
+    },
+    // Turn Pad Contact Detection On/Off
+    {
+      patterns: [
+        /(turn (on|off)|enable|disable|activate|deactivate|toggle).*(pad contact|contact detection|contact alarm)/i,
+        /(pad contact detection|pad contact alarm).*(turn (on|off)|enable|disable|toggle)/i,
+        /(pr\+|mode).*(pad contact|contact detection)/i,
+      ],
+      target: "How do I turn Pad Contact Detection on or off?",
     },
     // 5. Treatment / session duration
     {
@@ -1650,12 +1846,30 @@ if (!match || bestScore < 0.7) {
       ],
       target: "What settings should I use for my very first Ultima 5 session?",
     },
+    // Can't Change Intensity on U5 (Locked)
+    {
+      patterns: [
+        /(can't|cannot|won't|unable to|stuck|locked).*(change|adjust|turn up|increase).*(intensity|strength|level).*(u5|ultima 5)?/i,
+        /(intensity|knob).*(locked|stuck|not changing|won't adjust|can't turn up).*(u5|ultima 5)?/i,
+        /why can't i (change|adjust) the intensity.*(u5|ultima 5)?/i,
+      ],
+      target: "Why can't I change the intensity on my Ultima 5?",
+    },
     // 33. Intensity knobs on U5
     {
       patterns: [
         /(intensity controls|intensity knobs|knobs work).*(u5|ultima 5)/i,
       ],
       target: "How do the intensity knobs work on my Ultima 5?",
+    },
+    // Feel Nothing on U5
+    {
+      patterns: [
+        /(don't|dont|not|can't|cant).*(feel anything|feeling anything|feel sensation|any sensation).*(turn.*on|turned.*on|started)?.*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(turned on|running|power.*on).*(don't feel|no feeling|no sensation|not feeling)/i,
+        /(why don't i feel anything|why am i not feeling anything).*(u5|ultima 5)/i,
+      ],
+      target: "Why don't I feel anything when I turn on my Ultima 5?",
     },
     // 34. Turned on but no sensation / feel nothing
     {
@@ -1730,6 +1944,33 @@ if (!match || bestScore < 0.7) {
       ],
       target: "Can I wear a TENS unit all day?",
     },
+    // Charger Red Light
+    {
+      patterns: [
+        /(red light|light on the charger|charger light).*(stay red|go out|turn off|turn green|change color|always red)/i,
+        /does the (charger|red light).*(turn green|go out|shut off)/i,
+        /why is (the )?charger (always red|staying red)/i,
+      ],
+      target: "Does the red light on the charger go out?",
+    },
+    // Batteries Charged / Charging Time
+    {
+      patterns: [
+        /(how do (you|i) know|when are|tell if).*(batteries|battery).*(charged|full|done charging)/i,
+        /how (long|many hours).*(charge|charging).*(batteries|battery|rechargeable)/i,
+        /(charge time|charging time).*(batteries|battery|u5|ultima 5)/i,
+      ],
+      target: "How do you know when the batteries are charged?",
+    },
+    // Batteries for Ultima 5
+    {
+      patterns: [
+        /(what|which|kind of|type of) batteries.*(use|take|put in|support|work in).*(u5|ultima 5)/i,
+        /(can i use|use).*(alkaline|rechargeable|nimh|disposable|aa).*(batteries|battery).*(u5|ultima 5)/i,
+        /(batteries|battery).*(for|in).*(u5|ultima 5)/i,
+      ],
+      target: "What batteries can I use in the Ultima 5?",
+    },
     // 42. Battery life / replacement timing
     {
       patterns: [
@@ -1746,6 +1987,118 @@ if (!match || bestScore < 0.7) {
         /is ems the same thing as tens/i,
       ],
       target: "What's the difference between TENS and EMS?",
+    },
+    // Flashing / blinking CH1 or CH2 on U5
+    {
+      patterns: [
+        /(ch1|ch2|channel 1|channel 2).*(flashing|blinking)/i,
+        /(flashing|blinking).*(ch1|ch2|channel 1|channel 2)/i,
+        /why is (ch1|ch2) (flashing|blinking)/i,
+      ],
+      target: "Why is CH1 or CH2 flashing on my Ultima 5?",
+    },
+    // CH1 and CH2 channels meaning on U5
+    {
+      patterns: [
+        /(what (do|does|is)|meaning of|what are)\b.*(ch1|ch2|channel 1|channel 2)/i,
+        /(ch1|ch2|channel 1 and 2|two channels).*(mean|stand for)/i,
+        /(difference between).*(ch1 and ch2|channel 1 and channel 2)/i,
+      ],
+      target: "What do CH1 and CH2 mean on my Ultima 5?",
+    },
+    // Two pads / single channel on U5
+    {
+      patterns: [
+        /(can i use|use|run).*(only two|just 2|only 2|just two|single pair|2 pads|two pads).*(pads?|electrodes?|lead)?.*(u5|ultima 5)/i,
+        /(u5|ultima 5).*(with only 2|with just 2|with two pads|with 2 pads)/i,
+        /(have to use 4 pads|require 4 pads).*(u5|ultima 5)/i,
+      ],
+      target: "Can I use only two electrode pads with my Ultima 5?",
+    },
+    // Pad care / storage after treatment
+    {
+      patterns: [
+        /(what (should|do) i do with|how (to|should i) (store|keep|save|put away)).*(pads|electrodes).*(after|done|finished).*(treatment|session|use)/i,
+        /(pads|electrodes).*(after treatment|after session|after use|when finished|when done)/i,
+        /store.*(pads|electrodes).*(plastic backing|bag)/i,
+      ],
+      target: "What should I do with the electrode pads after treatment?",
+    },
+    // Difference between IFC and TENS
+    {
+      patterns: [
+        /(difference between|compare|versus|\bvs\b|how is.*different).*(interferential|ifc).*(tens)/i,
+        /(difference between|compare|versus|\bvs\b|how is.*different).*(tens).*(interferential|ifc)/i,
+        /(interferential|ifc).*(versus|\bvs\b|different|difference).*(tens)/i,
+        /(tens).*(versus|\bvs\b|different|difference).*(interferential|ifc)/i,
+        /(interferential|ifc).*(better than|same as|different from).*(tens)/i,
+      ],
+      target: "What is the difference between interferential therapy and TENS?",
+    },
+    // Criss-cross / X pattern pad application for IFC
+    {
+      patterns: [
+        /(criss[- ]?cross|x[- ]?pattern|crossing|intersect).*(pad|electrode|application|placement)/i,
+        /(pad|electrode|application|placement).*(criss[- ]?cross|x[- ]?pattern|crossing)/i,
+      ],
+      target: "What is criss-cross pad application for interferential therapy?",
+    },
+    // What is Interferential / IFC therapy
+    {
+      patterns: [
+        /(what is|tell me about|explain)\s+(the\s+)?(interferential(\s+therapy)?|ifc(\s+therapy)?|interferential\s+current)(\?|$)/i,
+        /what does interferential (mean|therapy mean|current mean)/i,
+        /what is interferential/i,
+      ],
+      target: "What is interferential therapy?",
+    },
+    // What is IF4D device
+    {
+      patterns: [
+        /(what is|tell me about|explain|what kind of device is|information on) (the )?(if4d|if 4d|if-4d)/i,
+        /^(if4d|if 4d|if-4d)$/i,
+      ],
+      target: "What is the IF4D?",
+    },
+    // Two or four electrodes on IF4D (bipolar vs quadripolar)
+    {
+      patterns: [
+        /(2 or 4|two or four|how many|use 2|use two|use 4|use four|bipolar|quadripolar).*(pads?|electrodes?).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(2 or 4|two or four|how many pads|two pads or four)/i,
+      ],
+      target: "Can I use two or four electrodes with the IF4D?",
+    },
+    // IF4D treatment modes / settings
+    {
+      patterns: [
+        /(treatment settings?|settings?|modes?|programs?|sweep|frequency shift).*(offer|have|available)?.*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(settings?|modes?|programs?|sweep options?)/i,
+      ],
+      target: "What treatment settings does the IF4D offer?",
+    },
+    // IF4D sine wave waveform
+    {
+      patterns: [
+        /(waveform|wave form|sine[- ]?wave).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(waveform|wave form|carrier frequency)/i,
+      ],
+      target: "What kind of waveform does the IF4D use?",
+    },
+    // What comes with IF4D / kit contents
+    {
+      patterns: [
+        /(what('s| is) (included|in the box)|comes with|comes in|accessories).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(kit|in the box|included|package contents)/i,
+      ],
+      target: "What comes with the IF4D?",
+    },
+    // IF4D battery or wall power
+    {
+      patterns: [
+        /(batteries?|battery|wall power|wall adapter|ac adapter|plug in|power supply).*(if4d|if 4d|if-4d)/i,
+        /(if4d|if 4d|if-4d).*(battery|batteries|wall power|wall adapter|plug)/i,
+      ],
+      target: "Can the IF4D run on batteries or wall power?",
     },
   ];
 
