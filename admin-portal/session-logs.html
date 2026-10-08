@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script>
+    // Route Protection: Redirect unauthenticated requests to login
+    if (
+      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
+      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
+    ) {
+      window.location.replace("login.html");
+    }
+
+    function logout() {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminEmail");
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>PMT Spark AI Core - Chat Logs &amp; Session Duration Telemetry</title>
+  <!-- Material Symbols Outlined -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Fonts: Space Grotesk, Geist, JetBrains Mono -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#00354a",
+            "surface-container-low": "#0e1c2e",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "primary": "#56dacd",
+            "inverse-primary": "#006a62",
+            "on-surface": "#d5e3fd",
+            "on-tertiary-container": "#00364b",
+            "tertiary-container": "#00a5de",
+            "surface-container-lowest": "#020e20",
+            "surface-container-high": "#1d2b3e",
+            "primary-fixed-dim": "#56dacd",
+            "surface": "#051426",
+            "primary-container": "#00aca0",
+            "on-primary-container": "#003934",
+            "on-surface-variant": "#bbc9c6",
+            "surface-tint": "#56dacd",
+            "error": "#ffb4ab",
+            "secondary-container": "#007daa",
+            "background": "#051426",
+            "on-tertiary-fixed-variant": "#004c69",
+            "surface-variant": "#283549",
+            "surface-container": "#122033",
+            "surface-container-highest": "#283549",
+            "outline-variant": "#3c4947",
+            "on-primary-fixed": "#00201d",
+            "secondary-fixed-dim": "#7cd0ff",
+            "inverse-surface": "#d5e3fd",
+            "on-secondary": "#00344a",
+            "on-secondary-container": "#fcfcff",
+            "on-secondary-fixed-variant": "#004c69",
+            "on-tertiary-fixed": "#001e2c",
+            "on-primary-fixed-variant": "#00504a",
+            "outline": "#869491",
+            "on-primary": "#003733",
+            "primary-fixed": "#76f7e9",
+            "secondary-fixed": "#c4e7ff",
+            "on-background": "#d5e3fd",
+            "tertiary-fixed": "#c4e7ff",
+            "on-error": "#690005",
+            "tertiary": "#7bd0ff",
+            "surface-bright": "#2d3a4e",
+            "inverse-on-surface": "#243144",
+            "on-error-container": "#ffdad6",
+            "surface-dim": "#051426",
+            "error-container": "#93000a",
+            "secondary": "#7cd0ff",
+            "on-secondary-fixed": "#001e2c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "margin": "2rem",
+            "space-md": "1rem",
+            "margin-mobile": "1rem",
+            "gutter-mobile": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.5rem",
+            "gutter": "1.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Space Grotesk"],
+            "body-md": ["Geist"],
+            "label-lg": ["JetBrains Mono"],
+            "headline-sm": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "body-lg": ["Geist"],
+            "label-sm": ["JetBrains Mono"],
+            "label-md": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "headline-xl": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "body-sm": ["Geist"]
+          },
+          "fontSize": {
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(2, 14, 32, 0.6);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(86, 218, 205, 0.25);
+      border-radius: 2px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(86, 218, 205, 0.5);
+    }
+
+    .telemetry-grid-bg {
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(0, 172, 160, 0.08) 0%, transparent 70%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .hud-grid-pattern {
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(0, 172, 160, 0.12) 0%, transparent 65%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .glow-teal-sm,
+    .cyan-glow-sm {
+      box-shadow: 0 0 15px -3px rgba(0, 172, 160, 0.35);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary selection:text-on-primary min-h-screen flex flex-col hud-grid-pattern">
+  <!-- TOP SHARED NAV BAR (PMT Spark AI Core) -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 h-16 bg-surface-container-lowest/85 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+    <div class="flex justify-between items-center w-full h-full px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-3">
+        <img src="logo.png" alt="Pain Management Technologies"
+          class="h-8 w-auto max-w-[160px] object-contain filter drop-shadow-[0_0_8px_rgba(0,172,160,0.35)]">
+      </div>
+      <!-- Right Side: Live Session Time & Sign Out Action -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-1.5 text-label-md font-label-md text-on-surface-variant font-mono text-xs">
+          <span class="text-outline">SESSION TIME:</span>
+          <span class="text-on-surface font-semibold utc-clock-display" id="utc-clock">LIVE: --</span>
+        </div>
+        <button onclick="logout()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-error hover:border-error/40 transition-all duration-150 active:scale-95 text-label-md font-label-md cursor-pointer"
+          title="Sign Out">
+          <span class="material-symbols-outlined text-error text-sm" data-icon="logout">logout</span>
+          <span class="hidden sm:inline">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <!-- Main System Shell -->
+  <div class="flex-1 pt-16 flex w-full">
+    <!-- Fixed/Sticky Left Telemetry Control Rail (280px) -->
+    <aside
+      class="w-[280px] shrink-0 hidden md:flex flex-col justify-between border-r border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-xl p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <!-- Navigation Menu -->
+      <nav class="space-y-1 flex-1">
+        <div class="px-3 pb-2 pt-1 text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+          Telemetry Engine</div>
+        <!-- 1. Overview -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="overview.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="dashboard">dashboard</span>
+            <span class="text-body-md font-body-md">Overview</span>
+          </div>
+        </a>
+        <!-- 2. Chat Logs & Sessions (Active) -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium shadow-[0_0_15px_-3px_rgba(0,172,160,0.35)] cyan-glow-sm transition-all duration-200 group"
+          href="session-logs.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl" data-icon="forum">forum</span>
+            <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface/20 text-on-primary-container border border-white/20 font-mono">1.2k</span>
+        </a>
+        <!-- 3. Support Tickets -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-body-md font-body-md">Support Tickets</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20 font-mono">42
+            pending</span>
+        </a>
+        <!-- 4. Questions & KB -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="knowledge-base.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="menu_book">menu_book</span>
+            <span class="text-body-md font-body-md">Questions &amp; KB</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-mono">358</span>
+        </a>
+        <!-- 5. Testing & Accuracy -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="tune">tune</span>
+            <span class="text-body-md font-body-md">Testing &amp; Accuracy</span>
+          </div>
+          <span class="text-label-sm font-label-sm text-secondary font-mono">94.2%</span>
+        </a>
+        <!-- 6. Fallbacks & Rules -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="alt_route">alt_route</span>
+            <span class="text-body-md font-body-md">Fallbacks &amp; Rules</span>
+          </div>
+        </a>
+        <!-- 7. Settings & Access -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="settings">settings</span>
+            <span class="text-body-md font-body-md">Settings &amp; Access</span>
+          </div>
+        </a>
+      </nav>
+      <!-- Sidebar Footer Diagnostics & Profile -->
+      <div class="pt-4 border-t border-outline-variant/30 space-y-3 mt-auto">
+        <div
+          class="p-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 text-label-sm font-label-sm">
+          <div class="flex items-center justify-between text-outline">
+            <span>DIAGNOSTIC NODE</span>
+            <span class="text-primary font-semibold font-mono">14ms</span>
+          </div>
+          <div class="text-on-surface mt-1 truncate">Node-East US • Cluster-4A</div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-full border border-primary/50 bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-base" data-icon="shield_person">shield_person</span>
+            </div>
+            <div class="truncate">
+              <p class="text-body-sm font-body-sm text-on-surface font-medium leading-none truncate max-w-[130px] user-profile-name"
+                id="logs-user-name">PMT Admin</p>
+              <p class="text-label-sm font-label-sm text-outline mt-0.5 truncate">SecOps Lead</p>
+            </div>
+          </div>
+          <button
+            class="p-1.5 rounded text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer shrink-0"
+            title="Logout" onclick="logout()">
+            <span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+    <!-- MAIN ADMINISTRATIVE CANVAS -->
+    <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-8 space-y-6 w-full">
+      <!-- TOP ADMINISTRATIVE HEADER & CONTROL ROW -->
+      <section class="flex flex-col space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-label-sm font-label-sm text-primary tracking-widest uppercase">Admin Telemetry
+                Console</span>
+              <span class="text-outline text-xs">•</span>
+              <span class="text-label-sm font-label-sm text-on-surface-variant uppercase">Pain Management Technologies
+                Core</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
+              Chat Logs &amp; Session Duration Telemetry
+            </h1>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Real-time Session Activity, Duration Analytics &amp; Patient Conversation Inspection // TLS 1.3 Telemetry
+              Stream
+            </p>
+          </div>
+          <!-- Quick Action Buttons -->
+          <div class="flex items-center space-x-3 self-start lg:self-auto">
+            <button
+              class="flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-surface-container-high/80 border border-outline-variant/40 hover:border-primary/40 text-on-surface font-label-md text-label-md transition-all duration-150">
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span>Live Stream Pause/Play</span>
+              <span class="material-symbols-outlined text-sm" data-icon="pause">pause</span>
+            </button>
+            <button
+              class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-container to-secondary-container text-on-secondary-container font-headline-sm text-xs font-semibold tracking-wide border border-white/20 glow-teal-sm hover:brightness-110 active:scale-95 transition-all duration-200">
+              <span class="material-symbols-outlined text-base" data-icon="download">download</span>
+              <span>Export to CSV / Excel</span>
+            </button>
+          </div>
+        </div>
+        <!-- Controls Row (Search, Date Filter, Dropdowns) -->
+        <div
+          class="p-3.5 rounded-xl bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/30 flex flex-wrap items-center justify-between gap-3">
+          <!-- Live Search Bar -->
+          <div class="relative flex-1 min-w-[320px]">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+              <span class="material-symbols-outlined text-lg" data-icon="search">search</span>
+            </span>
+            <input
+              class="w-full pl-9 pr-16 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-on-surface text-body-md placeholder-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 font-body-md text-xs transition-colors"
+              placeholder="Search by session_id, IP, question, or date..." type="text" />
+            <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+              <kbd
+                class="px-1.5 py-0.5 rounded bg-surface-container-high border border-outline-variant/40 text-on-surface-variant font-label-sm text-[10px]">Cmd+K</kbd>
+            </span>
+          </div>
+          <!-- Date Range Selector Pills -->
+          <div
+            class="flex items-center space-x-1 p-1 rounded-lg bg-surface-container-low border border-outline-variant/30 font-label-md text-label-md">
+            <button
+              class="px-3 py-1.5 rounded bg-primary-container/30 border border-primary/50 text-primary font-semibold">Last
+              24 Hours</button>
+            <button
+              class="px-3 py-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors">Last
+              7 Days</button>
+            <button
+              class="px-3 py-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors">Custom
+              Range</button>
+          </div>
+          <!-- Filter Dropdowns -->
+          <div class="flex items-center space-x-2 font-label-md text-label-md">
+            <div class="relative">
+              <select
+                class="appearance-none bg-surface-container-low border border-outline-variant/40 text-on-surface py-1.5 pl-3 pr-8 rounded-lg focus:outline-none focus:border-primary text-xs cursor-pointer">
+                <option>Status: All</option>
+                <option>Status: Active</option>
+                <option>Status: Ended</option>
+                <option>Status: Escalated</option>
+              </select>
+              <span
+                class="material-symbols-outlined absolute right-2 top-2 text-sm text-on-surface-variant pointer-events-none"
+                data-icon="expand_more">expand_more</span>
+            </div>
+            <div class="relative">
+              <select
+                class="appearance-none bg-surface-container-low border border-outline-variant/40 text-on-surface py-1.5 pl-3 pr-8 rounded-lg focus:outline-none focus:border-primary text-xs cursor-pointer">
+                <option>Device: All</option>
+                <option>Desktop (Win/Mac)</option>
+                <option>Mobile (iOS/Android)</option>
+              </select>
+              <span
+                class="material-symbols-outlined absolute right-2 top-2 text-sm text-on-surface-variant pointer-events-none"
+                data-icon="expand_more">expand_more</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- TOP METRICS RIBBON (4 CARDS) -->
+      <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Metric 1: Avg Session Duration -->
+        <div
+          class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Avg Session
+              Duration</span>
+            <div
+              class="w-7 h-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">4m 18s</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-primary font-semibold flex items-center">
+                <span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span> +12s
+              </span>
+              <span class="text-on-surface-variant">vs yesterday benchmark</span>
+            </div>
+          </div>
+          <div
+            class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>High Patient Engagement</span>
+            <span class="text-primary">99.4% P95 Norm</span>
+          </div>
+        </div>
+        <!-- Metric 2: Active Sessions Today -->
+        <div
+          class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Active Sessions
+              Today</span>
+            <div
+              class="w-7 h-7 rounded bg-secondary/10 border border-secondary/20 flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined text-sm" data-icon="bubble_chart">bubble_chart</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">1,248</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-primary font-semibold flex items-center">
+                <span class="material-symbols-outlined text-xs" data-icon="trending_up">trending_up</span> +8.4%
+              </span>
+              <span class="text-on-surface-variant">surge across clusters</span>
+            </div>
+          </div>
+          <div
+            class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Peak Concurrency: 184</span>
+            <span class="text-secondary">Node Load 31%</span>
+          </div>
+        </div>
+        <!-- Metric 3: IP Locations Tracked -->
+        <div
+          class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">IP Locations
+              Tracked</span>
+            <div
+              class="w-7 h-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-sm" data-icon="public">public</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">94.8%</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-primary font-semibold">Geo-Resolved</span>
+              <span class="text-on-surface-variant">via MaxMind DB</span>
+            </div>
+          </div>
+          <div
+            class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Top: US-East 68%</span>
+            <span>US-Central 21%</span>
+          </div>
+        </div>
+        <!-- Metric 4: Total Session Messages -->
+        <div
+          class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Session
+              Messages</span>
+            <div
+              class="w-7 h-7 rounded bg-tertiary-container/20 border border-tertiary/20 flex items-center justify-center text-tertiary">
+              <span class="material-symbols-outlined text-sm" data-icon="chat">chat</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">8,924</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-secondary font-semibold">Avg 7.1</span>
+              <span class="text-on-surface-variant">messages/session</span>
+            </div>
+          </div>
+          <div
+            class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Automated: 98.2%</span>
+            <span class="text-primary">Escalated: 1.8%</span>
+          </div>
+        </div>
+      </section>
+      <!-- MAIN INTERACTIVE SPLIT INSPECTOR LAYOUT (8-Column & 4-Column Grid) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-8">
+        <!-- LEFT PANEL (col-span-8): SESSION TELEMETRY LEDGER -->
+        <div
+          class="lg:col-span-8 rounded-xl bg-surface-container-low/70 backdrop-blur-md border border-outline-variant/30 flex flex-col overflow-hidden">
+          <!-- Panel Header -->
+          <div
+            class="px-5 py-3.5 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest/60">
+            <div class="flex items-center space-x-3">
+              <span class="material-symbols-outlined text-primary text-xl" data-icon="receipt_long">receipt_long</span>
+              <div>
+                <h2 class="font-headline-sm text-sm font-semibold text-on-surface tracking-tight">Session Telemetry
+                  Ledger</h2>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Inbound live patient stream connected via
+                  Socket v4.2</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface text-xs font-label-sm flex items-center space-x-1">
+                <span class="material-symbols-outlined text-xs" data-icon="filter_list">filter_list</span>
+                <span>Columns (6)</span>
+              </button>
+              <button
+                class="p-1.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+              </button>
+            </div>
+          </div>
+          <!-- Database Schema Table -->
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="border-b border-outline-variant/30 bg-surface-container-lowest/40 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                  <th class="py-3 px-4">Session ID</th>
+                  <th class="py-3 px-3">Started At</th>
+                  <th class="py-3 px-3">Last Activity &amp; Duration</th>
+                  <th class="py-3 px-3">IP Address &amp; Geo</th>
+                  <th class="py-3 px-3">User Agent</th>
+                  <th class="py-3 px-4 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-outline-variant/20 font-body-sm text-xs">
+                <!-- ROW 1 (SELECTED / INSPECTED STATE) -->
+                <tr
+                  class="bg-primary/10 border-l-2 border-primary cursor-pointer hover:bg-primary/15 transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="flex items-center space-x-2 font-label-md text-label-md text-primary font-semibold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                      <span class="truncate max-w-[170px]"
+                        title="spark_k9a2f7zq8_1775624102931">spark_k9a2f7zq8_1775624102931</span>
+                    </div>
+                    <div class="text-[11px] text-on-surface-variant font-body-sm truncate max-w-[200px] mt-0.5">TENS
+                      7000 electrode placement sciatica</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm text-on-surface">
+                    <div>Oct 24, 14:15:02</div>
+                    <div class="text-on-surface-variant text-[10px]">EDT (UTC-4)</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">14:22:14</div>
+                    <span
+                      class="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-primary-container/30 text-primary border border-primary/30 text-[10px] font-semibold">
+                      7m 12s duration
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">103.152.220.45</div>
+                    <div class="text-on-surface-variant text-[10px] flex items-center space-x-1">
+                      <span>🇺🇸</span>
+                      <span>US - Ashburn, VA</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <div
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface text-[11px] font-label-sm">
+                      <span class="material-symbols-outlined text-xs text-primary"
+                        data-icon="laptop_windows">laptop_windows</span>
+                      <span>Chrome 122 / Win 11</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span
+                      class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/40 font-label-sm text-[10px] font-semibold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+                      <span>Active</span>
+                    </span>
+                  </td>
+                </tr>
+                <!-- ROW 2 -->
+                <tr class="hover:bg-surface-container-high/30 cursor-pointer transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[170px]"
+                      title="spark_x7b4m1vv9_1775623991042">
+                      spark_x7b4m1vv9_1775623991042
+                    </div>
+                    <div class="text-[11px] text-on-surface-variant font-body-sm truncate max-w-[200px] mt-0.5">IF4D
+                      quad-polar lead impedance error</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm text-on-surface">
+                    <div>Oct 24, 14:10:19</div>
+                    <div class="text-on-surface-variant text-[10px]">EDT (UTC-4)</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">14:14:42</div>
+                    <span
+                      class="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/30 text-[10px]">
+                      4m 23s duration
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">74.125.210.101</div>
+                    <div class="text-on-surface-variant text-[10px] flex items-center space-x-1">
+                      <span>🇺🇸</span>
+                      <span>US - Atlanta, GA</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <div
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface text-[11px] font-label-sm">
+                      <span class="material-symbols-outlined text-xs text-secondary"
+                        data-icon="phone_iphone">phone_iphone</span>
+                      <span>Safari 17 / iOS 17.4</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/40 font-label-sm text-[10px]">
+                      Ended
+                    </span>
+                  </td>
+                </tr>
+                <!-- ROW 3 (ESCALATED) -->
+                <tr class="hover:bg-surface-container-high/30 cursor-pointer transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="font-label-md text-label-md text-error font-medium truncate max-w-[170px]"
+                      title="spark_w3f8j9aa1_1775623880199">
+                      spark_w3f8j9aa1_1775623880199
+                    </div>
+                    <div class="text-[11px] text-error font-body-sm truncate max-w-[200px] mt-0.5">High amplitude sharp
+                      burning sensation</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm text-on-surface">
+                    <div>Oct 24, 14:02:11</div>
+                    <div class="text-on-surface-variant text-[10px]">EDT (UTC-4)</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">14:11:05</div>
+                    <span
+                      class="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-error-container/20 text-error border border-error/30 text-[10px] font-semibold">
+                      8m 54s duration
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">172.56.42.119</div>
+                    <div class="text-on-surface-variant text-[10px] flex items-center space-x-1">
+                      <span>🇺🇸</span>
+                      <span>US - Dallas, TX</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <div
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface text-[11px] font-label-sm">
+                      <span class="material-symbols-outlined text-xs text-primary"
+                        data-icon="laptop_chromebook">laptop_chromebook</span>
+                      <span>Chrome 122 / Android</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span
+                      class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-error-container/30 text-error border border-error/40 font-label-sm text-[10px] font-semibold">
+                      <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                      <span>Escalated</span>
+                    </span>
+                  </td>
+                </tr>
+                <!-- ROW 4 -->
+                <tr class="hover:bg-surface-container-high/30 cursor-pointer transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[170px]"
+                      title="spark_d4p9q2cc5_1775623712990">
+                      spark_d4p9q2cc5_1775623712990
+                    </div>
+                    <div class="text-[11px] text-on-surface-variant font-body-sm truncate max-w-[200px] mt-0.5">TENS
+                      7000 9V battery compartment latch</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm text-on-surface">
+                    <div>Oct 24, 13:58:30</div>
+                    <div class="text-on-surface-variant text-[10px]">EDT (UTC-4)</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">14:01:22</div>
+                    <span
+                      class="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/30 text-[10px]">
+                      2m 52s duration
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">198.51.100.77</div>
+                    <div class="text-on-surface-variant text-[10px] flex items-center space-x-1">
+                      <span>🇺🇸</span>
+                      <span>US - Chicago, IL</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <div
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface text-[11px] font-label-sm">
+                      <span class="material-symbols-outlined text-xs text-secondary"
+                        data-icon="laptop_mac">laptop_mac</span>
+                      <span>Safari 17 / macOS 14</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/40 font-label-sm text-[10px]">
+                      Ended
+                    </span>
+                  </td>
+                </tr>
+                <!-- ROW 5 -->
+                <tr class="hover:bg-surface-container-high/30 cursor-pointer transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[170px]"
+                      title="spark_m8k1l3tt4_1775623544108">
+                      spark_m8k1l3tt4_1775623544108
+                    </div>
+                    <div class="text-[11px] text-on-surface-variant font-body-sm truncate max-w-[200px] mt-0.5">CPAP /
+                      BiPAP DME cross-billing insurance</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm text-on-surface">
+                    <div>Oct 24, 13:42:15</div>
+                    <div class="text-on-surface-variant text-[10px]">EDT (UTC-4)</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">13:48:02</div>
+                    <span
+                      class="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/30 text-[10px]">
+                      5m 47s duration
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">66.249.79.135</div>
+                    <div class="text-on-surface-variant text-[10px] flex items-center space-x-1">
+                      <span>🇺🇸</span>
+                      <span>US - New York, NY</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <div
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface text-[11px] font-label-sm">
+                      <span class="material-symbols-outlined text-xs text-primary"
+                        data-icon="laptop_windows">laptop_windows</span>
+                      <span>Edge 121 / Win 11</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/40 font-label-sm text-[10px]">
+                      Ended
+                    </span>
+                  </td>
+                </tr>
+                <!-- ROW 6 -->
+                <tr class="hover:bg-surface-container-high/30 cursor-pointer transition-colors">
+                  <td class="py-3.5 px-4">
+                    <div class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[170px]"
+                      title="spark_p0v2r8zz6_1775623399001">
+                      spark_p0v2r8zz6_1775623399001
+                    </div>
+                    <div class="text-[11px] text-on-surface-variant font-body-sm truncate max-w-[200px] mt-0.5">
+                      InTENSity 10 digital pre-set program mode</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm text-on-surface">
+                    <div>Oct 24, 13:30:00</div>
+                    <div class="text-on-surface-variant text-[10px]">EDT (UTC-4)</div>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">13:36:10</div>
+                    <span
+                      class="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/30 text-[10px]">
+                      6m 10s duration
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3 font-label-sm">
+                    <div class="text-on-surface">142.250.190.46</div>
+                    <div class="text-on-surface-variant text-[10px] flex items-center space-x-1">
+                      <span>🇺🇸</span>
+                      <span>US - Denver, CO</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3">
+                    <div
+                      class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface text-[11px] font-label-sm">
+                      <span class="material-symbols-outlined text-xs text-secondary"
+                        data-icon="phone_iphone">phone_iphone</span>
+                      <span>Safari 17 / iOS 17.3</span>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant border border-outline-variant/40 font-label-sm text-[10px]">
+                      Ended
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination Bar -->
+          <div
+            class="px-5 py-3 border-t border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest/60 font-label-sm text-label-sm text-on-surface-variant">
+            <div>
+              Showing <span class="text-on-surface font-semibold">1-8</span> of <span
+                class="text-on-surface font-semibold">1,248</span> sessions
+            </div>
+            <div class="flex items-center space-x-1">
+              <button
+                class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs">Prev</button>
+              <button
+                class="px-2.5 py-1 rounded bg-primary-container/30 border border-primary/50 text-primary font-semibold text-xs">1</button>
+              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">2</button>
+              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">3</button>
+              <span class="px-1 text-on-surface-variant">...</span>
+              <button
+                class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">156</button>
+              <button
+                class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs">Next</button>
+            </div>
+          </div>
+        </div>
+        <!-- RIGHT PANEL (col-span-4): LIVE CONVERSATION TRANSCRIPT PREVIEW -->
+        <div
+          class="lg:col-span-4 rounded-xl bg-surface-container-low/80 backdrop-blur-xl border border-primary/30 flex flex-col glow-teal-sm overflow-hidden">
+          <!-- Inspector Header -->
+          <div class="p-4 border-b border-outline-variant/30 bg-surface-container-lowest/80 flex flex-col space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+                <span class="font-headline-sm text-sm font-semibold text-on-surface">Live Transcript Inspector</span>
+              </div>
+              <span
+                class="px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 font-label-sm text-[10px] font-semibold flex items-center space-x-1">
+                <span>Active Stream</span>
+              </span>
+            </div>
+            <!-- Session ID Pill & Copy Action -->
+            <div
+              class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-surface-container-high/60 border border-outline-variant/30 font-label-md text-label-md">
+              <span class="text-primary truncate"
+                title="spark_k9a2f7zq8_1775624102931">spark_k9a2f7zq8_1775624102931</span>
+              <button class="text-on-surface-variant hover:text-primary transition-colors ml-2" title="Copy Session ID">
+                <span class="material-symbols-outlined text-sm" data-icon="content_copy">content_copy</span>
+              </button>
+            </div>
+            <!-- Telemetry Strip -->
+            <div
+              class="grid grid-cols-2 gap-2 text-[11px] font-label-sm text-on-surface-variant bg-surface-container-lowest/50 p-2 rounded-lg border border-outline-variant/20">
+              <div>
+                <span class="text-on-surface-variant/70">Client IP:</span>
+                <span class="text-on-surface font-semibold block truncate">103.152.220.45</span>
+                <span class="text-[10px] text-primary">Ashburn, VA</span>
+              </div>
+              <div>
+                <span class="text-on-surface-variant/70">Agent:</span>
+                <span class="text-on-surface font-semibold block truncate">Chrome 122</span>
+                <span class="text-[10px] text-secondary">Windows 11</span>
+              </div>
+              <div>
+                <span class="text-on-surface-variant/70">Started:</span>
+                <span class="text-on-surface block">14:15:02 EDT</span>
+              </div>
+              <div>
+                <span class="text-on-surface-variant/70">Current Duration:</span>
+                <span class="text-primary font-semibold block">7m 12s</span>
+              </div>
+            </div>
+          </div>
+          <!-- Chat Transcript Thread (Custom Scrollbar) -->
+          <div
+            class="p-4 space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar flex-1 bg-surface-container-lowest/30">
+            <!-- Message 1 (Patient/User) -->
+            <div class="flex flex-col items-end space-y-1">
+              <div class="flex items-center space-x-1.5 font-label-sm text-[10px] text-on-surface-variant">
+                <span>Patient / User</span>
+                <span>•</span>
+                <span>14:15:18</span>
+              </div>
+              <div
+                class="max-w-[90%] p-3 rounded-lg bg-surface-container-high/60 border-r-2 border-secondary text-on-surface font-body-sm text-xs leading-relaxed shadow-sm">
+                Hello, how do I position the electrode pads on my lower back for sciatica pain using the TENS 7000?
+              </div>
+            </div>
+            <!-- Message 2 (Spark AI Core v4.2) -->
+            <div class="flex flex-col items-start space-y-1">
+              <div class="flex items-center space-x-1.5 font-label-sm text-[10px] text-primary">
+                <span class="material-symbols-outlined text-xs" data-icon="neurology">neurology</span>
+                <span class="font-semibold">Spark AI Core v4.2</span>
+                <span class="text-on-surface-variant">•</span>
+                <span class="text-on-surface-variant">14:15:24 (600ms latency)</span>
+              </div>
+              <div
+                class="max-w-[92%] p-3 rounded-lg bg-surface-container-low/90 border border-primary/25 border-l-2 border-l-primary text-on-surface font-body-sm text-xs leading-relaxed space-y-2">
+                <p>
+                  For bilateral lumbar / sciatica symptoms with the <strong class="text-primary font-semibold">TENS
+                    7000</strong>:
+                </p>
+                <div
+                  class="bg-surface-container-lowest/80 p-2 rounded border border-outline-variant/30 font-label-sm text-[11px] space-y-1">
+                  <p><span class="text-primary font-semibold">Channel 1:</span> Place one pad on the lower lumbar area
+                    (pain origin) and the paired pad 2-3 inches laterally on the right side.</p>
+                  <p><span class="text-secondary font-semibold">Channel 2:</span> Place one pad mid-gluteus and the
+                    paired pad on the posterior upper thigh along the sciatic nerve pathway.</p>
+                </div>
+                <p class="text-[11px] text-on-surface-variant">
+                  Recommended parameters: <span class="font-label-sm text-on-surface font-semibold">Pulse Rate:
+                    80-100Hz</span>, <span class="font-label-sm text-on-surface font-semibold">Pulse Width: 150µs</span>
+                  in Normal or Burst mode.
+                </p>
+                <div
+                  class="text-[10px] text-on-surface-variant/80 border-t border-outline-variant/20 pt-1.5 flex items-center space-x-1">
+                  <span class="material-symbols-outlined text-xs text-primary" data-icon="verified">verified</span>
+                  <span>Clinical disclaimer: Never place electrodes over the carotid sinus, directly over the spine, or
+                    across chest wall.</span>
+                </div>
+              </div>
+            </div>
+            <!-- Message 3 (Patient/User) -->
+            <div class="flex flex-col items-end space-y-1">
+              <div class="flex items-center space-x-1.5 font-label-sm text-[10px] text-on-surface-variant">
+                <span>Patient / User</span>
+                <span>•</span>
+                <span>14:17:40</span>
+              </div>
+              <div
+                class="max-w-[90%] p-3 rounded-lg bg-surface-container-high/60 border-r-2 border-secondary text-on-surface font-body-sm text-xs leading-relaxed shadow-sm">
+                Should I turn it off before removing the pads or can I just peel them off?
+              </div>
+            </div>
+            <!-- Message 4 (Spark AI Core v4.2) -->
+            <div class="flex flex-col items-start space-y-1">
+              <div class="flex items-center space-x-1.5 font-label-sm text-[10px] text-primary">
+                <span class="material-symbols-outlined text-xs" data-icon="neurology">neurology</span>
+                <span class="font-semibold">Spark AI Core v4.2</span>
+                <span class="text-on-surface-variant">•</span>
+                <span class="text-on-surface-variant">14:17:48 (410ms latency)</span>
+              </div>
+              <div
+                class="max-w-[92%] p-3 rounded-lg bg-surface-container-low/90 border border-primary/25 border-l-2 border-l-primary text-on-surface font-body-sm text-xs leading-relaxed">
+                <p class="text-primary font-semibold flex items-center space-x-1">
+                  <span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+                  <span>Safety Critical Directive:</span>
+                </p>
+                <p class="mt-1">
+                  Always rotate both intensity dials completely counter-clockwise to <strong
+                    class="text-on-surface font-semibold">'0'</strong> and slide the main power switch to <strong
+                    class="text-on-surface font-semibold">OFF</strong> prior to removing or repositioning electrodes.
+                </p>
+                <p class="mt-1 text-[11px] text-on-surface-variant">
+                  Peeling energized electrodes will collapse surface contact area, causing a sudden sharp shock
+                  sensation and potential skin irritation.
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- Transcript Telemetry & Action Footer -->
+          <div class="p-4 border-t border-outline-variant/30 bg-surface-container-lowest/90 flex flex-col space-y-3">
+            <!-- Real-Time Model Confidence Chips -->
+            <div class="flex flex-wrap items-center justify-between gap-2 font-label-sm text-[10px]">
+              <div class="flex items-center space-x-2">
+                <span
+                  class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/30">Tokens:
+                  <strong class="text-on-surface">482</strong></span>
+                <span class="px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">Confidence:
+                  <strong class="text-primary">0.98</strong></span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-on-surface-variant">Latency: <span
+                    class="text-secondary font-semibold">410ms</span></span>
+                <span class="text-on-surface-variant">•</span>
+                <span class="text-on-surface-variant">Escalation: <span
+                    class="text-primary font-semibold">False</span></span>
+              </div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-2 pt-1 font-label-md text-label-md">
+              <button
+                class="px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/40 hover:border-primary/40 text-on-surface flex items-center justify-center space-x-1.5 transition-all duration-150">
+                <span class="material-symbols-outlined text-sm" data-icon="data_object">data_object</span>
+                <span>Download JSON</span>
+              </button>
+              <button
+                class="px-3 py-2 rounded-lg bg-surface-container-high border border-outline-variant/40 hover:border-error/40 text-error flex items-center justify-center space-x-1.5 transition-all duration-150">
+                <span class="material-symbols-outlined text-sm" data-icon="flag">flag</span>
+                <span>Clinical Review</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function updateClock() {
+      const clockElements = document.querySelectorAll('.utc-clock-display, #utc-clock');
+      if (clockElements.length > 0) {
+        const now = new Date();
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const month = months[now.getMonth()];
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        const secs = String(now.getSeconds()).padStart(2, '0');
+        const str = `LIVE: ${month} ${day}, ${year} • ${hours}:${mins}:${secs}`;
+        clockElements.forEach(el => el.textContent = str);
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Hydrate user profile from authenticated session
+    const adminEmail = localStorage.getItem("adminEmail") || sessionStorage.getItem("adminEmail");
+    if (adminEmail) {
+      const nameEls = document.querySelectorAll(".user-profile-name, #user-profile-name, #logs-user-name, #kb-user-name");
+      nameEls.forEach(el => { el.textContent = adminEmail.split('@')[0]; });
+    }
+  </script>
+</body>
+
+</html>

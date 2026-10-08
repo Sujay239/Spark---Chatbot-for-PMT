@@ -1826,7 +1826,7 @@
         const elFreeText = document.getElementById("chatInput");
         const btnSend = document.getElementById("btnSend");
 
-        // Manage Session ID
+        // Manage Session ID & Activity Tracking
         let sessionId = sessionStorage.getItem("spark_session_id");
         if (!sessionId) {
           sessionId =
@@ -1835,6 +1835,76 @@
             "_" +
             Date.now();
           sessionStorage.setItem("spark_session_id", sessionId);
+        }
+
+        let sessionStartedAt = sessionStorage.getItem("spark_session_started_at");
+        if (!sessionStartedAt) {
+          const parts = (sessionId || "").split("_");
+          const ts = Number(parts[parts.length - 1]);
+          if (!isNaN(ts) && ts > 1000000000000) {
+            sessionStartedAt = new Date(ts).toISOString();
+          } else {
+            sessionStartedAt = new Date().toISOString();
+          }
+          sessionStorage.setItem("spark_session_started_at", sessionStartedAt);
+        }
+
+        let cachedUserIp = sessionStorage.getItem("spark_user_ip") || "";
+
+        async function getUserIp() {
+          if (cachedUserIp) return cachedUserIp;
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch("https://api.ipify.org?format=json", {
+              signal: controller.signal,
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.ip) {
+                cachedUserIp = data.ip;
+                sessionStorage.setItem("spark_user_ip", cachedUserIp);
+                return cachedUserIp;
+              }
+            }
+          } catch (e) {
+            // Silently ignore network or timeout errors
+          }
+          return cachedUserIp || "";
+        }
+
+        // Pre-fetch IP quietly in background on startup
+        getUserIp();
+
+        function trackSessionActivity() {
+          // Asynchronous, fire-and-forget background execution (does not block chat)
+          setTimeout(async () => {
+            try {
+              const ip = await getUserIp();
+              const payload = {
+                session_id: sessionId,
+                started_at: sessionStartedAt,
+                last_activity: new Date().toISOString(),
+                user_agent: navigator.userAgent || "",
+                ip_address: ip || "",
+              };
+
+              fetch(
+                "https://n8n.srv917960.hstgr.cloud/webhook/session-duration",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                  keepalive: true,
+                },
+              ).catch((err) => {
+                console.warn("Session tracking webhook failed:", err);
+              });
+            } catch (err) {
+              console.warn("Session tracking error:", err);
+            }
+          }, 0);
         }
 
         function createSparkBotSvg(size = 20) {
@@ -2119,6 +2189,9 @@
         async function ask(q, sourceCategoryKey = null) {
           if (!q || !q.trim()) return;
 
+          // Non-blocking asynchronous session duration tracking
+          trackSessionActivity();
+
           const userQuery = q.trim();
           askedQuestionsSet.add(normalizeQ(userQuery));
 
@@ -2298,6 +2371,8 @@
             "_" +
             Date.now();
           sessionStorage.setItem("spark_session_id", sessionId);
+          sessionStartedAt = new Date().toISOString();
+          sessionStorage.setItem("spark_session_started_at", sessionStartedAt);
           renderHome();
         });
 

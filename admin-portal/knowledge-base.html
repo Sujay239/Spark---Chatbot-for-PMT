@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script>
+    // Route Protection: Redirect unauthenticated requests to login
+    if (
+      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
+      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
+    ) {
+      window.location.replace("login.html");
+    }
+
+    function logout() {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminEmail");
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>PMT Spark AI Core - Knowledge Base &amp; Predefined Questions Manager</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary": "#7cd0ff",
+            "outline-variant": "#3c4947",
+            "surface-dim": "#051426",
+            "on-secondary-fixed": "#001e2c",
+            "on-primary-fixed-variant": "#00504a",
+            "on-secondary": "#00344a",
+            "on-error": "#690005",
+            "on-secondary-container": "#fcfcff",
+            "inverse-on-surface": "#243144",
+            "inverse-primary": "#006a62",
+            "surface-container-highest": "#283549",
+            "on-tertiary-container": "#00364b",
+            "error": "#ffb4ab",
+            "tertiary": "#7bd0ff",
+            "on-background": "#d5e3fd",
+            "surface-variant": "#283549",
+            "surface-container-lowest": "#020e20",
+            "tertiary-container": "#00a5de",
+            "on-tertiary": "#00354a",
+            "on-error-container": "#ffdad6",
+            "inverse-surface": "#d5e3fd",
+            "surface": "#051426",
+            "on-primary-fixed": "#00201d",
+            "surface-tint": "#56dacd",
+            "primary": "#56dacd",
+            "tertiary-fixed": "#c4e7ff",
+            "on-tertiary-fixed": "#001e2c",
+            "on-primary": "#003733",
+            "primary-container": "#00aca0",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "surface-container-low": "#0e1c2e",
+            "surface-bright": "#2d3a4e",
+            "primary-fixed": "#76f7e9",
+            "secondary-fixed-dim": "#7cd0ff",
+            "on-surface-variant": "#bbc9c6",
+            "secondary-fixed": "#c4e7ff",
+            "on-tertiary-fixed-variant": "#004c69",
+            "surface-container": "#122033",
+            "on-surface": "#d5e3fd",
+            "surface-container-high": "#1d2b3e",
+            "primary-fixed-dim": "#56dacd",
+            "secondary-container": "#007daa",
+            "outline": "#869491",
+            "background": "#051426",
+            "error-container": "#93000a",
+            "on-primary-container": "#003934",
+            "on-secondary-fixed-variant": "#004c69"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin-mobile": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "gutter-mobile": "0.75rem",
+            "space-sm": "0.5rem",
+            "margin": "2rem",
+            "gutter": "1.25rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Space Grotesk"],
+            "headline-lg": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "label-lg": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "label-md": ["JetBrains Mono"],
+            "body-lg": ["Geist"],
+            "label-sm": ["JetBrains Mono"],
+            "body-sm": ["Geist"],
+            "headline-xl": ["Space Grotesk"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "body-md": ["Geist"]
+          },
+          "fontSize": {
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(2, 14, 32, 0.4);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(0, 172, 160, 0.25);
+      border-radius: 2px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 172, 160, 0.5);
+    }
+
+    .hud-grid-pattern {
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(0, 172, 160, 0.12) 0%, transparent 65%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .cyan-glow-sm {
+      box-shadow: 0 0 16px rgba(0, 172, 160, 0.25);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary selection:text-on-primary min-h-screen flex flex-col hud-grid-pattern">
+  <!-- TOP SHARED NAV BAR (PMT Spark AI Core) -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 h-16 bg-surface-container-lowest/85 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+    <div class="flex justify-between items-center w-full h-full px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-3">
+        <img src="logo.png" alt="Pain Management Technologies"
+          class="h-8 w-auto max-w-[160px] object-contain filter drop-shadow-[0_0_8px_rgba(0,172,160,0.35)]">
+      </div>
+      <!-- Right Side: Live Session Time & Sign Out Action -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-1.5 text-label-md font-label-md text-on-surface-variant font-mono text-xs">
+          <span class="text-outline">SESSION TIME:</span>
+          <span class="text-on-surface font-semibold utc-clock-display" id="utc-clock">LIVE: --</span>
+        </div>
+        <button onclick="logout()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-error hover:border-error/40 transition-all duration-150 active:scale-95 text-label-md font-label-md cursor-pointer"
+          title="Sign Out">
+          <span class="material-symbols-outlined text-error text-sm" data-icon="logout">logout</span>
+          <span class="hidden sm:inline">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <!-- Main System Shell -->
+  <div class="flex-1 pt-16 flex w-full">
+    <!-- Fixed/Sticky Left Telemetry Control Rail (280px) -->
+    <aside
+      class="w-[280px] shrink-0 hidden md:flex flex-col justify-between border-r border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-xl p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <!-- Navigation Menu -->
+      <nav class="space-y-1 flex-1">
+        <div class="px-3 pb-2 pt-1 text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+          Telemetry Engine</div>
+        <!-- 1. Overview -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="overview.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="dashboard">dashboard</span>
+            <span class="text-body-md font-body-md">Overview</span>
+          </div>
+        </a>
+        <!-- 2. Chat Logs & Sessions -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="session-logs.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="forum">forum</span>
+            <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-primary/20 font-mono">1.2k</span>
+        </a>
+        <!-- 3. Support Tickets -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-body-md font-body-md">Support Tickets</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20 font-mono">42
+            pending</span>
+        </a>
+        <!-- 4. Questions & KB (Active) -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium shadow-[0_0_15px_-3px_rgba(0,172,160,0.35)] cyan-glow-sm transition-all duration-200 group"
+          href="knowledge-base.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl" data-icon="menu_book">menu_book</span>
+            <span class="text-body-md font-body-md">Questions &amp; KB</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface/20 text-on-primary-container border border-white/20 font-mono">358</span>
+        </a>
+        <!-- 5. Testing & Accuracy -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="tune">tune</span>
+            <span class="text-body-md font-body-md">Testing &amp; Accuracy</span>
+          </div>
+          <span class="text-label-sm font-label-sm text-secondary font-mono">94.2%</span>
+        </a>
+        <!-- 6. Fallbacks & Rules -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="alt_route">alt_route</span>
+            <span class="text-body-md font-body-md">Fallbacks &amp; Rules</span>
+          </div>
+        </a>
+        <!-- 7. Settings & Access -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="#">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="settings">settings</span>
+            <span class="text-body-md font-body-md">Settings &amp; Access</span>
+          </div>
+        </a>
+      </nav>
+      <!-- Sidebar Footer Diagnostics & Profile -->
+      <div class="pt-4 border-t border-outline-variant/30 space-y-3 mt-auto">
+        <div
+          class="p-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 text-label-sm font-label-sm">
+          <div class="flex items-center justify-between text-outline">
+            <span>DIAGNOSTIC NODE</span>
+            <span class="text-primary font-semibold font-mono">14ms</span>
+          </div>
+          <div class="text-on-surface mt-1 truncate">Node-East US • Cluster-4A</div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-full border border-primary/50 bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-base" data-icon="shield_person">shield_person</span>
+            </div>
+            <div class="truncate">
+              <p class="text-body-sm font-body-sm text-on-surface font-medium leading-none truncate max-w-[130px] user-profile-name"
+                id="kb-user-name">PMT Admin</p>
+              <p class="text-label-sm font-label-sm text-outline mt-0.5 truncate">SecOps Lead</p>
+            </div>
+          </div>
+          <button
+            class="p-1.5 rounded text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer shrink-0"
+            title="Logout" onclick="logout()">
+            <span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+    <!-- MAIN ADMINISTRATIVE STAGE -->
+    <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-8 space-y-6 w-full">
+      <!-- Stage Header & Global Actions -->
+      <section class="flex flex-col space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-label-sm font-label-sm text-primary tracking-widest uppercase">Admin Telemetry
+                Console</span>
+              <span class="text-outline text-xs">•</span>
+              <span class="text-label-sm font-label-sm text-on-surface-variant uppercase">Pain Management Technologies
+                Core</span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight mt-1">
+              Knowledge Base &amp; Q&amp;A Repository
+            </h1>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Manage Clinical Q&amp;A, TENS &amp; IF4D protocols, and AI Knowledge Graph <span
+                class="text-primary font-mono text-xs">// Automated Spark Diagnostic Engine v4.2</span>
+            </p>
+          </div>
+          <div class="flex items-center gap-3 self-start lg:self-auto">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg"
+                data-icon="search">search</span>
+              <input
+                class="w-56 pl-9 pr-8 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-body-sm font-body-sm text-on-surface placeholder:text-outline/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                placeholder="Search KB index..." type="text" />
+              <span
+                class="absolute right-2.5 top-2.5 px-1 py-0.5 rounded bg-surface-container-high border border-outline-variant/30 text-[9px] font-label-sm text-outline">⌘K</span>
+            </div>
+            <button
+              class="px-3.5 py-2 rounded-lg bg-surface-container-high/60 hover:bg-surface-container-high border border-primary/30 hover:border-primary/60 text-primary text-label-md font-label-md flex items-center gap-2 transition-all active:scale-95 shadow-[0_0_12px_rgba(0,172,160,0.1)]">
+              <span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+              Sync with n8n Webhook
+            </button>
+            <button
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#00aca0] to-[#007fac] text-white font-headline-sm text-sm font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(0,172,160,0.35)] hover:brightness-110 active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+              Add New Question
+            </button>
+          </div>
+        </div>
+      </section>
+      <!-- Category Filter Pill Tabs -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-outline-variant/20 custom-scrollbar">
+        <button
+          class="px-3.5 py-1.5 rounded-full text-label-md font-label-md bg-primary-container/20 text-primary border border-primary/40 shadow-[0_0_10px_rgba(0,172,160,0.2)] shrink-0">
+          All Categories (358)
+        </button>
+        <button
+          class="px-3.5 py-1.5 rounded-full text-label-md font-label-md bg-surface-container-high/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border border-outline-variant/30 transition-colors shrink-0">
+          TENS Devices &amp; Settings (124)
+        </button>
+        <button
+          class="px-3.5 py-1.5 rounded-full text-label-md font-label-md bg-surface-container-high/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border border-outline-variant/30 transition-colors shrink-0">
+          IF4D Interferential Therapy (86)
+        </button>
+        <button
+          class="px-3.5 py-1.5 rounded-full text-label-md font-label-md bg-surface-container-high/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border border-outline-variant/30 transition-colors shrink-0">
+          Electrode Care &amp; Placement (68)
+        </button>
+        <button
+          class="px-3.5 py-1.5 rounded-full text-label-md font-label-md bg-surface-container-high/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border border-outline-variant/30 transition-colors shrink-0">
+          Battery &amp; Hardware Troubleshooting (45)
+        </button>
+        <button
+          class="px-3.5 py-1.5 rounded-full text-label-md font-label-md bg-surface-container-high/40 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border border-outline-variant/30 transition-colors shrink-0">
+          Warranty &amp; Medical Warnings (35)
+        </button>
+      </div>
+      <!-- SPLIT WORKSPACE LAYOUT (Grid cols-12) -->
+      <div class="grid grid-cols-12 gap-6 items-start">
+        <!-- LEFT PANEL (col-span-5): Questions Directory -->
+        <div
+          class="col-span-12 xl:col-span-5 bg-surface-container-low/80 backdrop-blur-md rounded-xl border border-outline-variant/30 p-4 space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+            <div>
+              <h2 class="text-headline-sm font-headline-sm text-on-surface">Questions Directory</h2>
+              <p class="text-label-sm font-label-sm text-outline">Showing 6 of 358 questions</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select
+                class="bg-surface-container-lowest border border-outline-variant/30 text-label-sm font-label-sm text-on-surface rounded px-2 py-1 focus:outline-none focus:border-primary">
+                <option>By Popularity</option>
+                <option>Recently Modified</option>
+                <option>Fallback Frequency</option>
+              </select>
+            </div>
+          </div>
+          <div class="space-y-3 max-h-[720px] overflow-y-auto pr-1 custom-scrollbar">
+            <!-- Card 1 (SELECTED ITEM) -->
+            <div
+              class="p-3.5 rounded-lg bg-surface-container-high/70 border border-primary/50 shadow-[0_0_15px_-2px_rgba(0,172,160,0.25)] relative transition-all cursor-pointer">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-primary-container/20 text-primary border border-primary/30">
+                  TENS Devices &amp; Settings
+                </span>
+                <span class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Active in Spark AI
+                </span>
+              </div>
+              <h3
+                class="text-body-md font-body-md font-medium text-on-surface hover:text-primary transition-colors leading-snug mb-2.5">
+                How do I correctly position electrode pads for chronic lower back sciatica pain on TENS 7000?
+              </h3>
+              <div
+                class="text-label-sm font-label-sm text-on-surface-variant flex flex-wrap items-center gap-y-1 gap-x-3 mb-2">
+                <span class="text-on-surface font-semibold">4,820 Queries</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-primary">98.4% Auto-Resolution</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-outline">Fallback: 0.8%</span>
+              </div>
+              <div
+                class="text-[11px] font-body-sm text-outline flex items-center justify-between pt-1 border-t border-outline-variant/20">
+                <span>Updated 2 hrs ago by Dr. Vance</span>
+                <span class="text-primary font-label-sm flex items-center gap-1">Selected <span
+                    class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span></span>
+              </div>
+            </div>
+            <!-- Card 2 -->
+            <div
+              class="p-3.5 rounded-lg bg-surface-container/50 hover:bg-surface-container-high/40 border border-outline-variant/20 hover:border-outline-variant/40 transition-all cursor-pointer">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-secondary-container/20 text-secondary border border-secondary/30">
+                  IF4D Therapy
+                </span>
+                <span class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Active in Spark AI
+                </span>
+              </div>
+              <h3 class="text-body-md font-body-md text-on-surface leading-snug mb-2">
+                Interferential IF4D channel 2 showing error code E-03 quad-polar setup
+              </h3>
+              <div class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span>1,940 Queries</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-primary">94.1% Auto-Resolution</span>
+              </div>
+            </div>
+            <!-- Card 3 -->
+            <div
+              class="p-3.5 rounded-lg bg-surface-container/50 hover:bg-surface-container-high/40 border border-outline-variant/20 hover:border-outline-variant/40 transition-all cursor-pointer">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-primary-container/20 text-primary border border-primary/30">
+                  Electrode Care
+                </span>
+                <span class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Active in Spark AI
+                </span>
+              </div>
+              <h3 class="text-body-md font-body-md text-on-surface leading-snug mb-2">
+                Can electrode gel pads be washed with alcohol or tap water to restore tackiness?
+              </h3>
+              <div class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span>3,110 Queries</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-primary">99.1% Auto-Resolution</span>
+              </div>
+            </div>
+            <!-- Card 4 -->
+            <div
+              class="p-3.5 rounded-lg bg-surface-container/50 hover:bg-surface-container-high/40 border border-outline-variant/20 hover:border-outline-variant/40 transition-all cursor-pointer">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-tertiary-container/20 text-tertiary border border-tertiary/30">
+                  Battery &amp; Hardware
+                </span>
+                <span class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Active in Spark AI
+                </span>
+              </div>
+              <h3 class="text-body-md font-body-md text-on-surface leading-snug mb-2">
+                Device won't turn on after overnight storage or battery door latch loose
+              </h3>
+              <div class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span>1,120 Queries</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-primary">91.5% Auto-Resolution</span>
+              </div>
+            </div>
+            <!-- Card 5 -->
+            <div
+              class="p-3.5 rounded-lg bg-surface-container/50 hover:bg-surface-container-high/40 border border-error/30 hover:border-error/50 transition-all cursor-pointer">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-error-container/20 text-error border border-error/40">
+                  Warranty &amp; Medical
+                </span>
+                <span class="flex items-center gap-1.5 text-label-sm font-label-sm text-error">
+                  <span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                  Flagged for Clinical Review
+                </span>
+              </div>
+              <h3 class="text-body-md font-body-md text-on-surface leading-snug mb-2">
+                Can a patient with a cardiac pacemaker or defibrillator use TENS or IF4D devices?
+              </h3>
+              <div class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span>890 Queries</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-error font-medium">100% Medical Escalation Protocol</span>
+              </div>
+            </div>
+            <!-- Card 6 -->
+            <div
+              class="p-3.5 rounded-lg bg-surface-container/50 hover:bg-surface-container-high/40 border border-outline-variant/20 hover:border-outline-variant/40 transition-all cursor-pointer">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span
+                  class="px-2 py-0.5 rounded text-[10px] font-label-sm bg-primary-container/20 text-primary border border-primary/30">
+                  TENS Devices &amp; Settings
+                </span>
+                <span class="flex items-center gap-1.5 text-label-sm font-label-sm text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Active in Spark AI
+                </span>
+              </div>
+              <h3 class="text-body-md font-body-md text-on-surface leading-snug mb-2">
+                What pulse rate (Hz) and pulse width (μs) are recommended for acute post-op knee recovery?
+              </h3>
+              <div class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span>760 Queries</span>
+                <span class="text-outline-variant">•</span>
+                <span class="text-primary">96.2% Auto-Resolution</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- RIGHT PANEL (col-span-7): Clinical Answer Editor & Live Chat Preview -->
+        <div
+          class="col-span-12 xl:col-span-7 bg-surface-container-low/80 backdrop-blur-md rounded-xl border border-outline-variant/30 p-5 space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+            <div>
+              <div class="text-label-sm font-label-sm text-outline">Editing Question ID: <span
+                  class="text-primary font-semibold">#KB-8921 // TENS-LOWER-BACK-SCIATICA-01</span></div>
+              <h2 class="text-headline-sm font-headline-sm text-on-surface mt-0.5">Clinical Protocol Specification</h2>
+            </div>
+            <span
+              class="px-2.5 py-1 rounded bg-primary-container/20 border border-primary/40 text-primary text-label-sm font-label-sm flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              Published • Live v3.4
+            </span>
+          </div>
+          <!-- Question Input -->
+          <div class="space-y-1.5">
+            <label class="text-label-sm font-label-sm text-on-surface-variant block">Primary Clinical Trigger
+              Query</label>
+            <input
+              class="w-full px-3.5 py-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              type="text"
+              value="How do I correctly position electrode pads for chronic lower back sciatica pain on TENS 7000?" />
+          </div>
+          <!-- Category & Semantic Tags -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-label-sm font-label-sm text-on-surface-variant block">Clinical Taxonomy
+                Category</label>
+              <select
+                class="w-full px-3.5 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary">
+                <option>TENS Devices &amp; Settings</option>
+                <option>IF4D Interferential Therapy</option>
+                <option>Electrode Care &amp; Placement</option>
+                <option>Battery &amp; Hardware</option>
+                <option>Warranty &amp; Safety</option>
+              </select>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-label-sm font-label-sm text-on-surface-variant block">Spark Semantic Graph
+                Vectors</label>
+              <div
+                class="flex flex-wrap gap-1.5 p-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/30 min-h-[38px] items-center">
+                <span
+                  class="px-2 py-0.5 rounded bg-surface-container-high text-[11px] font-label-sm text-primary flex items-center gap-1">
+                  sciatica <span class="material-symbols-outlined text-[12px] cursor-pointer"
+                    data-icon="close">close</span>
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded bg-surface-container-high text-[11px] font-label-sm text-primary flex items-center gap-1">
+                  lumbar <span class="material-symbols-outlined text-[12px] cursor-pointer"
+                    data-icon="close">close</span>
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded bg-surface-container-high text-[11px] font-label-sm text-primary flex items-center gap-1">
+                  pulse-width-150us <span class="material-symbols-outlined text-[12px] cursor-pointer"
+                    data-icon="close">close</span>
+                </span>
+                <span
+                  class="px-2 py-0.5 rounded bg-surface-container-high text-[11px] font-label-sm text-primary flex items-center gap-1">
+                  ch-1-ch-2-crisscross <span class="material-symbols-outlined text-[12px] cursor-pointer"
+                    data-icon="close">close</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- Rich Text Protocol Editor -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="text-label-sm font-label-sm text-on-surface-variant">Validated Spark Response
+                Content</label>
+              <div class="text-label-sm font-label-sm text-outline">Markdown &amp; Token Supported</div>
+            </div>
+            <!-- Toolbar -->
+            <div
+              class="flex items-center gap-1 px-3 py-1.5 bg-surface-container border border-outline-variant/40 rounded-t-lg border-b-0">
+              <button class="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                title="Bold">
+                <span class="material-symbols-outlined text-[16px]" data-icon="format_bold">format_bold</span>
+              </button>
+              <button class="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                title="Italic">
+                <span class="material-symbols-outlined text-[16px]" data-icon="format_italic">format_italic</span>
+              </button>
+              <span class="w-[1px] h-4 bg-outline-variant/40 mx-1"></span>
+              <button class="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                title="Bullet List">
+                <span class="material-symbols-outlined text-[16px]"
+                  data-icon="format_list_bulleted">format_list_bulleted</span>
+              </button>
+              <button class="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                title="Numbered List">
+                <span class="material-symbols-outlined text-[16px]"
+                  data-icon="format_list_numbered">format_list_numbered</span>
+              </button>
+              <span class="w-[1px] h-4 bg-outline-variant/40 mx-1"></span>
+              <button class="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                title="Code / Param Embed">
+                <span class="material-symbols-outlined text-[16px]" data-icon="code">code</span>
+              </button>
+              <button class="p-1 rounded hover:bg-surface-container-high text-primary hover:text-primary-fixed"
+                title="Insert Medical Warning Callout">
+                <span class="material-symbols-outlined text-[16px]" data-icon="warning">warning</span>
+              </button>
+              <button class="p-1 rounded hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface"
+                title="Link">
+                <span class="material-symbols-outlined text-[16px]" data-icon="link">link</span>
+              </button>
+            </div>
+            <!-- Answer Content -->
+            <div
+              class="rounded-b-lg border border-outline-variant/40 bg-surface-container-lowest p-3.5 space-y-3 font-body-md text-on-surface leading-relaxed text-sm">
+              <p class="font-medium text-primary">For bilateral lower back or sciatica pain:</p>
+              <ol class="list-decimal list-inside space-y-1.5 pl-1 text-on-surface-variant">
+                <li><strong class="text-on-surface">Channel 1 Electrode Placement:</strong> Position horizontally on
+                  lumbar spine level L4-S1 or flanking the spine by 1.5 inches.</li>
+                <li><strong class="text-on-surface">Channel 2 Electrode Placement:</strong> Align along the dermatomal
+                  radiating pain pathway (upper gluteal / posterior thigh).</li>
+                <li><strong class="text-on-surface">Recommended Protocol Settings:</strong> Continuous Mode, Pulse Rate
+                  80–100 Hz, Pulse Width 150 μs. Increase intensity dial slowly until tingling is robust and comforting
+                  without muscle fasciculation.</li>
+              </ol>
+              <!-- Medical Warning Callout Box -->
+              <div class="p-3 rounded-lg bg-error-container/20 border border-error/40 flex items-start gap-3">
+                <span class="material-symbols-outlined text-error text-xl shrink-0 mt-0.5"
+                  data-icon="gpp_bad">gpp_bad</span>
+                <div class="text-xs">
+                  <span class="font-bold text-error block mb-0.5">FDA &amp; PMT Medical Contraindication Warning:</span>
+                  <span class="text-on-surface-variant">Never place electrodes transthoracically across the chest, over
+                    the carotid sinus nerve bundles, or across the head. Prohibited for patients with active demand
+                    pacemakers.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Related Questions / Spark Follow-Up Chips -->
+          <div class="space-y-2">
+            <label class="text-label-sm font-label-sm text-on-surface-variant block">Spark Conversational Next-Action
+              Suggestions</label>
+            <div class="flex flex-wrap gap-2">
+              <span
+                class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/40 hover:border-primary/50 text-body-sm font-body-sm text-on-surface-variant hover:text-primary transition-all cursor-pointer flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-primary" data-icon="add">add</span>
+                Recommended session duration (30 min)
+              </span>
+              <span
+                class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/40 hover:border-primary/50 text-body-sm font-body-sm text-on-surface-variant hover:text-primary transition-all cursor-pointer flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-primary" data-icon="add">add</span>
+                Gel pad preservation guidelines
+              </span>
+              <span
+                class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/40 hover:border-primary/50 text-body-sm font-body-sm text-on-surface-variant hover:text-primary transition-all cursor-pointer flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-primary" data-icon="add">add</span>
+                Lead wire replacement SKU #7000-WIR
+              </span>
+            </div>
+          </div>
+          <!-- Safety Toggles & AI Confidence -->
+          <div
+            class="p-3 rounded-lg bg-surface-container/60 border border-outline-variant/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <input checked=""
+                class="w-4 h-4 rounded bg-surface-container-lowest border-outline-variant/40 text-primary-container focus:ring-0 focus:ring-offset-0"
+                type="checkbox" />
+              <span class="text-label-md font-label-md text-on-surface">Require Human Escalation if Pain Score &gt; 8 or
+                Paresthesia Reported</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-label-sm font-label-sm text-outline">Confidence Threshold:</span>
+              <span
+                class="text-label-md font-label-md text-primary font-bold px-2 py-0.5 rounded bg-surface-container-high border border-primary/30">0.88</span>
+            </div>
+          </div>
+          <!-- Bottom Action Buttons -->
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button
+              class="px-4 py-2.5 rounded-lg border border-outline-variant/40 hover:border-primary/40 text-primary text-label-md font-label-md hover:bg-primary-container/10 transition-all flex items-center gap-2">
+              <span class="material-symbols-outlined text-lg" data-icon="sparkle">drive_file_rename_outline</span>
+              Test with Spark AI Model
+            </button>
+            <button
+              class="px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#00aca0] to-[#007fac] text-white font-headline-sm text-sm font-semibold flex items-center gap-2 shadow-[0_0_20px_rgba(0,172,160,0.35)] hover:brightness-110 active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-lg" data-icon="cloud_upload">cloud_upload</span>
+              Save &amp; Deploy to Live Chatbot
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- BOTTOM CARD: Unresolved Patient Queries / Fallback Triage Queue -->
+      <div
+        class="bg-surface-container-low/80 backdrop-blur-md rounded-xl border border-outline-variant/30 p-5 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div>
+            <h2 class="text-headline-sm font-headline-sm text-on-surface">Telemetry Fallback Queue</h2>
+            <p class="text-body-sm font-body-sm text-on-surface-variant">Queries triggering &lt;70% AI Confidence or
+              Direct Clinician Escalation</p>
+          </div>
+          <span
+            class="px-2.5 py-1 rounded bg-error-container/20 text-error border border-error/30 text-label-sm font-label-sm flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+            3 Actionable Anomalies
+          </span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-outline-variant/20 text-label-sm font-label-sm text-outline">
+                <th class="py-2.5 px-3">PATIENT TELEMETRY QUERY</th>
+                <th class="py-2.5 px-3">DETECTED INTENT</th>
+                <th class="py-2.5 px-3">FREQUENCY</th>
+                <th class="py-2.5 px-3 text-right">RESOLUTION ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/15 text-body-sm font-body-sm">
+              <tr class="hover:bg-surface-container-high/30 transition-colors">
+                <td class="py-3 px-3 text-on-surface font-medium">
+                  "Will Medicare Part B reimburse conductive silver gloves if prescribed by physical therapist?"
+                </td>
+                <td class="py-3 px-3">
+                  <span
+                    class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-secondary-container/20 text-secondary border border-secondary/30">
+                    Billing / Insurance
+                  </span>
+                </td>
+                <td class="py-3 px-3 font-label-md text-on-surface-variant">28 queries</td>
+                <td class="py-3 px-3 text-right space-x-2">
+                  <button
+                    class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-primary-container/20 hover:bg-primary-container/30 text-primary border border-primary/40 transition-colors">
+                    + Add as New KB Question
+                  </button>
+                  <button
+                    class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-surface-container hover:bg-surface-container-high text-on-surface-variant border border-outline-variant/30 transition-colors">
+                    Map to Existing Answer
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-high/30 transition-colors">
+                <td class="py-3 px-3 text-on-surface font-medium">
+                  "My unit beeps 3 times and cuts power when dial is at setting 7"
+                </td>
+                <td class="py-3 px-3">
+                  <span
+                    class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-tertiary-container/20 text-tertiary border border-tertiary/30">
+                    Hardware / Fault
+                  </span>
+                </td>
+                <td class="py-3 px-3 font-label-md text-on-surface-variant">19 queries</td>
+                <td class="py-3 px-3 text-right space-x-2">
+                  <button
+                    class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-primary-container/20 hover:bg-primary-container/30 text-primary border border-primary/40 transition-colors">
+                    + Add as New KB Question
+                  </button>
+                  <button
+                    class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-surface-container hover:bg-surface-container-high text-on-surface-variant border border-outline-variant/30 transition-colors">
+                    Map to Existing Answer
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-surface-container-high/30 transition-colors">
+                <td class="py-3 px-3 text-on-surface font-medium">
+                  "Is it safe to use IF4D unit while wearing a copper compression knee brace?"
+                </td>
+                <td class="py-3 px-3">
+                  <span
+                    class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-error-container/20 text-error border border-error/40">
+                    Safety / Contraindication
+                  </span>
+                </td>
+                <td class="py-3 px-3 font-label-md text-on-surface-variant">14 queries</td>
+                <td class="py-3 px-3 text-right space-x-2">
+                  <button
+                    class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-primary-container/20 hover:bg-primary-container/30 text-primary border border-primary/40 transition-colors">
+                    + Add as New KB Question
+                  </button>
+                  <button
+                    class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-surface-container hover:bg-surface-container-high text-on-surface-variant border border-outline-variant/30 transition-colors">
+                    Map to Existing Answer
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function updateClock() {
+      const clockElements = document.querySelectorAll('.utc-clock-display, #utc-clock');
+      if (clockElements.length > 0) {
+        const now = new Date();
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const month = months[now.getMonth()];
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        const secs = String(now.getSeconds()).padStart(2, '0');
+        const str = `LIVE: ${month} ${day}, ${year} • ${hours}:${mins}:${secs}`;
+        clockElements.forEach(el => el.textContent = str);
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Hydrate user profile from authenticated session
+    const adminEmail = localStorage.getItem("adminEmail") || sessionStorage.getItem("adminEmail");
+    if (adminEmail) {
+      const nameEls = document.querySelectorAll(".user-profile-name, #user-profile-name, #kb-user-name, #logs-user-name");
+      nameEls.forEach(el => { el.textContent = adminEmail.split('@')[0]; });
+    }
+  </script>
+</body>
+
+</html>
