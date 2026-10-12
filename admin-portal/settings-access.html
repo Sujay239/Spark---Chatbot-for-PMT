@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script>
+    // Route Protection: Redirect unauthenticated requests to login
+    if (
+      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
+      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
+    ) {
+      window.location.replace("login.html");
+    }
+
+    function logout() {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminEmail");
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>PMT Spark AI Core - Settings &amp; Access</title>
+  <!-- Material Symbols Outlined -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Fonts: Space Grotesk, Geist, JetBrains Mono -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#00354a",
+            "surface-container-low": "#0e1c2e",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "primary": "#56dacd",
+            "inverse-primary": "#006a62",
+            "on-surface": "#d5e3fd",
+            "on-tertiary-container": "#00364b",
+            "tertiary-container": "#00a5de",
+            "surface-container-lowest": "#020e20",
+            "surface-container-high": "#1d2b3e",
+            "primary-fixed-dim": "#56dacd",
+            "surface": "#051426",
+            "primary-container": "#00aca0",
+            "on-primary-container": "#003934",
+            "on-surface-variant": "#bbc9c6",
+            "surface-tint": "#56dacd",
+            "error": "#ffb4ab",
+            "secondary-container": "#007daa",
+            "background": "#051426",
+            "on-tertiary-fixed-variant": "#004c69",
+            "surface-variant": "#283549",
+            "surface-container": "#122033",
+            "surface-container-highest": "#283549",
+            "outline-variant": "#3c4947",
+            "on-primary-fixed": "#00201d",
+            "secondary-fixed-dim": "#7cd0ff",
+            "inverse-surface": "#d5e3fd",
+            "on-secondary": "#00344a",
+            "on-secondary-container": "#fcfcff",
+            "on-secondary-fixed-variant": "#004c69",
+            "on-tertiary-fixed": "#001e2c",
+            "on-primary-fixed-variant": "#00504a",
+            "outline": "#869491",
+            "on-primary": "#003733",
+            "primary-fixed": "#76f7e9",
+            "secondary-fixed": "#c4e7ff",
+            "on-background": "#d5e3fd",
+            "tertiary-fixed": "#c4e7ff",
+            "on-error": "#690005",
+            "tertiary": "#7bd0ff",
+            "surface-bright": "#2d3a4e",
+            "inverse-on-surface": "#243144",
+            "on-error-container": "#ffdad6",
+            "surface-dim": "#051426",
+            "error-container": "#93000a",
+            "secondary": "#7cd0ff",
+            "on-secondary-fixed": "#001e2c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Space Grotesk", "sans-serif"],
+            "headline-md": ["Space Grotesk", "sans-serif"],
+            "headline-sm": ["Space Grotesk", "sans-serif"],
+            "headline-xl": ["Space Grotesk", "sans-serif"],
+            "headline-xl-mobile": ["Space Grotesk", "sans-serif"],
+            "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
+            "body-lg": ["Geist", "sans-serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "body-sm": ["Geist", "sans-serif"],
+            "label-lg": ["JetBrains Mono", "monospace"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "sans": ["Geist", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          "fontSize": {
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(2, 14, 32, 0.6);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(86, 218, 205, 0.25);
+      border-radius: 2px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(86, 218, 205, 0.5);
+    }
+
+    .hud-grid-pattern {
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(0, 172, 160, 0.12) 0%, transparent 65%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .glow-teal-sm,
+    .cyan-glow-sm {
+      box-shadow: 0 0 15px -3px rgba(0, 172, 160, 0.35);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary selection:text-on-primary min-h-screen flex flex-col hud-grid-pattern">
+  <!-- TOP SHARED NAV BAR (PMT Spark AI Core) -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 h-16 bg-surface-container-lowest/85 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+    <div class="flex justify-between items-center w-full h-full px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-3">
+        <img src="logo.png" alt="Pain Management Technologies"
+          class="h-8 w-auto max-w-[160px] object-contain filter drop-shadow-[0_0_8px_rgba(0,172,160,0.35)]">
+      </div>
+      <!-- Right Side: Live Session Time & Sign Out Action -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-1.5 text-label-md font-label-md text-on-surface-variant font-mono text-xs">
+          <span class="text-outline">SESSION TIME:</span>
+          <span class="text-on-surface font-semibold utc-clock-display" id="utc-clock">LIVE: --</span>
+        </div>
+        <button onclick="logout()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-error hover:border-error/40 transition-all duration-150 active:scale-95 text-label-md font-label-md cursor-pointer"
+          title="Sign Out">
+          <span class="material-symbols-outlined text-error text-sm" data-icon="logout">logout</span>
+          <span class="hidden sm:inline">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main System Shell -->
+  <div class="flex-1 pt-16 flex w-full">
+    <!-- Fixed/Sticky Left Telemetry Control Rail (280px) -->
+    <aside
+      class="w-[280px] shrink-0 hidden md:flex flex-col justify-between border-r border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-xl p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar">
+      <!-- Navigation Menu -->
+      <nav class="space-y-1 flex-1">
+        <div class="px-3 pb-2 pt-1 text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+          Telemetry Engine</div>
+        <!-- 1. Overview -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="overview.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="dashboard">dashboard</span>
+            <span class="text-body-md font-body-md">Overview</span>
+          </div>
+        </a>
+        <!-- 2. Chat Logs & Sessions -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="session-logs.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="forum">forum</span>
+            <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-primary/20 font-mono">1.2k</span>
+        </a>
+        <!-- 3. Support Tickets -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="support-tickets.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-body-md font-body-md">Support Tickets</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20 font-mono whitespace-nowrap">42 pending</span>
+        </a>
+        <!-- 4. Questions & KB -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="knowledge-base.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="menu_book">menu_book</span>
+            <span class="text-body-md font-body-md">Questions &amp; KB</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-on-surface-variant border border-outline-variant/30 font-mono">358</span>
+        </a>
+        <!-- 5. Token Usage -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="token-usage.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="token">token</span>
+            <span class="text-body-md font-body-md">Token Usage</span>
+          </div>
+        </a>
+        <!-- 6. Fallbacks & Rules -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="fallbacks-rules.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="alt_route">alt_route</span>
+            <span class="text-body-md font-body-md">Fallbacks &amp; Rules</span>
+          </div>
+        </a>
+        <!-- 7. Settings & Access (ACTIVE) -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium shadow-[0_0_15px_-3px_rgba(0,172,160,0.35)] cyan-glow-sm transition-all duration-200 group"
+          href="settings-access.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl"
+              data-icon="settings">settings</span>
+            <span class="text-body-md font-body-md">Settings &amp; Access</span>
+          </div>
+        </a>
+      </nav>
+      <!-- Sidebar Footer Diagnostics & Profile -->
+      <div class="pt-4 border-t border-outline-variant/30 space-y-3 mt-auto">
+        <div
+          class="p-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 text-label-sm font-label-sm">
+          <div class="flex items-center justify-between text-outline">
+            <span>DIAGNOSTIC NODE</span>
+            <span class="text-primary font-semibold font-mono">14ms</span>
+          </div>
+          <div class="text-on-surface mt-1 truncate">Node-East US • Cluster-4A</div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div id="sidebar-avatar-initials"
+              class="w-7 h-7 rounded-full bg-primary/20 text-primary border border-primary/40 flex items-center justify-center font-bold text-xs uppercase">
+              AD
+            </div>
+            <div>
+              <div id="sidebar-admin-name" class="text-xs font-semibold text-on-surface">Admin Console</div>
+              <div class="text-[10px] text-outline">PMT Superuser</div>
+            </div>
+          </div>
+          <span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse" title="System Active"></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8 space-y-6">
+      <!-- Page Breadcrumb & Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-outline-variant/20">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-mono text-outline mb-1">
+            <span>SPARK AI ENGINE</span>
+            <span>/</span>
+            <span class="text-primary">SYSTEM ADMINISTRATION</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-headline-md text-on-surface font-semibold tracking-tight">
+            Settings &amp; Access
+          </h1>
+          <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
+            Manage your administrator profile details, security credentials, and access keys.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-primary/10 text-primary border border-primary/30">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            SECURITY LEVEL: HIGH (SUPERUSER)
+          </span>
+        </div>
+      </div>
+
+      <!-- Toast Feedback Notification Container -->
+      <div id="toast-container" class="fixed top-20 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+      <!-- TABS CONTAINER -->
+      <div class="space-y-6">
+        <!-- Tab Navigation Buttons -->
+        <div class="flex border-b border-outline-variant/30 gap-2 sm:gap-4 overflow-x-auto custom-scrollbar">
+          <!-- Tab 1 Button -->
+          <button id="tab-btn-profile" onclick="switchTab('profile')"
+            class="flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all duration-150 border-primary text-primary bg-primary/5 rounded-t-lg">
+            <span class="material-symbols-outlined text-lg" data-icon="account_circle">account_circle</span>
+            <span>User Profile Details</span>
+          </button>
+          <!-- Tab 2 Button -->
+          <button id="tab-btn-password" onclick="switchTab('password')"
+            class="flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all duration-150 border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container/30 rounded-t-lg">
+            <span class="material-symbols-outlined text-lg" data-icon="lock_reset">lock_reset</span>
+            <span>Change Password</span>
+          </button>
+          <!-- Tab 3 Button: 2FA Authentication -->
+          <button id="tab-btn-2fa" onclick="switchTab('2fa')"
+            class="flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all duration-150 border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container/30 rounded-t-lg">
+            <span class="material-symbols-outlined text-lg" data-icon="phonelink_lock">phonelink_lock</span>
+            <span>2FA Authentication</span>
+            <span id="tab-2fa-badge" class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/20 text-primary border border-primary/30">TOTP</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT 1: USER PROFILE DETAILS -->
+        <div id="tab-content-profile" class="space-y-6">
+          <!-- Profile Overview Banner Card -->
+          <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 sm:p-6 shadow-lg backdrop-blur-md">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <div id="profile-avatar-circle"
+                    class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-primary/30 to-[#00aca0]/20 border-2 border-primary/40 flex items-center justify-center font-headline-md text-2xl sm:text-3xl font-bold text-primary shadow-[0_0_20px_rgba(86,218,205,0.25)] uppercase">
+                    AD
+                  </div>
+                  <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary border-2 border-surface flex items-center justify-center" title="Online Active">
+                    <span class="w-2 h-2 rounded-full bg-surface-container-lowest"></span>
+                  </span>
+                </div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 id="profile-display-name" class="text-lg sm:text-xl font-bold text-on-surface">Admin Operator</h2>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-primary/15 text-primary border border-primary/30">
+                      SUPERUSER
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-secondary/10 text-secondary border border-secondary/20">
+                      VERIFIED
+                    </span>
+                  </div>
+                  <p id="profile-display-email" class="text-xs sm:text-sm text-on-surface-variant font-mono mt-0.5">admin@painmanagementtechnologies.com</p>
+                  <div class="flex items-center gap-4 mt-2 text-[11px] text-outline font-mono">
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs text-primary" data-icon="business">business</span>
+                      Pain Management Technologies (PMT)
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs text-secondary" data-icon="verified_user">verified_user</span>
+                      Session Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Status Badges -->
+              <div class="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 border-t sm:border-t-0 border-outline-variant/30 pt-3 sm:pt-0">
+                <span class="text-xs text-outline font-mono">AUTH SESSION</span>
+                <span class="px-2.5 py-1 rounded bg-surface-container text-xs font-mono text-primary border border-outline-variant/40 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                  n8n HMAC Authenticated
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Edit Form & System Privileges Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left 2 Cols: Editable Information -->
+            <div class="lg:col-span-2 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 sm:p-6 shadow-lg backdrop-blur-md space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-xl" data-icon="person_edit">person_edit</span>
+                  <h3 class="text-sm sm:text-base font-semibold text-on-surface">Account Credentials &amp; Identity</h3>
+                </div>
+                <span class="text-[11px] font-mono text-outline">EDITS SYNC TO LOCAL CONSOLE</span>
+              </div>
+
+              <form id="profile-form" onsubmit="saveProfileDetails(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Full Name -->
+                  <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                      Full Name
+                    </label>
+                    <div class="relative">
+                      <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="badge">badge</span>
+                      <input type="text" id="input-full-name" required value="Admin Operator"
+                        class="w-full pl-9 pr-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans" />
+                    </div>
+                  </div>
+
+                  <!-- Email Address -->
+                  <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                      Admin Email
+                    </label>
+                    <div class="relative">
+                      <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="mail">mail</span>
+                      <input type="email" id="input-email" required value="admin@painmanagementtechnologies.com"
+                        class="w-full pl-9 pr-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Role / Title -->
+                  <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                      Administrative Role
+                    </label>
+                    <div class="relative">
+                      <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="shield_person">shield_person</span>
+                      <select id="input-role"
+                        class="w-full pl-9 pr-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans">
+                        <option value="Super Administrator">Super Administrator (Tier 1)</option>
+                        <option value="Operations Lead">Operations Lead</option>
+                        <option value="Clinical Reviewer">Clinical Reviewer</option>
+                        <option value="Support Agent">Support Agent</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Primary Timezone -->
+                  <div>
+                    <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                      Timezone Preference
+                    </label>
+                    <div class="relative">
+                      <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="schedule">schedule</span>
+                      <select id="input-timezone"
+                        class="w-full pl-9 pr-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans">
+                        <option value="UTC (Coordinated Universal Time)">UTC (Coordinated Universal Time)</option>
+                        <option value="EST (US Eastern Time)">EST (US Eastern Time)</option>
+                        <option value="CST (US Central Time)">CST (US Central Time)</option>
+                        <option value="PST (US Pacific Time)">PST (US Pacific Time)</option>
+                        <option value="IST (India Standard Time)">IST (India Standard Time)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Button Group -->
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30">
+                  <button type="button" onclick="resetProfileForm()"
+                    class="px-4 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium">
+                    Reset
+                  </button>
+                  <button type="submit"
+                    class="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary-container text-on-primary-container font-semibold text-xs sm:text-sm shadow-md hover:bg-primary transition-all duration-150 active:scale-95 cyan-glow-sm">
+                    <span class="material-symbols-outlined text-base" data-icon="save">save</span>
+                    <span>Save Profile Details</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Right 1 Col: Permissions & Authority Matrix -->
+            <div class="space-y-6">
+              <!-- Security Access Matrix Card -->
+              <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 shadow-lg backdrop-blur-md space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-lg" data-icon="admin_panel_settings">admin_panel_settings</span>
+                    <h3 class="text-sm font-semibold text-on-surface">Console Permissions</h3>
+                  </div>
+                  <span class="text-[10px] font-mono text-primary font-semibold">ALL ACTIVE</span>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                  <!-- Item 1 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-base" data-icon="dashboard">dashboard</span>
+                      <span class="text-on-surface font-medium">Telemetry &amp; Metrics</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-primary font-bold">FULL ACCESS</span>
+                  </div>
+
+                  <!-- Item 2 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-base" data-icon="forum">forum</span>
+                      <span class="text-on-surface font-medium">Chat Sessions &amp; Duration</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-primary font-bold">FULL ACCESS</span>
+                  </div>
+
+                  <!-- Item 3 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-base" data-icon="confirmation_number">confirmation_number</span>
+                      <span class="text-on-surface font-medium">Support Tickets</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-primary font-bold">RESOLVE / EDIT</span>
+                  </div>
+
+                  <!-- Item 4 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-base" data-icon="menu_book">menu_book</span>
+                      <span class="text-on-surface font-medium">Knowledge Base Manager</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-primary font-bold">READ / WRITE</span>
+                  </div>
+
+                  <!-- Item 5 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-base" data-icon="alt_route">alt_route</span>
+                      <span class="text-on-surface font-medium">Fallbacks &amp; Guardrails</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-primary font-bold">OVERRIDE OK</span>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: CHANGE PASSWORD -->
+        <div id="tab-content-password" class="hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left 2 Cols: Password Form -->
+            <div class="lg:col-span-2 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 sm:p-6 shadow-lg backdrop-blur-md space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-xl" data-icon="lock_reset">lock_reset</span>
+                  <h3 class="text-sm sm:text-base font-semibold text-on-surface">Update Account Password</h3>
+                </div>
+                <span class="text-[11px] font-mono text-outline">ENCRYPTED AT REST</span>
+              </div>
+
+              <!-- Instructions / Warning Alert -->
+              <div class="p-3.5 rounded-lg bg-secondary/10 border border-secondary/20 flex items-start gap-3 text-xs text-on-surface-variant">
+                <span class="material-symbols-outlined text-secondary text-lg shrink-0 mt-0.5" data-icon="info">info</span>
+                <div class="leading-relaxed">
+                  Choose a robust password with at least 8 characters. For enhanced security, your new password will update your active administrator credentials on next login.
+                </div>
+              </div>
+
+              <!-- Password Change Form -->
+              <form id="password-form" onsubmit="submitPasswordChange(event)" class="space-y-4">
+                <!-- Current Password -->
+                <div>
+                  <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                    Current Password
+                  </label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="key">key</span>
+                    <input type="password" id="input-current-pass" required placeholder="Enter current admin password"
+                      class="w-full pl-9 pr-10 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans" />
+                    <button type="button" onclick="togglePasswordVisibility('input-current-pass', 'toggle-cur-icon')"
+                      class="absolute right-3 top-2.5 text-outline hover:text-on-surface">
+                      <span id="toggle-cur-icon" class="material-symbols-outlined text-base" data-icon="visibility">visibility</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- New Password -->
+                <div>
+                  <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                    New Password
+                  </label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="lock">lock</span>
+                    <input type="password" id="input-new-pass" required minlength="8" oninput="checkPasswordStrength()" placeholder="Enter minimum 8 characters"
+                      class="w-full pl-9 pr-10 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans" />
+                    <button type="button" onclick="togglePasswordVisibility('input-new-pass', 'toggle-new-icon')"
+                      class="absolute right-3 top-2.5 text-outline hover:text-on-surface">
+                      <span id="toggle-new-icon" class="material-symbols-outlined text-base" data-icon="visibility">visibility</span>
+                    </button>
+                  </div>
+
+                  <!-- Live Strength Indicator Bar -->
+                  <div class="mt-2 space-y-1">
+                    <div class="flex items-center justify-between text-[11px] font-mono">
+                      <span class="text-outline">Strength:</span>
+                      <span id="pass-strength-label" class="text-outline">None</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+                      <div id="pass-strength-bar" class="h-full w-0 transition-all duration-300 bg-error"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Confirm New Password -->
+                <div>
+                  <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-1.5 font-label-sm">
+                    Confirm New Password
+                  </label>
+                  <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-outline" data-icon="lock_clock">lock_clock</span>
+                    <input type="password" id="input-confirm-pass" required minlength="8" oninput="validatePassMatch()" placeholder="Re-type new password"
+                      class="w-full pl-9 pr-10 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none font-sans" />
+                    <button type="button" onclick="togglePasswordVisibility('input-confirm-pass', 'toggle-conf-icon')"
+                      class="absolute right-3 top-2.5 text-outline hover:text-on-surface">
+                      <span id="toggle-conf-icon" class="material-symbols-outlined text-base" data-icon="visibility">visibility</span>
+                    </button>
+                  </div>
+                  <div id="pass-match-feedback" class="text-[11px] font-mono mt-1 hidden text-error">
+                    Passwords do not match
+                  </div>
+                </div>
+
+                <!-- Session Termination Option -->
+                <div class="pt-2">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="check-logout-other" checked
+                      class="rounded bg-surface-container border-outline-variant/40 text-primary focus:ring-primary h-4 w-4" />
+                    <span class="text-xs text-on-surface-variant">
+                      Revoke other active sessions on password change
+                    </span>
+                  </label>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30">
+                  <button type="button" onclick="document.getElementById('password-form').reset(); checkPasswordStrength();"
+                    class="px-4 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs sm:text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors font-medium">
+                    Clear
+                  </button>
+                  <button type="submit" id="btn-update-pass"
+                    class="flex items-center gap-2 px-5 py-2 rounded-lg bg-primary-container text-on-primary-container font-semibold text-xs sm:text-sm shadow-md hover:bg-primary transition-all duration-150 active:scale-95 cyan-glow-sm">
+                    <span class="material-symbols-outlined text-base" data-icon="check_circle">check_circle</span>
+                    <span id="btn-update-pass-text">Update Password</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Right 1 Col: Password Policy & 2FA Information -->
+            <div class="space-y-6">
+              <!-- Security Guidelines Card -->
+              <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 shadow-lg backdrop-blur-md space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-outline-variant/30">
+                  <span class="material-symbols-outlined text-primary text-lg" data-icon="security">security</span>
+                  <h3 class="text-sm font-semibold text-on-surface">Password Requirements</h3>
+                </div>
+
+                <ul class="space-y-2.5 text-xs text-on-surface-variant">
+                  <li class="flex items-center gap-2">
+                    <span id="req-length" class="material-symbols-outlined text-sm text-outline" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                    <span>At least 8 characters in length</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span id="req-upper" class="material-symbols-outlined text-sm text-outline" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                    <span>Contains uppercase letters (A-Z)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span id="req-number" class="material-symbols-outlined text-sm text-outline" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                    <span>Contains numbers (0-9)</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <span id="req-special" class="material-symbols-outlined text-sm text-outline" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+                    <span>Contains special symbol (!@#$%^&amp;*)</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Two-Factor Authentication (2FA) Status Card -->
+              <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 shadow-lg backdrop-blur-md space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-lg" data-icon="phonelink_lock">phonelink_lock</span>
+                    <h3 class="text-sm font-semibold text-on-surface">2FA Authentication</h3>
+                  </div>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-primary/15 text-primary border border-primary/30">
+                    ENABLED
+                  </span>
+                </div>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                  Two-factor authentication adds an additional layer of security to your PMT telemetry console.
+                </p>
+                <div class="pt-1 flex items-center justify-between text-xs font-mono text-outline">
+                  <span>Method: Google Authenticator</span>
+                  <span id="quick-2fa-status-text" class="text-primary font-semibold">Active</span>
+                </div>
+                <button type="button" onclick="switchTab('2fa')"
+                  class="mt-2 w-full py-1.5 px-3 rounded text-xs font-medium bg-surface-container border border-outline-variant/30 text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                  <span class="material-symbols-outlined text-sm" data-icon="settings_suggest">settings_suggest</span>
+                  <span>Manage 2FA Settings &amp; TOTP</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 3: 2FA AUTHENTICATION (TOTP & GOOGLE AUTHENTICATOR) -->
+        <div id="tab-content-2fa" class="hidden space-y-6">
+          <!-- 2FA Master Status Banner Card -->
+          <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 sm:p-6 shadow-lg backdrop-blur-md">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <div id="status-2fa-icon-box"
+                    class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(86,218,205,0.2)]">
+                    <span class="material-symbols-outlined text-3xl sm:text-4xl" data-icon="security">security</span>
+                  </div>
+                  <span id="status-2fa-dot" class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary border-2 border-surface flex items-center justify-center">
+                    <span class="w-2 h-2 rounded-full bg-surface-container-lowest"></span>
+                  </span>
+                </div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-lg sm:text-xl font-bold text-on-surface">Two-Factor Authentication (2FA)</h2>
+                    <span id="badge-2fa-enforced" class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30">
+                      ACTIVE &amp; ENFORCED
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-secondary/15 text-secondary border border-secondary/20">
+                      RFC 6238 TOTP
+                    </span>
+                  </div>
+                  <p id="desc-2fa-status" class="text-xs sm:text-sm text-on-surface-variant mt-1">
+                    Your console is fortified with Time-based One-Time Passwords (TOTP). Login requests mandate your 6-digit authenticator code.
+                  </p>
+                  <div class="flex flex-wrap items-center gap-4 mt-2 text-[11px] text-outline font-mono">
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs text-primary" data-icon="verified">verified</span>
+                      Primary: Google Authenticator
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs text-secondary" data-icon="timelapse">timelapse</span>
+                      Rotation: 30-Second Window
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Toggle Button -->
+              <div class="flex items-center gap-2">
+                <button type="button" id="btn-toggle-2fa" onclick="handleToggle2FA()"
+                  class="px-4 py-2 rounded-lg border text-xs font-semibold transition-all duration-150 active:scale-95 flex items-center gap-1.5 border-error/30 bg-error/10 text-error hover:bg-error/20 cursor-pointer">
+                  <span class="material-symbols-outlined text-sm" data-icon="lock_open">lock_open</span>
+                  <span id="btn-toggle-2fa-text">Disable 2FA</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Configuration Grid: Setup Flow & Recovery Codes -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left 7 Cols: Google Authenticator / TOTP Setup Card -->
+            <div class="lg:col-span-7 bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 sm:p-6 shadow-lg backdrop-blur-md space-y-6">
+              <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+                <div class="flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-xl" data-icon="qr_code_scanner">qr_code_scanner</span>
+                  <h3 class="text-sm sm:text-base font-semibold text-on-surface">Authenticator App Enrollment (TOTP)</h3>
+                </div>
+                <span class="text-[10px] font-mono text-outline">STEP-BY-STEP PAIRING</span>
+              </div>
+
+              <!-- STEP 1: Download App -->
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-primary/20 text-primary border border-primary/40 flex items-center justify-center font-mono text-[11px] font-bold">1</span>
+                  <h4 class="text-xs sm:text-sm font-semibold text-on-surface">Install Authenticator Application</h4>
+                </div>
+                <p class="text-xs text-on-surface-variant pl-7">
+                  Download and launch an authenticator app on your smartphone or desktop:
+                </p>
+                <div class="flex flex-wrap gap-2 pl-7 pt-1">
+                  <span class="px-2.5 py-1 rounded bg-surface-container text-[11px] font-medium text-on-surface border border-outline-variant/30 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-xs text-primary" data-icon="android">android</span> Google Authenticator
+                  </span>
+                  <span class="px-2.5 py-1 rounded bg-surface-container text-[11px] font-medium text-on-surface border border-outline-variant/30 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-xs text-secondary" data-icon="window">window</span> Microsoft Authenticator
+                  </span>
+                  <span class="px-2.5 py-1 rounded bg-surface-container text-[11px] font-medium text-on-surface border border-outline-variant/30 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-xs text-primary" data-icon="password">password</span> 1Password / Authy
+                  </span>
+                </div>
+              </div>
+
+              <!-- STEP 2: Scan QR Code or Use Secret Key -->
+              <div class="space-y-3 pt-3 border-t border-outline-variant/20">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-primary/20 text-primary border border-primary/40 flex items-center justify-center font-mono text-[11px] font-bold">2</span>
+                  <h4 class="text-xs sm:text-sm font-semibold text-on-surface">Scan QR Code or Enter Secret Key</h4>
+                </div>
+
+                <div class="pl-7 grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+                  <!-- QR Code Display Box (High Contrast Scannable Card) -->
+                  <div class="sm:col-span-5 flex flex-col items-center">
+                    <div class="p-3.5 bg-white rounded-2xl shadow-[0_0_25px_rgba(86,218,205,0.25)] border-2 border-primary/50 relative group flex items-center justify-center">
+                      <img id="qr-code-image"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&amp;margin=8&amp;data=otpauth%3A%2F%2Ftotp%2FPMT-Spark-AI%3Aadmin%40painmanagementtechnologies.com%3Fsecret%3DHXDMVJECJJWGSZ3U%26issuer%3DPMT%2520Spark%2520AI"
+                        alt="Google Authenticator 2FA QR Code"
+                        class="w-36 h-36 sm:w-40 sm:h-40 rounded-lg object-contain block bg-white"
+                        onerror="this.onerror=null; this.src='https://quickchart.io/qr?size=220&amp;margin=2&amp;text=otpauth%3A%2F%2Ftotp%2FPMT-Spark-AI%3Aadmin%40painmanagementtechnologies.com%3Fsecret%3DHXDMVJECJJWGSZ3U%26issuer%3DPMT%2520Spark%2520AI';" />
+                    </div>
+                    <span class="text-[11px] font-mono text-primary font-semibold mt-2.5 flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-xs" data-icon="center_focus_strong">center_focus_strong</span>
+                      <span>Scan with Authenticator App</span>
+                    </span>
+                  </div>
+
+                  <!-- Secret Key Details -->
+                  <div class="sm:col-span-7 space-y-3">
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                      Cannot scan the barcode? Add account manually in Google Authenticator using the key below:
+                    </p>
+                    <div class="space-y-1">
+                      <label class="block text-[11px] font-mono text-outline uppercase font-semibold">
+                        Manual Entry Secret Key
+                      </label>
+                      <div class="p-2.5 rounded-lg bg-surface-container border border-outline-variant/30 flex items-center justify-between font-mono text-xs text-primary">
+                        <span id="totp-secret-display" class="font-bold tracking-widest selection:bg-primary selection:text-surface">
+                          HXDM VJEC JJWG SZ3U
+                        </span>
+                        <button type="button" onclick="copyTotpSecretKey()" class="text-secondary hover:text-primary transition-colors p-1" title="Copy Secret Key">
+                          <span class="material-symbols-outlined text-base" data-icon="content_copy">content_copy</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Key Metadata specs -->
+                    <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-outline pt-1">
+                      <div>Type: <span class="text-on-surface">Time-based (TOTP)</span></div>
+                      <div>Algorithm: <span class="text-on-surface">SHA-1</span></div>
+                      <div>Interval: <span class="text-on-surface">30 Seconds</span></div>
+                      <div>Digits: <span class="text-on-surface">6 Numbers</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STEP 3: Enter 6-Digit Code to Bind / Verify -->
+              <div class="space-y-3 pt-3 border-t border-outline-variant/20">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-primary/20 text-primary border border-primary/40 flex items-center justify-center font-mono text-[11px] font-bold">3</span>
+                    <h4 class="text-xs sm:text-sm font-semibold text-on-surface">Verify 6-Digit Authenticator Code</h4>
+                  </div>
+                  <!-- Rotating 30s Countdown Timer Indicator -->
+                  <div class="flex items-center gap-1.5 text-[11px] font-mono text-outline">
+                    <span class="material-symbols-outlined text-xs text-primary animate-spin" data-icon="sync">sync</span>
+                    <span>Window: <span id="totp-countdown-sec" class="text-primary font-bold">30s</span></span>
+                  </div>
+                </div>
+
+                <div class="pl-7 space-y-4">
+                  <p class="text-xs text-on-surface-variant">
+                    Input the 6-digit rolling numerical token from your Google Authenticator app to activate security:
+                  </p>
+
+                  <!-- 6 Individual Digit OTP Boxes with Auto-Advance -->
+                  <div class="flex items-center gap-2 sm:gap-3 max-w-sm">
+                    <input type="text" maxlength="1" id="otp-1" inputmode="numeric" autocomplete="one-time-code"
+                      class="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-lg bg-surface-container border border-outline-variant/40 text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" />
+                    <input type="text" maxlength="1" id="otp-2" inputmode="numeric"
+                      class="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-lg bg-surface-container border border-outline-variant/40 text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" />
+                    <input type="text" maxlength="1" id="otp-3" inputmode="numeric"
+                      class="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-lg bg-surface-container border border-outline-variant/40 text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" />
+                    <span class="text-outline font-bold">-</span>
+                    <input type="text" maxlength="1" id="otp-4" inputmode="numeric"
+                      class="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-lg bg-surface-container border border-outline-variant/40 text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" />
+                    <input type="text" maxlength="1" id="otp-5" inputmode="numeric"
+                      class="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-lg bg-surface-container border border-outline-variant/40 text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" />
+                    <input type="text" maxlength="1" id="otp-6" inputmode="numeric"
+                      class="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-mono font-bold rounded-lg bg-surface-container border border-outline-variant/40 text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none" />
+                  </div>
+
+                  <!-- Activation Trigger Button -->
+                  <div class="flex items-center gap-3 pt-1">
+                    <button type="button" id="btn-verify-otp" onclick="verifyAndActivate2FA()"
+                      class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-semibold text-xs sm:text-sm shadow-md hover:bg-primary transition-all duration-150 active:scale-95 cyan-glow-sm cursor-pointer">
+                      <span class="material-symbols-outlined text-base" data-icon="check_circle">check_circle</span>
+                      <span id="btn-verify-otp-text">Verify &amp; Activate 2FA</span>
+                    </button>
+                    <button type="button" onclick="clearOtpBoxes()"
+                      class="px-3 py-2 text-xs font-medium text-outline hover:text-on-surface transition-colors">
+                      Clear Digits
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right 5 Cols: Emergency Recovery Codes & Trusted Devices -->
+            <div class="lg:col-span-5 space-y-6">
+              <!-- Emergency Single-Use Recovery Codes Card -->
+              <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 shadow-lg backdrop-blur-md space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-lg" data-icon="key_vertical">key_vertical</span>
+                    <h3 class="text-sm font-semibold text-on-surface">Emergency Recovery Codes</h3>
+                  </div>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-container text-outline border border-outline-variant/30">
+                    8 SINGLE-USE
+                  </span>
+                </div>
+
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                  Store these one-time codes in your password manager. If you ever lose your phone or authenticator access, each code can authenticate once.
+                </p>
+
+                <!-- Recovery Codes Grid -->
+                <div id="recovery-codes-grid" class="grid grid-cols-2 gap-2 p-3 rounded-lg bg-surface-container/70 border border-outline-variant/30 font-mono text-xs text-primary font-semibold select-all">
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">4B9F-88E2</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">A1C7-33D9</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">E560-91F4</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">89AC-00B2</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">22FE-710A</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">F41C-59B8</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">99E3-44D1</div>
+                  <div class="p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20">D28A-67E9</div>
+                </div>
+
+                <!-- Recovery Actions -->
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                  <button type="button" onclick="copyRecoveryCodes()"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded bg-surface-container border border-outline-variant/30 text-xs font-medium text-on-surface hover:text-primary hover:bg-surface-container-high transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-xs" data-icon="content_copy">content_copy</span>
+                    <span>Copy All</span>
+                  </button>
+                  <button type="button" onclick="downloadRecoveryCodes()"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded bg-surface-container border border-outline-variant/30 text-xs font-medium text-on-surface hover:text-secondary hover:bg-surface-container-high transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-xs" data-icon="download">download</span>
+                    <span>Download (.txt)</span>
+                  </button>
+                  <button type="button" onclick="regenerateRecoveryCodes()"
+                    class="p-1.5 rounded bg-surface-container border border-outline-variant/30 text-outline hover:text-on-surface transition-colors cursor-pointer"
+                    title="Regenerate Codes">
+                    <span class="material-symbols-outlined text-base" data-icon="refresh">refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Trusted Devices & Active Enrolled Sessions Card -->
+              <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-5 shadow-lg backdrop-blur-md space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-outline-variant/30">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg" data-icon="devices">devices</span>
+                    <h3 class="text-sm font-semibold text-on-surface">Trusted Devices &amp; Sessions</h3>
+                  </div>
+                  <span class="text-[10px] font-mono text-primary font-bold">2 DEVICES</span>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                  <!-- Device 1 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <span class="material-symbols-outlined text-primary text-base" data-icon="laptop_windows">laptop_windows</span>
+                      <div>
+                        <div class="text-on-surface font-medium flex items-center gap-1.5">
+                          Chrome on Windows 11
+                          <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-primary/20 text-primary">CURRENT</span>
+                        </div>
+                        <div class="text-[10px] font-mono text-outline">Verified via TOTP • 10:42 AM UTC</div>
+                      </div>
+                    </div>
+                    <span class="w-2 h-2 rounded-full bg-primary" title="Active"></span>
+                  </div>
+
+                  <!-- Device 2 -->
+                  <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <span class="material-symbols-outlined text-secondary text-base" data-icon="phone_iphone">phone_iphone</span>
+                      <div>
+                        <div class="text-on-surface font-medium">Safari on iPhone (iOS 18)</div>
+                        <div class="text-[10px] font-mono text-outline">Verified via TOTP • 3 days ago</div>
+                      </div>
+                    </div>
+                    <span class="w-2 h-2 rounded-full bg-outline" title="Standby"></span>
+                  </div>
+                </div>
+
+                <!-- Revoke Action -->
+                <button type="button" onclick="revokeOtherTrustedDevices()"
+                  class="w-full py-2 px-3 rounded bg-surface-container border border-outline-variant/30 text-xs font-medium text-error hover:bg-error/10 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                  <span class="material-symbols-outlined text-xs" data-icon="logout">logout</span>
+                  <span>Revoke All Other Remembered Devices</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Live Clock Display
+    function updateClock() {
+      const now = new Date();
+      const utcString = now.toUTCString().split(' ')[4] + ' UTC';
+      const clockElements = document.querySelectorAll('.utc-clock-display, #utc-clock');
+      clockElements.forEach(el => {
+        el.textContent = 'LIVE: ' + utcString;
+      });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Tab Switching Logic
+    function switchTab(tab) {
+      const tabs = ['profile', 'password', '2fa'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (!btn || !content) return;
+
+        if (t === tab) {
+          btn.className = "flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all duration-150 border-primary text-primary bg-primary/5 rounded-t-lg";
+          content.classList.remove('hidden');
+        } else {
+          btn.className = "flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all duration-150 border-transparent text-on-surface-variant hover:text-on-surface hover:bg-surface-container/30 rounded-t-lg";
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    // Load initial user details from session / storage
+    function loadUserData() {
+      const storedEmail = localStorage.getItem("adminEmail") || sessionStorage.getItem("adminEmail") || "admin@painmanagementtechnologies.com";
+      const storedName = localStorage.getItem("adminName") || "Admin Operator";
+      const storedRole = localStorage.getItem("adminRole") || "Super Administrator";
+      const storedTz = localStorage.getItem("adminTimezone") || "UTC (Coordinated Universal Time)";
+
+      // Update Form Inputs
+      document.getElementById("input-full-name").value = storedName;
+      document.getElementById("input-email").value = storedEmail;
+      document.getElementById("input-role").value = storedRole;
+      document.getElementById("input-timezone").value = storedTz;
+
+      // Update UI Header Elements
+      document.getElementById("profile-display-name").textContent = storedName;
+      document.getElementById("profile-display-email").textContent = storedEmail;
+      document.getElementById("sidebar-admin-name").textContent = storedName;
+
+      // Compute Initials
+      const initials = storedName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() || "AD";
+      document.getElementById("profile-avatar-circle").textContent = initials;
+      document.getElementById("sidebar-avatar-initials").textContent = initials;
+    }
+
+    // Save Profile Details
+    function saveProfileDetails(e) {
+      e.preventDefault();
+      const name = document.getElementById("input-full-name").value.trim();
+      const email = document.getElementById("input-email").value.trim();
+      const role = document.getElementById("input-role").value;
+      const tz = document.getElementById("input-timezone").value;
+
+      localStorage.setItem("adminName", name);
+      localStorage.setItem("adminEmail", email);
+      sessionStorage.setItem("adminEmail", email);
+      localStorage.setItem("adminRole", role);
+      localStorage.setItem("adminTimezone", tz);
+
+      // Re-render UI
+      loadUserData();
+      showToast("Profile details successfully updated and saved!", "success");
+    }
+
+    // Reset Profile Form
+    function resetProfileForm() {
+      loadUserData();
+      showToast("Form reset to currently active profile data.", "info");
+    }
+
+    // Toggle Password Visibility
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "visibility_off";
+      } else {
+        input.type = "password";
+        icon.textContent = "visibility";
+      }
+    }
+
+    // Check Password Strength
+    function checkPasswordStrength() {
+      const pass = document.getElementById("input-new-pass").value;
+      const bar = document.getElementById("pass-strength-bar");
+      const label = document.getElementById("pass-strength-label");
+
+      const hasLength = pass.length >= 8;
+      const hasUpper = /[A-Z]/.test(pass);
+      const hasNumber = /[0-9]/.test(pass);
+      const hasSpecial = /[^A-Za-z0-9]/.test(pass);
+
+      // Update Requirement Checkmarks
+      updateReqIcon('req-length', hasLength);
+      updateReqIcon('req-upper', hasUpper);
+      updateReqIcon('req-number', hasNumber);
+      updateReqIcon('req-special', hasSpecial);
+
+      const score = [hasLength, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+
+      if (!pass) {
+        bar.style.width = "0%";
+        bar.className = "h-full w-0 transition-all duration-300 bg-error";
+        label.textContent = "None";
+        label.className = "text-outline";
+      } else if (score <= 1) {
+        bar.style.width = "25%";
+        bar.className = "h-full transition-all duration-300 bg-error";
+        label.textContent = "Weak";
+        label.className = "text-error font-semibold";
+      } else if (score === 2) {
+        bar.style.width = "50%";
+        bar.className = "h-full transition-all duration-300 bg-amber-400";
+        label.textContent = "Fair";
+        label.className = "text-amber-400 font-semibold";
+      } else if (score === 3) {
+        bar.style.width = "75%";
+        bar.className = "h-full transition-all duration-300 bg-secondary";
+        label.textContent = "Good";
+        label.className = "text-secondary font-semibold";
+      } else {
+        bar.style.width = "100%";
+        bar.className = "h-full transition-all duration-300 bg-primary";
+        label.textContent = "Strong";
+        label.className = "text-primary font-semibold";
+      }
+
+      validatePassMatch();
+    }
+
+    function updateReqIcon(id, valid) {
+      const el = document.getElementById(id);
+      if (valid) {
+        el.textContent = "check_circle";
+        el.className = "material-symbols-outlined text-sm text-primary";
+      } else {
+        el.textContent = "radio_button_unchecked";
+        el.className = "material-symbols-outlined text-sm text-outline";
+      }
+    }
+
+    // Validate Password Match
+    function validatePassMatch() {
+      const newPass = document.getElementById("input-new-pass").value;
+      const confPass = document.getElementById("input-confirm-pass").value;
+      const feedback = document.getElementById("pass-match-feedback");
+
+      if (confPass.length > 0 && newPass !== confPass) {
+        feedback.classList.remove("hidden");
+        return false;
+      } else {
+        feedback.classList.add("hidden");
+        return true;
+      }
+    }
+
+    // Submit Password Change
+    function submitPasswordChange(e) {
+      e.preventDefault();
+      const currentPass = document.getElementById("input-current-pass").value;
+      const newPass = document.getElementById("input-new-pass").value;
+      const confPass = document.getElementById("input-confirm-pass").value;
+      const btn = document.getElementById("btn-update-pass");
+      const btnText = document.getElementById("btn-update-pass-text");
+
+      if (newPass !== confPass) {
+        showToast("Password confirmation does not match new password.", "error");
+        return;
+      }
+
+      if (newPass.length < 8) {
+        showToast("New password must be at least 8 characters.", "error");
+        return;
+      }
+
+      // Simulate update
+      btn.disabled = true;
+      btnText.textContent = "Encrypting & Updating...";
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btnText.textContent = "Update Password";
+        document.getElementById("password-form").reset();
+        checkPasswordStrength();
+        showToast("Password updated successfully! Active across security layers.", "success");
+      }, 700);
+    }
+
+
+
+    // Toast Alert Notification System
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `flex items-center gap-2 px-4 py-3 rounded-lg shadow-xl border text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${
+        type === "success" 
+          ? "bg-surface-container-high border-primary/40 text-primary shadow-[0_0_15px_rgba(86,218,205,0.2)]" 
+          : type === "error"
+          ? "bg-surface-container-high border-error/40 text-error shadow-[0_0_15px_rgba(255,180,171,0.2)]"
+          : "bg-surface-container-high border-secondary/40 text-secondary"
+      }`;
+
+      const iconName = type === "success" ? "check_circle" : type === "error" ? "warning" : "info";
+      toast.innerHTML = `
+        <span class="material-symbols-outlined text-base" data-icon="${iconName}">${iconName}</span>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      // Trigger entrance transition
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      // Auto dismiss after 3.5s
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "-translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // ==========================================
+    // 2FA / TOTP (GOOGLE AUTHENTICATOR) LOGIC
+    // ==========================================
+
+    let totpCountdownTimer = null;
+
+    // Initialize OTP 6-box input listeners
+    function initOtpInputHandling() {
+      const otpInputs = [
+        document.getElementById("otp-1"),
+        document.getElementById("otp-2"),
+        document.getElementById("otp-3"),
+        document.getElementById("otp-4"),
+        document.getElementById("otp-5"),
+        document.getElementById("otp-6")
+      ];
+
+      otpInputs.forEach((input, index) => {
+        if (!input) return;
+
+        // Auto advance on character entry
+        input.addEventListener("input", (e) => {
+          const val = input.value.replace(/[^0-9]/g, "");
+          input.value = val ? val[val.length - 1] : "";
+
+          if (input.value && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+          }
+        });
+
+        // Shift backward on Backspace
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !input.value && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+        });
+
+        // Paste support for full 6-digit code
+        input.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const pasted = (e.clipboardData || window.clipboardData).getData("text").replace(/[^0-9]/g, "").slice(0, 6);
+          if (pasted) {
+            pasted.split("").forEach((char, i) => {
+              if (otpInputs[i]) otpInputs[i].value = char;
+            });
+            const nextIdx = Math.min(pasted.length, otpInputs.length - 1);
+            otpInputs[nextIdx].focus();
+          }
+        });
+      });
+    }
+
+    // 30-Second Rolling TOTP Countdown
+    function startTotpCountdown() {
+      const countdownEl = document.getElementById("totp-countdown-sec");
+      if (!countdownEl) return;
+
+      function updateRemaining() {
+        const nowSec = Math.floor(Date.now() / 1000);
+        const remaining = 30 - (nowSec % 30);
+        countdownEl.textContent = `${remaining}s`;
+      }
+
+      updateRemaining();
+      if (totpCountdownTimer) clearInterval(totpCountdownTimer);
+      totpCountdownTimer = setInterval(updateRemaining, 1000);
+    }
+
+    // Copy TOTP Secret Key
+    function copyTotpSecretKey() {
+      const secret = "HXDMVJECJJWGSZ3U";
+      navigator.clipboard.writeText(secret).then(() => {
+        showToast("Secret key copied to clipboard (HXDMVJECJJWGSZ3U)!", "success");
+      }).catch(() => {
+        showToast("Failed to copy key to clipboard.", "error");
+      });
+    }
+
+    // Clear OTP Input Boxes
+    function clearOtpBoxes() {
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById(`otp-${i}`);
+        if (el) el.value = "";
+      }
+      const first = document.getElementById("otp-1");
+      if (first) first.focus();
+    }
+
+    // Verify & Activate 2FA
+    function verifyAndActivate2FA() {
+      let code = "";
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById(`otp-${i}`);
+        code += el ? el.value.trim() : "";
+      }
+
+      if (code.length < 6) {
+        showToast("Please enter all 6 digits from your Google Authenticator app.", "error");
+        return;
+      }
+
+      const btn = document.getElementById("btn-verify-otp");
+      const btnText = document.getElementById("btn-verify-otp-text");
+      btn.disabled = true;
+      btnText.textContent = "Verifying with TOTP Engine...";
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btnText.textContent = "Verify & Activate 2FA";
+
+        localStorage.setItem("is2FAEnabled", "true");
+        load2FAState();
+        clearOtpBoxes();
+        showToast("Google Authenticator paired successfully! 2FA is now enforced.", "success");
+      }, 750);
+    }
+
+    // Toggle 2FA Master Switch
+    function handleToggle2FA() {
+      const isEnabled = localStorage.getItem("is2FAEnabled") !== "false";
+      if (isEnabled) {
+        if (confirm("Are you sure you want to disable Two-Factor Authentication? This will reduce the security level of your admin account.")) {
+          localStorage.setItem("is2FAEnabled", "false");
+          load2FAState();
+          showToast("Two-Factor Authentication has been disabled.", "info");
+        }
+      } else {
+        const firstOtp = document.getElementById("otp-1");
+        if (firstOtp) firstOtp.focus();
+        showToast("Enter your 6-digit Google Authenticator code to activate 2FA.", "info");
+      }
+    }
+
+    // Load and reflect 2FA UI state
+    function load2FAState() {
+      const isEnabled = localStorage.getItem("is2FAEnabled") !== "false"; // default true
+      const iconBox = document.getElementById("status-2fa-icon-box");
+      const dot = document.getElementById("status-2fa-dot");
+      const badgeEnforced = document.getElementById("badge-2fa-enforced");
+      const descStatus = document.getElementById("desc-2fa-status");
+      const btnToggle = document.getElementById("btn-toggle-2fa");
+      const btnToggleText = document.getElementById("btn-toggle-2fa-text");
+      const quickStatus = document.getElementById("quick-2fa-status-text");
+      const tabBadge = document.getElementById("tab-2fa-badge");
+
+      if (isEnabled) {
+        if (iconBox) iconBox.className = "w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(86,218,205,0.2)]";
+        if (dot) dot.className = "absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary border-2 border-surface flex items-center justify-center";
+        if (badgeEnforced) {
+          badgeEnforced.textContent = "ACTIVE & ENFORCED";
+          badgeEnforced.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30";
+        }
+        if (descStatus) descStatus.textContent = "Your console is fortified with Time-based One-Time Passwords (TOTP). Login requests mandate your 6-digit authenticator code.";
+        if (btnToggle) {
+          btnToggle.className = "px-4 py-2 rounded-lg border text-xs font-semibold transition-all duration-150 active:scale-95 flex items-center gap-1.5 border-error/30 bg-error/10 text-error hover:bg-error/20 cursor-pointer";
+          btnToggleText.textContent = "Disable 2FA";
+        }
+        if (quickStatus) {
+          quickStatus.textContent = "Active";
+          quickStatus.className = "text-primary font-semibold";
+        }
+        if (tabBadge) {
+          tabBadge.textContent = "ACTIVE";
+          tabBadge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/20 text-primary border border-primary/30";
+        }
+      } else {
+        if (iconBox) iconBox.className = "w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/15 border-2 border-amber-500/40 flex items-center justify-center text-amber-400";
+        if (dot) dot.className = "absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-amber-400 border-2 border-surface flex items-center justify-center";
+        if (badgeEnforced) {
+          badgeEnforced.textContent = "INACTIVE (RECOMMENDED)";
+          badgeEnforced.className = "px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30";
+        }
+        if (descStatus) descStatus.textContent = "2FA is currently disabled. Scan the QR code with Google Authenticator and enter your code below to activate security.";
+        if (btnToggle) {
+          btnToggle.className = "px-4 py-2 rounded-lg border text-xs font-semibold transition-all duration-150 active:scale-95 flex items-center gap-1.5 border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer";
+          btnToggleText.textContent = "Enroll 2FA";
+        }
+        if (quickStatus) {
+          quickStatus.textContent = "Disabled";
+          quickStatus.className = "text-amber-400 font-semibold";
+        }
+        if (tabBadge) {
+          tabBadge.textContent = "OFF";
+          tabBadge.className = "px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30";
+        }
+      }
+    }
+
+    // Copy Recovery Codes
+    function copyRecoveryCodes() {
+      const grid = document.getElementById("recovery-codes-grid");
+      if (!grid) return;
+      const codes = Array.from(grid.children).map(c => c.textContent.trim()).join("\n");
+      navigator.clipboard.writeText(codes).then(() => {
+        showToast("All 8 recovery backup codes copied to clipboard!", "success");
+      }).catch(() => {
+        showToast("Failed to copy codes.", "error");
+      });
+    }
+
+    // Download Recovery Codes as .txt
+    function downloadRecoveryCodes() {
+      const grid = document.getElementById("recovery-codes-grid");
+      if (!grid) return;
+      const codes = Array.from(grid.children).map(c => c.textContent.trim()).join("\n");
+      const content = `PMT SPARK AI CORE - 2FA EMERGENCY RECOVERY CODES\nGenerated: ${new Date().toUTCString()}\nAccount: admin@painmanagementtechnologies.com\n\n${codes}\n\nNOTE: Each code can only be used ONCE. Keep this file in a secure location.\n`;
+
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pmt-spark-2fa-recovery-codes.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Emergency backup codes downloaded!", "success");
+    }
+
+    // Regenerate Recovery Codes
+    function regenerateRecoveryCodes() {
+      const grid = document.getElementById("recovery-codes-grid");
+      if (!grid) return;
+
+      const chars = "0123456789ABCDEF";
+      grid.innerHTML = "";
+      for (let i = 0; i < 8; i++) {
+        let code = "";
+        for (let j = 0; j < 8; j++) {
+          if (j === 4) code += "-";
+          code += chars[Math.floor(Math.random() * chars.length)];
+        }
+        const div = document.createElement("div");
+        div.className = "p-1.5 rounded bg-surface/60 text-center tracking-wider border border-outline-variant/20";
+        div.textContent = code;
+        grid.appendChild(div);
+      }
+      showToast("Generated a fresh batch of 8 single-use recovery codes!", "success");
+    }
+
+    // Revoke Trusted Devices
+    function revokeOtherTrustedDevices() {
+      showToast("All other remembered sessions and devices have been revoked.", "success");
+    }
+
+    // Initialize on document ready
+    document.addEventListener("DOMContentLoaded", () => {
+      loadUserData();
+      initOtpInputHandling();
+      startTotpCountdown();
+      load2FAState();
+    });
+  </script>
+</body>
+
+</html>

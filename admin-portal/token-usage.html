@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script>
+    // Route Protection: Redirect unauthenticated requests to login
+    if (
+      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
+      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
+    ) {
+      window.location.replace("login.html");
+    }
+
+    function logout() {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminEmail");
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>PMT Spark AI Core - Token Usage Telemetry</title>
+  <!-- Material Symbols Outlined -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+    <!-- Fonts: Space Grotesk, Geist, JetBrains Mono -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tailwind CSS with theme plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#76f7e9",
+              "on-secondary-container": "#fcfcff",
+              "surface-dim": "#051426",
+              "on-error": "#690005",
+              "tertiary-container": "#00a5de",
+              "surface-variant": "#283549",
+              "primary-fixed-dim": "#56dacd",
+              "inverse-primary": "#006a62",
+              "surface-bright": "#2d3a4e",
+              surface: "#051426",
+              "surface-container-highest": "#283549",
+              "on-tertiary-fixed": "#001e2c",
+              "on-secondary-fixed": "#001e2c",
+              "on-tertiary": "#00354a",
+              secondary: "#7cd0ff",
+              "on-secondary": "#00344a",
+              "primary-container": "#00aca0",
+              "on-tertiary-container": "#00364b",
+              "inverse-on-surface": "#243144",
+              "tertiary-fixed": "#c4e7ff",
+              "on-secondary-fixed-variant": "#004c69",
+              "on-surface": "#d5e3fd",
+              outline: "#869491",
+              background: "#051426",
+              "on-primary": "#003733",
+              "on-error-container": "#ffdad6",
+              "on-tertiary-fixed-variant": "#004c69",
+              "inverse-surface": "#d5e3fd",
+              tertiary: "#7bd0ff",
+              "on-primary-container": "#003934",
+              "on-surface-variant": "#bbc9c6",
+              "secondary-container": "#007daa",
+              "surface-tint": "#56dacd",
+              "tertiary-fixed-dim": "#7bd0ff",
+              "surface-container-low": "#0e1c2e",
+              "on-primary-fixed": "#00201d",
+              "on-primary-fixed-variant": "#00504a",
+              "secondary-fixed-dim": "#7cd0ff",
+              "outline-variant": "#3c4947",
+              "secondary-fixed": "#c4e7ff",
+              primary: "#56dacd",
+              "surface-container-high": "#1d2b3e",
+              "error-container": "#93000a",
+              "surface-container-lowest": "#020e20",
+              error: "#ffb4ab",
+              "surface-container": "#122033",
+              "on-background": "#d5e3fd",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "space-sm": "0.5rem",
+              "space-lg": "1.5rem",
+              "space-xs": "0.25rem",
+              margin: "2rem",
+              gutter: "1.25rem",
+              "margin-mobile": "1rem",
+              "gutter-mobile": "0.75rem",
+              "space-xl": "2.5rem",
+              "space-md": "1rem",
+            },
+            fontFamily: {
+              "headline-md": ["Space Grotesk"],
+              "headline-lg": ["Space Grotesk"],
+              "headline-sm": ["Space Grotesk"],
+              "body-md": ["Geist"],
+              "headline-lg-mobile": ["Space Grotesk"],
+              "headline-xl": ["Space Grotesk"],
+              "body-sm": ["Geist"],
+              "headline-xl-mobile": ["Space Grotesk"],
+              "label-md": ["JetBrains Mono"],
+              "label-lg": ["JetBrains Mono"],
+              "body-lg": ["Geist"],
+              "label-sm": ["JetBrains Mono"],
+            },
+            fontSize: {
+              "headline-md": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  letterSpacing: "-0.015em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-sm": [
+                "20px",
+                { lineHeight: "28px", fontWeight: "500" },
+              ],
+              "body-md": ["14px", { lineHeight: "22px", fontWeight: "400" }],
+              "headline-lg-mobile": [
+                "24px",
+                {
+                  lineHeight: "32px",
+                  letterSpacing: "-0.01em",
+                  fontWeight: "600",
+                },
+              ],
+              "headline-xl": [
+                "40px",
+                {
+                  lineHeight: "48px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "body-sm": ["12px", { lineHeight: "18px", fontWeight: "400" }],
+              "headline-xl-mobile": [
+                "30px",
+                {
+                  lineHeight: "38px",
+                  letterSpacing: "-0.02em",
+                  fontWeight: "700",
+                },
+              ],
+              "label-md": [
+                "11px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.06em",
+                  fontWeight: "500",
+                },
+              ],
+              "label-lg": [
+                "13px",
+                {
+                  lineHeight: "18px",
+                  letterSpacing: "0.04em",
+                  fontWeight: "500",
+                },
+              ],
+              "body-lg": ["16px", { lineHeight: "26px", fontWeight: "400" }],
+              "label-sm": [
+                "10px",
+                {
+                  lineHeight: "14px",
+                  letterSpacing: "0.08em",
+                  fontWeight: "600",
+                },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1;
+      }
+
+      .hud-grid-pattern {
+        background-image:
+          radial-gradient(
+            ellipse at 50% 0%,
+            rgba(0, 172, 160, 0.12) 0%,
+            transparent 65%
+          ),
+          linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 1px
+          );
+        background-size:
+          100% 100%,
+          32px 32px,
+          32px 32px;
+      }
+
+      .glass-tier-1 {
+        background: rgba(4, 28, 61, 0.55);
+        backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(0, 172, 160, 0.22);
+      }
+
+      .glass-tier-2 {
+        background: rgba(4, 34, 74, 0.75);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0, 172, 160, 0.35);
+      }
+
+      .cyan-glow-sm {
+        box-shadow: 0 0 16px rgba(0, 172, 160, 0.25);
+      }
+    </style>
+</head>
+
+<body
+  class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary selection:text-on-primary min-h-screen flex flex-col hud-grid-pattern">
+  <!-- TOP SHARED NAV BAR -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 h-16 bg-surface-container-lowest/85 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+    <div class="flex justify-between items-center w-full h-full px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-3">
+        <img src="logo.png" alt="Pain Management Technologies"
+          class="h-8 w-auto max-w-[160px] object-contain filter drop-shadow-[0_0_8px_rgba(0,172,160,0.35)]">
+      </div>
+      <!-- Right Side: Live Session Time & Sign Out Action -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-1.5 text-label-md font-label-md text-on-surface-variant font-mono text-xs">
+          <span class="text-outline">SESSION TIME:</span>
+          <span class="text-on-surface font-semibold utc-clock-display" id="utc-clock">LIVE: --</span>
+        </div>
+        <button onclick="logout()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-error hover:border-error/40 transition-all duration-150 active:scale-95 text-label-md font-label-md cursor-pointer"
+          title="Sign Out">
+          <span class="material-symbols-outlined text-error text-sm" data-icon="logout">logout</span>
+          <span class="hidden sm:inline">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main System Shell -->
+  <div class="flex-1 pt-16 flex w-full">
+    <!-- Fixed/Sticky Left Telemetry Control Rail (280px) -->
+    <aside
+      class="w-[280px] shrink-0 hidden md:flex flex-col justify-between border-r border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-xl p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <!-- Navigation Menu -->
+      <nav class="space-y-1 flex-1">
+        <div
+          class="px-3 pb-2 pt-1 text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+          Telemetry Engine
+        </div>
+        <!-- 1. Overview -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="overview.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="dashboard">dashboard</span>
+            <span class="text-body-md font-body-md">Overview</span>
+          </div>
+        </a>
+        <!-- 2. Chat Logs & Sessions -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="session-logs.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="forum">forum</span>
+            <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-primary/20 font-mono">1.2k</span>
+        </a>
+        <!-- 3. Support Tickets -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="support-tickets.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-body-md font-body-md">Support Tickets</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20 font-mono">42 pending</span>
+        </a>
+        <!-- 4. Questions & KB -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="knowledge-base.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="menu_book">menu_book</span>
+            <span class="text-body-md font-body-md">Questions &amp; KB</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-mono">358</span>
+        </a>
+        <!-- 5. Token Usage (Active) -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium shadow-[0_0_15px_-3px_rgba(0,172,160,0.35)] cyan-glow-sm transition-all duration-200 group"
+          href="token-usage.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl"
+              data-icon="token">token</span>
+            <span class="text-body-md font-body-md">Token Usage</span>
+          </div>
+          <span class="w-1.5 h-1.5 rounded-full bg-surface"></span>
+        </a>
+        <!-- 6. Fallbacks & Rules -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="fallbacks-rules.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="alt_route">alt_route</span>
+            <span class="text-body-md font-body-md">Fallbacks &amp; Rules</span>
+          </div>
+        </a>
+        <!-- 7. Settings & Access -->
+        <a
+          class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="settings-access.html">
+          <div class="flex items-center gap-3">
+            <span
+              class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="settings">settings</span>
+            <span class="text-body-md font-body-md">Settings &amp; Access</span>
+          </div>
+        </a>
+      </nav>
+      <!-- Sidebar Footer Diagnostics & Profile -->
+      <div class="pt-4 border-t border-outline-variant/30 space-y-3 mt-auto">
+        <div
+          class="p-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 text-label-sm font-label-sm">
+          <div class="flex items-center justify-between text-outline">
+            <span>DIAGNOSTIC NODE</span>
+            <span class="text-primary font-semibold font-mono">14ms</span>
+          </div>
+          <div class="text-on-surface mt-1 truncate">
+            Node-East US • Cluster-4A
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-full border border-primary/50 bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+              <span
+                class="material-symbols-outlined text-base"
+                data-icon="shield_person">shield_person</span>
+            </div>
+            <div class="truncate">
+              <p
+                class="text-body-sm font-body-sm text-on-surface font-medium leading-none truncate max-w-[130px] user-profile-name"
+                id="user-profile-name">
+                PMT Admin
+              </p>
+              <p
+                class="text-label-sm font-label-sm text-outline mt-0.5 truncate">
+                SecOps Lead
+              </p>
+            </div>
+          </div>
+          <button
+            class="p-1.5 rounded text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer shrink-0"
+            title="Logout"
+            onclick="logout()">
+            <span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Canvas -->
+    <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full space-y-6">
+      <!-- Page Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/30 pb-5">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-primary text-2xl" data-icon="token">token</span>
+            <h1 class="text-headline-md font-headline-md font-semibold text-on-surface tracking-tight">
+              Token Usage &amp; Consumption Telemetry
+            </h1>
+          </div>
+          <p class="text-body-md text-on-surface-variant">
+            Live LLM inference quotas, token throughput rate, and model context bandwidth tracking for PMT Spark AI.
+          </p>
+        </div>
+        <!-- Time Filter Controls -->
+        <div class="flex items-center gap-2">
+          <div class="flex rounded-lg border border-outline-variant/30 bg-surface-container-low p-1 text-xs font-medium">
+            <button class="px-3 py-1.5 rounded bg-primary text-on-primary font-semibold transition-all">Today</button>
+            <button class="px-3 py-1.5 rounded text-on-surface-variant hover:text-on-surface transition-all">7 Days</button>
+            <button class="px-3 py-1.5 rounded text-on-surface-variant hover:text-on-surface transition-all">30 Days</button>
+          </div>
+          <button class="p-2 rounded-lg border border-outline-variant/30 bg-surface-container-low text-primary hover:bg-surface-container transition-all" title="Refresh Telemetry">
+            <span class="material-symbols-outlined text-lg" data-icon="refresh">refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: Total Tokens -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span>TOTAL TOKENS TODAY</span>
+            <span class="material-symbols-outlined text-primary text-base" data-icon="generating_tokens">generating_tokens</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-2xl font-bold font-mono text-on-surface">1,428,950</span>
+            <span class="text-xs text-primary font-mono font-semibold">+8.4%</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant">Prompt + Completion cumulative load</div>
+        </div>
+
+        <!-- KPI 2: Prompt Tokens -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span>PROMPT TOKENS</span>
+            <span class="material-symbols-outlined text-secondary text-base" data-icon="input">input</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-2xl font-bold font-mono text-on-surface">1,132,500</span>
+            <span class="text-xs text-secondary font-mono font-semibold">79.3%</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant">Input instructions &amp; context tokens consumed</div>
+        </div>
+
+        <!-- KPI 3: Completion Tokens -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span>COMPLETION TOKENS</span>
+            <span class="material-symbols-outlined text-primary text-base" data-icon="output">output</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-2xl font-bold font-mono text-on-surface">296,450</span>
+            <span class="text-xs text-primary font-mono font-semibold">20.7%</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant">Generated LLM output response tokens</div>
+        </div>
+
+        <!-- KPI 4: Active Tokens -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span>ACTIVE TOKENS</span>
+            <span class="material-symbols-outlined text-secondary text-base" data-icon="token">token</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span class="text-2xl font-bold font-mono text-on-surface">48,210</span>
+            <span class="text-xs text-secondary font-mono font-semibold">Live Window</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant">Active in-memory context session tokens</div>
+        </div>
+      </div>
+
+      <!-- Model Distribution & Throughput Graphs -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Usage by Tier Donut Chart (Col 1) -->
+        <div class="glass-tier-1 p-5 rounded-xl border border-outline-variant/30 space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+              <div class="flex items-center gap-2.5">
+                <div class="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                  <span class="material-symbols-outlined text-lg">pie_chart</span>
+                </div>
+                <div>
+                  <h2 class="text-headline-sm font-headline-sm font-semibold text-on-surface">Usage by Tier</h2>
+                  <p class="text-[11px] text-on-surface-variant font-sans">Token split across service tiers</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-outline uppercase font-semibold">2 Tiers</span>
+            </div>
+
+            <!-- Donut Visual -->
+            <div class="relative flex items-center justify-center my-4">
+              <svg viewBox="0 0 180 180" class="w-48 h-48 -rotate-90 transform">
+                <!-- Base track circle -->
+                <circle cx="90" cy="90" r="62" stroke="rgba(255,255,255,0.05)" stroke-width="22" fill="transparent" />
+
+                <!-- Default Tier (Emerald Green: 86.0%) -->
+                <circle
+                  id="tier-donut-default"
+                  cx="90" cy="90" r="62"
+                  stroke="#10b981"
+                  stroke-width="22"
+                  stroke-dasharray="332.0 389.6"
+                  stroke-dashoffset="0"
+                  fill="transparent"
+                  stroke-linecap="butt"
+                  class="transition-all duration-300 hover:brightness-125 cursor-pointer filter hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                  onmouseenter="highlightTier('default')"
+                  onmouseleave="resetTierHighlight()"
+                />
+
+                <!-- Metadata Generation Tier (Slate Gray: 14.0%) -->
+                <circle
+                  id="tier-donut-meta"
+                  cx="90" cy="90" r="62"
+                  stroke="#64748b"
+                  stroke-width="22"
+                  stroke-dasharray="51.5 389.6"
+                  stroke-dashoffset="-335.0"
+                  fill="transparent"
+                  stroke-linecap="butt"
+                  class="transition-all duration-300 hover:brightness-125 cursor-pointer filter hover:drop-shadow-[0_0_8px_rgba(100,116,139,0.6)]"
+                  onmouseenter="highlightTier('meta')"
+                  onmouseleave="resetTierHighlight()"
+                />
+              </svg>
+
+              <!-- Center Hollow Telemetry Info -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span id="tier-center-label" class="text-[10px] font-mono uppercase tracking-wider text-outline">TOTAL TOKENS</span>
+                <span id="tier-center-val" class="text-xl font-bold font-mono text-on-surface tracking-tight">1.43M</span>
+                <span id="tier-center-sub" class="text-[10px] font-mono text-emerald-400 font-semibold">1,428,950</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Tier Legend Breakdown -->
+          <div class="space-y-2.5 pt-3 border-t border-outline-variant/20">
+            <!-- Tier 1: Default -->
+            <div
+              id="tier-card-default"
+              class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container/40 hover:bg-surface-container/80 border border-outline-variant/15 hover:border-emerald-500/30 transition-all cursor-pointer group"
+              onmouseenter="highlightTier('default')"
+              onmouseleave="resetTierHighlight()">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] group-hover:scale-125 transition-transform"></span>
+                <div>
+                  <div class="font-semibold text-xs text-on-surface group-hover:text-emerald-400 transition-colors">Default</div>
+                  <div class="text-[10px] text-on-surface-variant font-sans">Primary inference &amp; clinical chat</div>
+                </div>
+              </div>
+              <div class="text-right font-mono">
+                <div class="font-bold text-xs text-on-surface">1,228,600</div>
+                <div class="text-[11px] text-emerald-400 font-semibold">86.0%</div>
+              </div>
+            </div>
+
+            <!-- Tier 2: Metadata_generation -->
+            <div
+              id="tier-card-meta"
+              class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container/40 hover:bg-surface-container/80 border border-outline-variant/15 hover:border-slate-400/30 transition-all cursor-pointer group"
+              onmouseenter="highlightTier('meta')"
+              onmouseleave="resetTierHighlight()">
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-[0_0_8px_rgba(100,116,139,0.6)] group-hover:scale-125 transition-transform"></span>
+                <div>
+                  <div class="font-semibold text-xs text-on-surface group-hover:text-slate-300 transition-colors">Metadata_generation</div>
+                  <div class="text-[10px] text-on-surface-variant font-sans">Vector embeddings &amp; safety filter</div>
+                </div>
+              </div>
+              <div class="text-right font-mono">
+                <div class="font-bold text-xs text-on-surface">200,350</div>
+                <div class="text-[11px] text-slate-400 font-semibold">14.0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Token Usage Over Time Graph Chart (Col 2 & 3) -->
+        <div class="lg:col-span-2 glass-tier-1 p-5 rounded-xl border border-outline-variant/30 space-y-4 flex flex-col justify-between">
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-outline-variant/20 pb-3 gap-2">
+              <div>
+                <h2 class="text-headline-sm font-headline-sm font-semibold text-on-surface">Token Usage Over Time</h2>
+                <p class="text-xs text-on-surface-variant">Hourly distribution of Prompt Tokens and Completion Tokens</p>
+              </div>
+              <div class="flex items-center gap-4 text-xs font-mono">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-primary inline-block"></span>
+                  <span class="text-on-surface-variant">Prompt Tokens</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-secondary inline-block"></span>
+                  <span class="text-on-surface-variant">Completion Tokens</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual Graph Chart Bars -->
+            <div class="pt-6 pb-2">
+              <div class="flex items-end justify-between gap-2 h-40 px-2">
+                <!-- 00:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="00:00 - Prompt: 22k, Completion: 6k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/70 group-hover:bg-primary transition-all rounded-t" style="height: 24%"></div>
+                    <div class="w-1/2 bg-secondary/70 group-hover:bg-secondary transition-all rounded-t" style="height: 10%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">00:00</span>
+                </div>
+
+                <!-- 02:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="02:00 - Prompt: 16k, Completion: 4k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/70 group-hover:bg-primary transition-all rounded-t" style="height: 18%"></div>
+                    <div class="w-1/2 bg-secondary/70 group-hover:bg-secondary transition-all rounded-t" style="height: 7%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">02:00</span>
+                </div>
+
+                <!-- 04:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="04:00 - Prompt: 11k, Completion: 3k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/70 group-hover:bg-primary transition-all rounded-t" style="height: 12%"></div>
+                    <div class="w-1/2 bg-secondary/70 group-hover:bg-secondary transition-all rounded-t" style="height: 5%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">04:00</span>
+                </div>
+
+                <!-- 06:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="06:00 - Prompt: 32k, Completion: 9k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/70 group-hover:bg-primary transition-all rounded-t" style="height: 35%"></div>
+                    <div class="w-1/2 bg-secondary/70 group-hover:bg-secondary transition-all rounded-t" style="height: 14%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">06:00</span>
+                </div>
+
+                <!-- 08:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="08:00 - Prompt: 62k, Completion: 18k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/80 group-hover:bg-primary transition-all rounded-t" style="height: 60%"></div>
+                    <div class="w-1/2 bg-secondary/80 group-hover:bg-secondary transition-all rounded-t" style="height: 24%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">08:00</span>
+                </div>
+
+                <!-- 10:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="10:00 - Prompt: 82k, Completion: 23k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/85 group-hover:bg-primary transition-all rounded-t" style="height: 80%"></div>
+                    <div class="w-1/2 bg-secondary/85 group-hover:bg-secondary transition-all rounded-t" style="height: 31%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">10:00</span>
+                </div>
+
+                <!-- 12:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="12:00 - Prompt: 92k, Completion: 25k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/90 group-hover:bg-primary transition-all rounded-t" style="height: 90%"></div>
+                    <div class="w-1/2 bg-secondary/90 group-hover:bg-secondary transition-all rounded-t" style="height: 34%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">12:00</span>
+                </div>
+
+                <!-- 14:00 (Peak) -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="14:00 (Peak) - Prompt: 110k, Completion: 32k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary group-hover:bg-primary-fixed-dim transition-all rounded-t shadow-[0_0_10px_rgba(86,218,205,0.4)]" style="height: 100%"></div>
+                    <div class="w-1/2 bg-secondary group-hover:bg-secondary-fixed-dim transition-all rounded-t shadow-[0_0_10px_rgba(124,208,255,0.4)]" style="height: 38%"></div>
+                  </div>
+                  <span class="text-[9px] text-primary font-mono font-semibold">14:00</span>
+                </div>
+
+                <!-- 16:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="16:00 - Prompt: 88k, Completion: 24k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/85 group-hover:bg-primary transition-all rounded-t" style="height: 86%"></div>
+                    <div class="w-1/2 bg-secondary/85 group-hover:bg-secondary transition-all rounded-t" style="height: 32%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">16:00</span>
+                </div>
+
+                <!-- 18:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="18:00 - Prompt: 72k, Completion: 19k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/75 group-hover:bg-primary transition-all rounded-t" style="height: 70%"></div>
+                    <div class="w-1/2 bg-secondary/75 group-hover:bg-secondary transition-all rounded-t" style="height: 26%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">18:00</span>
+                </div>
+
+                <!-- 20:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="20:00 - Prompt: 54k, Completion: 14k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/65 group-hover:bg-primary transition-all rounded-t" style="height: 52%"></div>
+                    <div class="w-1/2 bg-secondary/65 group-hover:bg-secondary transition-all rounded-t" style="height: 19%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">20:00</span>
+                </div>
+
+                <!-- 22:00 -->
+                <div class="flex-1 flex flex-col items-center gap-1 group" title="22:00 - Prompt: 38k, Completion: 10k">
+                  <div class="w-full flex items-end justify-center gap-0.5 h-32">
+                    <div class="w-1/2 bg-primary/55 group-hover:bg-primary transition-all rounded-t" style="height: 38%"></div>
+                    <div class="w-1/2 bg-secondary/55 group-hover:bg-secondary transition-all rounded-t" style="height: 14%"></div>
+                  </div>
+                  <span class="text-[9px] text-outline font-mono">22:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Metric Row -->
+          <div class="grid grid-cols-3 gap-3 pt-3 border-t border-outline-variant/20 text-center">
+            <div class="p-2 rounded bg-surface-container/40">
+              <span class="text-[10px] text-outline uppercase font-mono block">Prompt Tokens (24h)</span>
+              <span class="text-sm font-bold font-mono text-primary">1,132,500</span>
+            </div>
+            <div class="p-2 rounded bg-surface-container/40">
+              <span class="text-[10px] text-outline uppercase font-mono block">Completion Tokens (24h)</span>
+              <span class="text-sm font-bold font-mono text-secondary">296,450</span>
+            </div>
+            <div class="p-2 rounded bg-surface-container/40">
+              <span class="text-[10px] text-outline uppercase font-mono block">Peak Throughput</span>
+              <span class="text-sm font-bold font-mono text-on-surface">142,000 / hr</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Token Logs Table -->
+      <div class="glass-tier-1 rounded-xl border border-outline-variant/30 overflow-hidden">
+        <div class="p-4 border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-low/60">
+          <div>
+            <h3 class="text-headline-sm font-headline-sm font-semibold text-on-surface">Recent Token Logs</h3>
+            <p class="text-xs text-on-surface-variant">Real-time token audit per chat session and knowledge lookup</p>
+          </div>
+          <div class="text-xs font-mono text-outline" id="top-log-count">
+            Showing page 1 of 3 (30 total logs)
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-surface-container-high/40 text-outline font-mono uppercase text-[10px] border-b border-outline-variant/30">
+              <tr>
+                <th class="py-3 px-4">Session ID</th>
+                <th class="py-3 px-4">Subject / Intent</th>
+                <th class="py-3 px-4">Model Engine</th>
+                <th class="py-3 px-4 text-right">Prompt Tkns</th>
+                <th class="py-3 px-4 text-right">Completion Tkns</th>
+                <th class="py-3 px-4 text-right">Total Tkns</th>
+                <th class="py-3 px-4 text-center">Latency</th>
+                <th class="py-3 px-4 text-right">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/20 font-mono">
+              <!-- Row 1 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8921</td>
+                <td class="py-3 px-4 font-sans text-on-surface">TENS 7000 electrode placement troubleshooting</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">482</td>
+                <td class="py-3 px-4 text-right text-on-surface">194</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">676</td>
+                <td class="py-3 px-4 text-center text-on-surface">412ms</td>
+                <td class="py-3 px-4 text-right text-outline">Just now</td>
+              </tr>
+              <!-- Row 2 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8920</td>
+                <td class="py-3 px-4 font-sans text-on-surface">VA prescription refill status check</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">340</td>
+                <td class="py-3 px-4 text-right text-on-surface">112</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">452</td>
+                <td class="py-3 px-4 text-center text-on-surface">320ms</td>
+                <td class="py-3 px-4 text-right text-outline">2m ago</td>
+              </tr>
+              <!-- Row 3 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8919</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Knowledge base vector index rebuild</td>
+                <td class="py-3 px-4 text-secondary">Text-Embedding-3</td>
+                <td class="py-3 px-4 text-right text-outline">4,210</td>
+                <td class="py-3 px-4 text-right text-on-surface">0</td>
+                <td class="py-3 px-4 text-right font-bold text-secondary">4,210</td>
+                <td class="py-3 px-4 text-center text-on-surface">180ms</td>
+                <td class="py-3 px-4 text-right text-outline">5m ago</td>
+              </tr>
+              <!-- Row 4 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8918</td>
+                <td class="py-3 px-4 font-sans text-on-surface">InTENSity 7 replacement lead wires inquiry</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">510</td>
+                <td class="py-3 px-4 text-right text-on-surface">240</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">750</td>
+                <td class="py-3 px-4 text-center text-on-surface">510ms</td>
+                <td class="py-3 px-4 text-right text-outline">9m ago</td>
+              </tr>
+              <!-- Row 5 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8917</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Contraindication check: pacemaker warning</td>
+                <td class="py-3 px-4 text-tertiary">PMT Guardrail Node</td>
+                <td class="py-3 px-4 text-right text-outline">280</td>
+                <td class="py-3 px-4 text-right text-on-surface">88</td>
+                <td class="py-3 px-4 text-right font-bold text-tertiary">368</td>
+                <td class="py-3 px-4 text-center text-on-surface">95ms</td>
+                <td class="py-3 px-4 text-right text-outline">14m ago</td>
+              </tr>
+              <!-- Row 6 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8916</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Device won't turn on after overnight storage</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">420</td>
+                <td class="py-3 px-4 text-right text-on-surface">165</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">585</td>
+                <td class="py-3 px-4 text-center text-on-surface">380ms</td>
+                <td class="py-3 px-4 text-right text-outline">18m ago</td>
+              </tr>
+              <!-- Row 7 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8915</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Clinical query: Twin Stim IV pulse modes</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">680</td>
+                <td class="py-3 px-4 text-right text-on-surface">310</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">990</td>
+                <td class="py-3 px-4 text-center text-on-surface">590ms</td>
+                <td class="py-3 px-4 text-right text-outline">23m ago</td>
+              </tr>
+              <!-- Row 8 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8914</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Electrode gel pad adhesion &amp; skin preparation</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">395</td>
+                <td class="py-3 px-4 text-right text-on-surface">145</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">540</td>
+                <td class="py-3 px-4 text-center text-on-surface">340ms</td>
+                <td class="py-3 px-4 text-right text-outline">29m ago</td>
+              </tr>
+              <!-- Row 9 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8913</td>
+                <td class="py-3 px-4 font-sans text-on-surface">RAG Semantic vector search: Knee osteoarthritis</td>
+                <td class="py-3 px-4 text-secondary">Text-Embedding-3</td>
+                <td class="py-3 px-4 text-right text-outline">3,450</td>
+                <td class="py-3 px-4 text-right text-on-surface">0</td>
+                <td class="py-3 px-4 text-right font-bold text-secondary">3,450</td>
+                <td class="py-3 px-4 text-center text-on-surface">165ms</td>
+                <td class="py-3 px-4 text-right text-outline">35m ago</td>
+              </tr>
+              <!-- Row 10 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8912</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Battery type &amp; voltage specifications (9V)</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">310</td>
+                <td class="py-3 px-4 text-right text-on-surface">92</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">402</td>
+                <td class="py-3 px-4 text-center text-on-surface">290ms</td>
+                <td class="py-3 px-4 text-right text-outline">41m ago</td>
+              </tr>
+              <!-- Row 11 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8911</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Warranty registration &amp; replacement unit eligibility</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">460</td>
+                <td class="py-3 px-4 text-right text-on-surface">175</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">635</td>
+                <td class="py-3 px-4 text-center text-on-surface">425ms</td>
+                <td class="py-3 px-4 text-right text-outline">48m ago</td>
+              </tr>
+              <!-- Row 12 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8910</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Channel output disparity troubleshooting</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">540</td>
+                <td class="py-3 px-4 text-right text-on-surface">230</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">770</td>
+                <td class="py-3 px-4 text-center text-on-surface">490ms</td>
+                <td class="py-3 px-4 text-right text-outline">54m ago</td>
+              </tr>
+              <!-- Row 13 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8909</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Clinical dosage guardrail check: Cervical region</td>
+                <td class="py-3 px-4 text-tertiary">PMT Guardrail Node</td>
+                <td class="py-3 px-4 text-right text-outline">290</td>
+                <td class="py-3 px-4 text-right text-on-surface">75</td>
+                <td class="py-3 px-4 text-right font-bold text-tertiary">365</td>
+                <td class="py-3 px-4 text-center text-on-surface">110ms</td>
+                <td class="py-3 px-4 text-right text-outline">1h ago</td>
+              </tr>
+              <!-- Row 14 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8908</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Knowledge lookup: Medicare DME code E0730</td>
+                <td class="py-3 px-4 text-secondary">Text-Embedding-3</td>
+                <td class="py-3 px-4 text-right text-outline">3,890</td>
+                <td class="py-3 px-4 text-right text-on-surface">0</td>
+                <td class="py-3 px-4 text-right font-bold text-secondary">3,890</td>
+                <td class="py-3 px-4 text-center text-on-surface">195ms</td>
+                <td class="py-3 px-4 text-right text-outline">1h ago</td>
+              </tr>
+              <!-- Row 15 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8907</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Lead wire pin adapter compatibility check</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">375</td>
+                <td class="py-3 px-4 text-right text-on-surface">130</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">505</td>
+                <td class="py-3 px-4 text-center text-on-surface">315ms</td>
+                <td class="py-3 px-4 text-right text-outline">1h ago</td>
+              </tr>
+              <!-- Row 16 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8906</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Timer auto-shutoff configuration instructions</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">330</td>
+                <td class="py-3 px-4 text-right text-on-surface">105</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">435</td>
+                <td class="py-3 px-4 text-center text-on-surface">300ms</td>
+                <td class="py-3 px-4 text-right text-outline">2h ago</td>
+              </tr>
+              <!-- Row 17 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8905</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Patient onboarding: First session walkthrough</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">710</td>
+                <td class="py-3 px-4 text-right text-on-surface">340</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">1,050</td>
+                <td class="py-3 px-4 text-center text-on-surface">620ms</td>
+                <td class="py-3 px-4 text-right text-outline">2h ago</td>
+              </tr>
+              <!-- Row 18 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8904</td>
+                <td class="py-3 px-4 font-sans text-on-surface">IF 4000 Interferential difference vs TENS</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">580</td>
+                <td class="py-3 px-4 text-right text-on-surface">260</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">840</td>
+                <td class="py-3 px-4 text-center text-on-surface">530ms</td>
+                <td class="py-3 px-4 text-right text-outline">2h ago</td>
+              </tr>
+              <!-- Row 19 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8903</td>
+                <td class="py-3 px-4 font-sans text-on-surface">RAG Embedding sync: Updated prescribing guidelines</td>
+                <td class="py-3 px-4 text-secondary">Text-Embedding-3</td>
+                <td class="py-3 px-4 text-right text-outline">4,600</td>
+                <td class="py-3 px-4 text-right text-on-surface">0</td>
+                <td class="py-3 px-4 text-right font-bold text-secondary">4,600</td>
+                <td class="py-3 px-4 text-center text-on-surface">210ms</td>
+                <td class="py-3 px-4 text-right text-outline">3h ago</td>
+              </tr>
+              <!-- Row 20 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8902</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Safety alert: Skin redness and electrode gel allergy</td>
+                <td class="py-3 px-4 text-tertiary">PMT Guardrail Node</td>
+                <td class="py-3 px-4 text-right text-outline">310</td>
+                <td class="py-3 px-4 text-right text-on-surface">95</td>
+                <td class="py-3 px-4 text-right font-bold text-tertiary">405</td>
+                <td class="py-3 px-4 text-center text-on-surface">105ms</td>
+                <td class="py-3 px-4 text-right text-outline">3h ago</td>
+              </tr>
+              <!-- Row 21 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8901</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Microcurrent therapy frequency settings for TMJ</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">620</td>
+                <td class="py-3 px-4 text-right text-on-surface">280</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">900</td>
+                <td class="py-3 px-4 text-center text-on-surface">540ms</td>
+                <td class="py-3 px-4 text-right text-outline">3h ago</td>
+              </tr>
+              <!-- Row 22 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8900</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Electrode cleaning and re-hydrating spray</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">350</td>
+                <td class="py-3 px-4 text-right text-on-surface">120</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">470</td>
+                <td class="py-3 px-4 text-center text-on-surface">310ms</td>
+                <td class="py-3 px-4 text-right text-outline">4h ago</td>
+              </tr>
+              <!-- Row 23 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8899</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Belt clip and carrying case accessory request</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">290</td>
+                <td class="py-3 px-4 text-right text-on-surface">85</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">375</td>
+                <td class="py-3 px-4 text-center text-on-surface">270ms</td>
+                <td class="py-3 px-4 text-right text-outline">4h ago</td>
+              </tr>
+              <!-- Row 24 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8898</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Semantic indexing: Clinical trials on chronic pain</td>
+                <td class="py-3 px-4 text-secondary">Text-Embedding-3</td>
+                <td class="py-3 px-4 text-right text-outline">3,920</td>
+                <td class="py-3 px-4 text-right text-on-surface">0</td>
+                <td class="py-3 px-4 text-right font-bold text-secondary">3,920</td>
+                <td class="py-3 px-4 text-center text-on-surface">185ms</td>
+                <td class="py-3 px-4 text-right text-outline">4h ago</td>
+              </tr>
+              <!-- Row 25 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8897</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Over-intensity safety fallback activation logged</td>
+                <td class="py-3 px-4 text-tertiary">PMT Guardrail Node</td>
+                <td class="py-3 px-4 text-right text-outline">275</td>
+                <td class="py-3 px-4 text-right text-on-surface">70</td>
+                <td class="py-3 px-4 text-right font-bold text-tertiary">345</td>
+                <td class="py-3 px-4 text-center text-on-surface">90ms</td>
+                <td class="py-3 px-4 text-right text-outline">5h ago</td>
+              </tr>
+              <!-- Row 26 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8896</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Dual channel stimulation for bilateral sciatica</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">590</td>
+                <td class="py-3 px-4 text-right text-on-surface">250</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">840</td>
+                <td class="py-3 px-4 text-center text-on-surface">510ms</td>
+                <td class="py-3 px-4 text-right text-outline">5h ago</td>
+              </tr>
+              <!-- Row 27 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8895</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Replacement battery door latch inquiry</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">315</td>
+                <td class="py-3 px-4 text-right text-on-surface">95</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">410</td>
+                <td class="py-3 px-4 text-center text-on-surface">295ms</td>
+                <td class="py-3 px-4 text-right text-outline">6h ago</td>
+              </tr>
+              <!-- Row 28 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8894</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Pulse width duration modulation explanation</td>
+                <td class="py-3 px-4 text-on-surface-variant">GPT-4o Mini</td>
+                <td class="py-3 px-4 text-right text-outline">480</td>
+                <td class="py-3 px-4 text-right text-on-surface">210</td>
+                <td class="py-3 px-4 text-right font-bold text-primary">690</td>
+                <td class="py-3 px-4 text-center text-on-surface">440ms</td>
+                <td class="py-3 px-4 text-right text-outline">6h ago</td>
+              </tr>
+              <!-- Row 29 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8893</td>
+                <td class="py-3 px-4 font-sans text-on-surface">RAG query: FDA 510(k) summary for TENS 7000</td>
+                <td class="py-3 px-4 text-secondary">Text-Embedding-3</td>
+                <td class="py-3 px-4 text-right text-outline">4,110</td>
+                <td class="py-3 px-4 text-right text-on-surface">0</td>
+                <td class="py-3 px-4 text-right font-bold text-secondary">4,110</td>
+                <td class="py-3 px-4 text-center text-on-surface">190ms</td>
+                <td class="py-3 px-4 text-right text-outline">7h ago</td>
+              </tr>
+              <!-- Row 30 -->
+              <tr class="token-log-row hover:bg-surface-container/30 transition-colors">
+                <td class="py-3 px-4 font-bold text-primary">#SPK-8892</td>
+                <td class="py-3 px-4 font-sans text-on-surface">Emergency physician escalation protocol</td>
+                <td class="py-3 px-4 text-tertiary">PMT Guardrail Node</td>
+                <td class="py-3 px-4 text-right text-outline">340</td>
+                <td class="py-3 px-4 text-right text-on-surface">110</td>
+                <td class="py-3 px-4 text-right font-bold text-tertiary">450</td>
+                <td class="py-3 px-4 text-center text-on-surface">115ms</td>
+                <td class="py-3 px-4 text-right text-outline">7h ago</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="p-4 bg-surface-container-lowest/60 border-t border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-label-sm font-label-sm text-on-surface-variant">
+          <div id="log-showing-count">Showing 1-10 of 30 active logs</div>
+          <div class="flex items-center gap-2">
+            <button
+              id="log-prev-btn"
+              onclick="changeLogPage(-1)"
+              class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+              disabled>
+              Previous
+            </button>
+            <button
+              id="log-page-btn-1"
+              onclick="gotoLogPage(1)"
+              class="px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold cursor-pointer">
+              1
+            </button>
+            <button
+              id="log-page-btn-2"
+              onclick="gotoLogPage(2)"
+              class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:border-outline cursor-pointer transition-colors">
+              2
+            </button>
+            <button
+              id="log-page-btn-3"
+              onclick="gotoLogPage(3)"
+              class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:border-outline cursor-pointer transition-colors">
+              3
+            </button>
+            <button
+              id="log-next-btn"
+              onclick="changeLogPage(1)"
+              class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cost Estimation Breakdown Section -->
+      <div class="bg-surface-container/60 border border-outline-variant/30 rounded-xl p-6 backdrop-blur-md relative overflow-hidden shadow-2xl mb-8">
+        <!-- Accent Top Bar -->
+        <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-cyan-400 to-primary/20"></div>
+
+        <!-- Section Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-outline-variant/20">
+          <div class="flex items-start gap-3">
+            <div class="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary shrink-0 shadow-inner">
+              <span class="material-symbols-outlined text-2xl">calculate</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <h2 class="text-lg font-bold text-on-surface tracking-tight">Cost Estimation Breakdown</h2>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider font-semibold">Active Fleet</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface-variant font-medium">USD / INR Peg: 83.00</span>
+              </div>
+              <p class="text-xs text-on-surface-variant/80 mt-1 font-sans">
+                Estimated API cost for all recorded token usage, priced per model (per 1M input / output tokens)
+              </p>
+            </div>
+          </div>
+
+          <!-- Top Metric Chips & Export -->
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Prompt Used Chip -->
+            <div class="px-3.5 py-2 rounded-lg bg-surface-container/80 border border-outline-variant/30 flex flex-col">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant/70">Prompt Tokens</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-primary font-bold font-mono text-sm tracking-tight">1,132,500</span>
+                <span class="text-purple-400 font-mono text-[10px] font-medium">(245.8k Cached)</span>
+              </div>
+            </div>
+
+            <!-- Completion Used Chip -->
+            <div class="px-3.5 py-2 rounded-lg bg-surface-container/80 border border-outline-variant/30 flex flex-col">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant/70">Completion Tokens</span>
+              <span class="text-emerald-400 font-bold font-mono text-sm tracking-tight">296,450</span>
+            </div>
+
+            <!-- Total Tokens Chip -->
+            <div class="px-3.5 py-2 rounded-lg bg-surface-container/80 border border-outline-variant/30 flex flex-col">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-on-surface-variant/70">Total Tokens</span>
+              <span class="text-amber-400 font-bold font-mono text-sm tracking-tight">1,428,950</span>
+            </div>
+
+            <!-- Total Cost Chip -->
+            <div class="px-3.5 py-2 rounded-lg bg-primary/10 border border-primary/30 flex flex-col">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-primary font-semibold">Est. Total Cost</span>
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-on-surface font-bold font-mono text-sm tracking-tight">$0.7969</span>
+                <span class="text-on-surface-variant/80 font-mono text-[10px]">₹66.14</span>
+              </div>
+            </div>
+
+            <!-- Export Button -->
+            <button
+              onclick="exportCostBreakdown()"
+              class="px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-primary/50 text-xs font-mono text-on-surface hover:text-primary transition-all flex items-center gap-1.5 cursor-pointer shadow-sm group">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-colors">download</span>
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto mt-4 -mx-2 sm:mx-0">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-outline-variant/30 text-[11px] font-mono uppercase tracking-wider text-on-surface-variant/70 bg-surface-container/40">
+                <th class="py-3 px-4 font-semibold">Model</th>
+                <th class="py-3 px-4 text-right font-semibold">Prompt</th>
+                <th class="py-3 px-4 text-right font-semibold">Cached</th>
+                <th class="py-3 px-4 text-right font-semibold">Completion</th>
+                <th class="py-3 px-4 text-right font-semibold">Total Tokens</th>
+                <th class="py-3 px-4 text-center font-semibold">Rate (1M In / Out)</th>
+                <th class="py-3 px-4 font-semibold text-center w-36 sm:w-44">Cost Share</th>
+                <th class="py-3 px-4 text-right font-semibold">Estimated Cost</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/15 font-mono text-[12px]">
+              <!-- Model 1: gpt-4o -->
+              <tr class="hover:bg-surface-container/40 transition-colors group">
+                <td class="py-3.5 px-4 font-sans">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <div>
+                      <div class="font-bold text-on-surface flex items-center gap-1.5 font-mono">
+                        gpt-4o
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-primary/20 text-primary border border-primary/30 uppercase font-sans">Flagship</span>
+                      </div>
+                      <div class="text-[11px] text-on-surface-variant/80 font-sans">Clinical Diagnostics &amp; Escalations</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right text-primary font-medium">42,100</td>
+                <td class="py-3.5 px-4 text-right text-purple-400 font-medium">12,400</td>
+                <td class="py-3.5 px-4 text-right text-emerald-400 font-medium">38,150</td>
+                <td class="py-3.5 px-4 text-right font-bold text-on-surface">80,250</td>
+                <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px]">$2.50 / $10.00</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2 justify-center">
+                    <div class="w-24 sm:w-28 bg-surface-container-high h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-primary to-cyan-400 h-full rounded-full transition-all duration-500" style="width: 59.1%;"></div>
+                    </div>
+                    <span class="text-[11px] text-on-surface font-semibold w-9 text-right">59.1%</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="font-bold text-amber-300 text-[13px]">$0.4713</div>
+                  <div class="text-[10px] text-on-surface-variant/70 font-sans">₹39.12</div>
+                </td>
+              </tr>
+
+              <!-- Model 2: gpt-4o-mini -->
+              <tr class="hover:bg-surface-container/40 transition-colors group">
+                <td class="py-3.5 px-4 font-sans">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                    <div>
+                      <div class="font-bold text-on-surface flex items-center gap-1.5 font-mono">
+                        gpt-4o-mini
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase font-sans">Primary</span>
+                      </div>
+                      <div class="text-[11px] text-on-surface-variant/80 font-sans">Patient Q&amp;A &amp; Device Setup Inquiries</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right text-primary font-medium">705,200</td>
+                <td class="py-3.5 px-4 text-right text-purple-400 font-medium">198,000</td>
+                <td class="py-3.5 px-4 text-right text-emerald-400 font-medium">239,300</td>
+                <td class="py-3.5 px-4 text-right font-bold text-on-surface">944,500</td>
+                <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px]">$0.15 / $0.60</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2 justify-center">
+                    <div class="w-24 sm:w-28 bg-surface-container-high h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full transition-all duration-500" style="width: 29.4%;"></div>
+                    </div>
+                    <span class="text-[11px] text-on-surface font-semibold w-9 text-right">29.4%</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="font-bold text-amber-300 text-[13px]">$0.2345</div>
+                  <div class="text-[10px] text-on-surface-variant/70 font-sans">₹19.46</div>
+                </td>
+              </tr>
+
+              <!-- Model 3: claude-3.5-sonnet -->
+              <tr class="hover:bg-surface-container/40 transition-colors group">
+                <td class="py-3.5 px-4 font-sans">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                    <div>
+                      <div class="font-bold text-on-surface flex items-center gap-1.5 font-mono">
+                        claude-3.5-sonnet
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase font-sans">Fallback</span>
+                      </div>
+                      <div class="text-[11px] text-on-surface-variant/80 font-sans">Medical Second-Opinion &amp; Synthesis</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right text-primary font-medium">19,000</td>
+                <td class="py-3.5 px-4 text-right text-purple-400 font-medium">0</td>
+                <td class="py-3.5 px-4 text-right text-emerald-400 font-medium">750</td>
+                <td class="py-3.5 px-4 text-right font-bold text-on-surface">19,750</td>
+                <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px]">$3.00 / $15.00</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2 justify-center">
+                    <div class="w-24 sm:w-28 bg-surface-container-high h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full transition-all duration-500" style="width: 8.6%;"></div>
+                    </div>
+                    <span class="text-[11px] text-on-surface font-semibold w-9 text-right">8.6%</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="font-bold text-amber-300 text-[13px]">$0.0683</div>
+                  <div class="text-[10px] text-on-surface-variant/70 font-sans">₹5.67</div>
+                </td>
+              </tr>
+
+              <!-- Model 4: pmt-guardrail-v2 -->
+              <tr class="hover:bg-surface-container/40 transition-colors group">
+                <td class="py-3.5 px-4 font-sans">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full bg-tertiary"></div>
+                    <div>
+                      <div class="font-bold text-on-surface flex items-center gap-1.5 font-mono">
+                        pmt-guardrail-v2
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-tertiary/20 text-tertiary border border-tertiary/30 uppercase font-sans">Safety</span>
+                      </div>
+                      <div class="text-[11px] text-on-surface-variant/80 font-sans">PII Shield &amp; Dosage Safety Policy Engine</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right text-primary font-medium">102,100</td>
+                <td class="py-3.5 px-4 text-right text-purple-400 font-medium">0</td>
+                <td class="py-3.5 px-4 text-right text-emerald-400 font-medium">18,250</td>
+                <td class="py-3.5 px-4 text-right font-bold text-on-surface">120,350</td>
+                <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px]">$0.10 / $0.40</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2 justify-center">
+                    <div class="w-24 sm:w-28 bg-surface-container-high h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-tertiary to-orange-400 h-full rounded-full transition-all duration-500" style="width: 2.2%;"></div>
+                    </div>
+                    <span class="text-[11px] text-on-surface font-semibold w-9 text-right">2.2%</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="font-bold text-amber-300 text-[13px]">$0.0175</div>
+                  <div class="text-[10px] text-on-surface-variant/70 font-sans">₹1.45</div>
+                </td>
+              </tr>
+
+              <!-- Model 5: text-embedding-3-small -->
+              <tr class="hover:bg-surface-container/40 transition-colors group">
+                <td class="py-3.5 px-4 font-sans">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-2 h-2 rounded-full bg-secondary"></div>
+                    <div>
+                      <div class="font-bold text-on-surface flex items-center gap-1.5 font-mono">
+                        text-embedding-3-small
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-secondary/20 text-secondary border border-secondary/30 uppercase font-sans">Vector</span>
+                      </div>
+                      <div class="text-[11px] text-on-surface-variant/80 font-sans">Knowledge Base Semantic Indexing</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right text-primary font-medium">264,100</td>
+                <td class="py-3.5 px-4 text-right text-purple-400 font-medium">35,400</td>
+                <td class="py-3.5 px-4 text-right text-on-surface-variant font-medium">0</td>
+                <td class="py-3.5 px-4 text-right font-bold text-on-surface">264,100</td>
+                <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px]">$0.02 / &mdash;</td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2 justify-center">
+                    <div class="w-24 sm:w-28 bg-surface-container-high h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-secondary to-teal-300 h-full rounded-full transition-all duration-500" style="width: 0.7%;"></div>
+                    </div>
+                    <span class="text-[11px] text-on-surface font-semibold w-9 text-right">0.7%</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="font-bold text-amber-300 text-[13px]">$0.0053</div>
+                  <div class="text-[10px] text-on-surface-variant/70 font-sans">₹0.44</div>
+                </td>
+              </tr>
+            </tbody>
+
+            <!-- Table Summary Footer -->
+            <tfoot>
+              <tr class="bg-surface-container/70 border-t-2 border-outline-variant/40 font-mono text-xs font-semibold text-on-surface">
+                <td class="py-3.5 px-4 font-bold font-sans text-on-surface">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                    <span>Fleet Total (5 Models)</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-right text-primary font-bold text-sm">1,132,500</td>
+                <td class="py-3.5 px-4 text-right text-purple-400 font-bold text-sm">245,800</td>
+                <td class="py-3.5 px-4 text-right text-emerald-400 font-bold text-sm">296,450</td>
+                <td class="py-3.5 px-4 text-right text-amber-400 font-bold text-sm">1,428,950</td>
+                <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px]">Blended Avg</td>
+                <td class="py-3.5 px-4 text-center text-on-surface font-bold">100.0%</td>
+                <td class="py-3.5 px-4 text-right">
+                  <div class="font-bold text-amber-300 text-sm">$0.7969</div>
+                  <div class="text-[10px] text-on-surface-variant font-sans">₹66.14</div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Footer Notes & Caching Benefit -->
+        <div class="mt-4 pt-3 border-t border-outline-variant/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-on-surface-variant">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-purple-400 text-base">savings</span>
+            <span>Prompt caching reduced total telemetry costs by <strong class="text-purple-300 font-mono font-semibold">$0.0304 (3.7%)</strong> today.</span>
+          </div>
+          <div class="text-outline font-mono text-[10px]">
+            Updated in real-time via Spark Telemetry Pipe &bull; Billing Cycle: Current UTC Day
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Live Clock Display
+    function updateClock() {
+      const now = new Date();
+      const utcString = now.toUTCString().split(' ')[4] + ' UTC';
+      const clockElements = document.querySelectorAll('.utc-clock-display, #utc-clock');
+      clockElements.forEach(el => {
+        el.textContent = 'LIVE: ' + utcString;
+      });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Hydrate user profile from authenticated session
+    const adminEmail = localStorage.getItem("adminEmail") || sessionStorage.getItem("adminEmail");
+    if (adminEmail) {
+      const nameEls = document.querySelectorAll(".user-profile-name, #user-profile-name, #logs-user-name, #kb-user-name");
+      nameEls.forEach(el => { el.textContent = adminEmail.split('@')[0]; });
+    }
+
+    // Pagination Logic for Recent Token Logs (10 items per page)
+    const logPageSize = 10;
+    let currentLogPage = 1;
+    const logRows = document.querySelectorAll('.token-log-row');
+    const totalLogs = logRows.length;
+    const totalLogPages = Math.ceil(totalLogs / logPageSize);
+
+    function renderLogPage(page) {
+      currentLogPage = page;
+      const start = (page - 1) * logPageSize;
+      const end = start + logPageSize;
+
+      logRows.forEach((row, idx) => {
+        if (idx >= start && idx < end) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      const showingStart = totalLogs === 0 ? 0 : start + 1;
+      const showingEnd = Math.min(end, totalLogs);
+      const counterEl = document.getElementById('log-showing-count');
+      if (counterEl) {
+        counterEl.textContent = `Showing ${showingStart}-${showingEnd} of ${totalLogs} active logs`;
+      }
+      const topCountEl = document.getElementById('top-log-count');
+      if (topCountEl) {
+        topCountEl.textContent = `Showing page ${page} of ${totalLogPages} (${totalLogs} total logs)`;
+      }
+
+      // Update button states
+      const prevBtn = document.getElementById('log-prev-btn');
+      const nextBtn = document.getElementById('log-next-btn');
+      if (prevBtn) prevBtn.disabled = (currentLogPage === 1);
+      if (nextBtn) nextBtn.disabled = (currentLogPage === totalLogPages);
+
+      // Update page numbers highlighting
+      for (let i = 1; i <= totalLogPages; i++) {
+        const btn = document.getElementById(`log-page-btn-${i}`);
+        if (btn) {
+          if (i === currentLogPage) {
+            btn.className = "px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold cursor-pointer";
+          } else {
+            btn.className = "px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface hover:border-outline cursor-pointer transition-colors";
+          }
+        }
+      }
+    }
+
+    function changeLogPage(delta) {
+      const targetPage = currentLogPage + delta;
+      if (targetPage >= 1 && targetPage <= totalLogPages) {
+        renderLogPage(targetPage);
+      }
+    }
+
+    function gotoLogPage(page) {
+      if (page >= 1 && page <= totalLogPages) {
+        renderLogPage(page);
+      }
+    }
+
+    // Initialize Page 1
+    renderLogPage(1);
+
+    // Export Cost Estimation Breakdown to CSV
+    function exportCostBreakdown() {
+      const rows = [
+        ["Model", "Role", "Prompt Tokens", "Cached Tokens", "Completion Tokens", "Total Tokens", "Rate In / Out (per 1M)", "Cost Share", "Estimated Cost USD", "Estimated Cost INR"],
+        ["gpt-4o", "Clinical Diagnostics & Escalations", "42,100", "12,400", "38,150", "80,250", "$2.50 / $10.00", "59.1%", "$0.4713", "₹39.12"],
+        ["gpt-4o-mini", "Patient Q&A & Device Setup", "705,200", "198,000", "239,300", "944,500", "$0.15 / $0.60", "29.4%", "$0.2345", "₹19.46"],
+        ["claude-3.5-sonnet", "Medical Second-Opinion Fallback", "19,000", "0", "750", "19,750", "$3.00 / $15.00", "8.6%", "$0.0683", "₹5.67"],
+        ["pmt-guardrail-v2", "PII Shield & Dosage Safety", "102,100", "0", "18,250", "120,350", "$0.10 / $0.40", "2.2%", "$0.0175", "₹1.45"],
+        ["text-embedding-3-small", "KB Semantic Indexing", "264,100", "35,400", "0", "264,100", "$0.02 / —", "0.7%", "$0.0053", "₹0.44"],
+        ["FLEET TOTAL", "Active Fleet (5 Models)", "1,132,500", "245,800", "296,450", "1,428,950", "Blended Avg", "100.0%", "$0.7969", "₹66.14"]
+      ];
+
+      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.map(val => `"${val}"`).join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `pmt_spark_cost_estimation_breakdown_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Usage by Tier Donut Interactive Highlighting
+    function highlightTier(tier) {
+      const labelEl = document.getElementById('tier-center-label');
+      const valEl = document.getElementById('tier-center-val');
+      const subEl = document.getElementById('tier-center-sub');
+      const donutDefault = document.getElementById('tier-donut-default');
+      const donutMeta = document.getElementById('tier-donut-meta');
+
+      if (tier === 'default') {
+        if (labelEl) labelEl.textContent = 'DEFAULT TIER';
+        if (valEl) {
+          valEl.textContent = '1,228,600';
+          valEl.className = 'text-xl font-bold font-mono text-emerald-400 tracking-tight transition-colors';
+        }
+        if (subEl) {
+          subEl.textContent = '86.0% share';
+          subEl.className = 'text-[10px] font-mono text-emerald-300 font-semibold transition-colors';
+        }
+        if (donutDefault) {
+          donutDefault.style.strokeWidth = '26';
+        }
+        if (donutMeta) {
+          donutMeta.style.opacity = '0.35';
+        }
+      } else if (tier === 'meta') {
+        if (labelEl) labelEl.textContent = 'METADATA GEN';
+        if (valEl) {
+          valEl.textContent = '200,350';
+          valEl.className = 'text-xl font-bold font-mono text-slate-300 tracking-tight transition-colors';
+        }
+        if (subEl) {
+          subEl.textContent = '14.0% share';
+          subEl.className = 'text-[10px] font-mono text-slate-400 font-semibold transition-colors';
+        }
+        if (donutMeta) {
+          donutMeta.style.strokeWidth = '26';
+        }
+        if (donutDefault) {
+          donutDefault.style.opacity = '0.35';
+        }
+      }
+    }
+
+    function resetTierHighlight() {
+      const labelEl = document.getElementById('tier-center-label');
+      const valEl = document.getElementById('tier-center-val');
+      const subEl = document.getElementById('tier-center-sub');
+      const donutDefault = document.getElementById('tier-donut-default');
+      const donutMeta = document.getElementById('tier-donut-meta');
+
+      if (labelEl) labelEl.textContent = 'TOTAL TOKENS';
+      if (valEl) {
+        valEl.textContent = '1.43M';
+        valEl.className = 'text-xl font-bold font-mono text-on-surface tracking-tight transition-colors';
+      }
+      if (subEl) {
+        subEl.textContent = '1,428,950';
+        subEl.className = 'text-[10px] font-mono text-emerald-400 font-semibold transition-colors';
+      }
+      if (donutDefault) {
+        donutDefault.style.strokeWidth = '22';
+        donutDefault.style.opacity = '1';
+      }
+      if (donutMeta) {
+        donutMeta.style.strokeWidth = '22';
+        donutMeta.style.opacity = '1';
+      }
+    }
+  </script>
+</body>
+
+</html>

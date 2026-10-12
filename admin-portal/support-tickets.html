@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <link rel="icon" type="image/png" href="logo.png" />
+  <script>
+    // Route Protection: Redirect unauthenticated requests to login
+    if (
+      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
+      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
+    ) {
+      window.location.replace("login.html");
+    }
+
+    function logout() {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminEmail");
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>PMT Spark AI Core - Patient &amp; Clinical Support Tickets</title>
+  <!-- Material Symbols Outlined -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Fonts: Space Grotesk, Geist, JetBrains Mono -->
+  <link href="https://fonts.googleapis.com" rel="preconnect" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+    rel="stylesheet" />
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary": "#00354a",
+            "surface-container-low": "#0e1c2e",
+            "tertiary-fixed-dim": "#7bd0ff",
+            "primary": "#56dacd",
+            "inverse-primary": "#006a62",
+            "on-surface": "#d5e3fd",
+            "on-tertiary-container": "#00364b",
+            "tertiary-container": "#00a5de",
+            "surface-container-lowest": "#020e20",
+            "surface-container-high": "#1d2b3e",
+            "primary-fixed-dim": "#56dacd",
+            "surface": "#051426",
+            "primary-container": "#00aca0",
+            "on-primary-container": "#003934",
+            "on-surface-variant": "#bbc9c6",
+            "surface-tint": "#56dacd",
+            "error": "#ffb4ab",
+            "secondary-container": "#007daa",
+            "background": "#051426",
+            "on-tertiary-fixed-variant": "#004c69",
+            "surface-variant": "#283549",
+            "surface-container": "#122033",
+            "surface-container-highest": "#283549",
+            "outline-variant": "#3c4947",
+            "on-primary-fixed": "#00201d",
+            "secondary-fixed-dim": "#7cd0ff",
+            "inverse-surface": "#d5e3fd",
+            "on-secondary": "#00344a",
+            "on-secondary-container": "#fcfcff",
+            "on-secondary-fixed-variant": "#004c69",
+            "on-tertiary-fixed": "#001e2c",
+            "on-primary-fixed-variant": "#00504a",
+            "outline": "#869491",
+            "on-primary": "#003733",
+            "primary-fixed": "#76f7e9",
+            "secondary-fixed": "#c4e7ff",
+            "on-background": "#d5e3fd",
+            "tertiary-fixed": "#c4e7ff",
+            "on-error": "#690005",
+            "tertiary": "#7bd0ff",
+            "surface-bright": "#2d3a4e",
+            "inverse-on-surface": "#243144",
+            "on-error-container": "#ffdad6",
+            "surface-dim": "#051426",
+            "error-container": "#93000a",
+            "secondary": "#7cd0ff",
+            "on-secondary-fixed": "#001e2c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Space Grotesk", "sans-serif"],
+            "headline-md": ["Space Grotesk", "sans-serif"],
+            "headline-sm": ["Space Grotesk", "sans-serif"],
+            "headline-xl": ["Space Grotesk", "sans-serif"],
+            "headline-xl-mobile": ["Space Grotesk", "sans-serif"],
+            "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
+            "body-lg": ["Geist", "sans-serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "body-sm": ["Geist", "sans-serif"],
+            "label-lg": ["JetBrains Mono", "monospace"],
+            "label-md": ["JetBrains Mono", "monospace"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "sans": ["Geist", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          "fontSize": {
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
+            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500" }],
+            "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(2, 14, 32, 0.6);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(86, 218, 205, 0.25);
+      border-radius: 2px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(86, 218, 205, 0.5);
+    }
+
+    .hud-grid-pattern {
+      background-image:
+        radial-gradient(ellipse at 50% 0%, rgba(0, 172, 160, 0.12) 0%, transparent 65%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .glow-teal-sm,
+    .cyan-glow-sm {
+      box-shadow: 0 0 15px -3px rgba(0, 172, 160, 0.35);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-surface text-on-surface font-body-md antialiased selection:bg-primary selection:text-on-primary min-h-screen flex flex-col hud-grid-pattern">
+  <!-- TOP SHARED NAV BAR (PMT Spark AI Core) -->
+  <header
+    class="fixed top-0 left-0 w-full z-50 h-16 bg-surface-container-lowest/85 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+    <div class="flex justify-between items-center w-full h-full px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center space-x-3">
+        <img src="logo.png" alt="Pain Management Technologies"
+          class="h-8 w-auto max-w-[160px] object-contain filter drop-shadow-[0_0_8px_rgba(0,172,160,0.35)]">
+      </div>
+      <!-- Right Side: Live Session Time & Sign Out Action -->
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center gap-1.5 text-label-md font-label-md text-on-surface-variant font-mono text-xs">
+          <span class="text-outline">SESSION TIME:</span>
+          <span class="text-on-surface font-semibold utc-clock-display" id="utc-clock">LIVE: --</span>
+        </div>
+        <button onclick="logout()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-error hover:border-error/40 transition-all duration-150 active:scale-95 text-label-md font-label-md cursor-pointer"
+          title="Sign Out">
+          <span class="material-symbols-outlined text-error text-sm" data-icon="logout">logout</span>
+          <span class="hidden sm:inline">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main System Shell -->
+  <div class="flex-1 pt-16 flex w-full">
+    <!-- Fixed/Sticky Left Telemetry Control Rail (280px) -->
+    <aside
+      class="w-[280px] shrink-0 hidden md:flex flex-col justify-between border-r border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-xl p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar">
+      <!-- Navigation Menu -->
+      <nav class="space-y-1 flex-1">
+        <div class="px-3 pb-2 pt-1 text-label-sm font-label-sm text-outline uppercase tracking-wider font-semibold">
+          Telemetry Engine</div>
+        <!-- 1. Overview -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="overview.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="dashboard">dashboard</span>
+            <span class="text-body-md font-body-md">Overview</span>
+          </div>
+        </a>
+        <!-- 2. Chat Logs & Sessions -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="session-logs.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="forum">forum</span>
+            <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-primary/20 font-mono">1.2k</span>
+        </a>
+        <!-- 3. Support Tickets (ACTIVE) -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium shadow-[0_0_15px_-3px_rgba(0,172,160,0.35)] cyan-glow-sm transition-all duration-200 group"
+          href="support-tickets.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl" data-icon="confirmation_number">confirmation_number</span>
+            <span class="text-body-md font-body-md">Support Tickets</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface/20 text-on-primary-container border border-white/20 font-mono whitespace-nowrap">42 pending</span>
+        </a>
+        <!-- 4. Questions & KB -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="knowledge-base.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="menu_book">menu_book</span>
+            <span class="text-body-md font-body-md">Questions &amp; KB</span>
+          </div>
+          <span
+            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-on-surface-variant border border-outline-variant/30 font-mono">358</span>
+        </a>
+        <!-- 5. Token Usage -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="token-usage.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="token">token</span>
+            <span class="text-body-md font-body-md">Token Usage</span>
+          </div>
+        </a>
+        <!-- 6. Fallbacks & Rules -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="fallbacks-rules.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="alt_route">alt_route</span>
+            <span class="text-body-md font-body-md">Fallbacks &amp; Rules</span>
+          </div>
+        </a>
+        <!-- 7. Settings & Access -->
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
+          href="settings-access.html">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl group-hover:text-primary"
+              data-icon="settings">settings</span>
+            <span class="text-body-md font-body-md">Settings &amp; Access</span>
+          </div>
+        </a>
+      </nav>
+      <!-- Sidebar Footer Diagnostics & Profile -->
+      <div class="pt-4 border-t border-outline-variant/30 space-y-3 mt-auto">
+        <div
+          class="p-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 text-label-sm font-label-sm">
+          <div class="flex items-center justify-between text-outline">
+            <span>DIAGNOSTIC NODE</span>
+            <span class="text-primary font-semibold font-mono">14ms</span>
+          </div>
+          <div class="text-on-surface mt-1 truncate">Node-East US • Cluster-4A</div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-full border border-primary/50 bg-surface-container-high flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined text-base" data-icon="shield_person">shield_person</span>
+            </div>
+            <div class="truncate">
+              <p class="text-body-sm font-body-sm text-on-surface font-medium leading-none truncate max-w-[130px] user-profile-name"
+                id="tickets-user-name">PMT Admin</p>
+              <p class="text-label-sm font-label-sm text-outline mt-0.5 truncate">SecOps Lead</p>
+            </div>
+          </div>
+          <button
+            class="p-1.5 rounded text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer shrink-0"
+            title="Logout" onclick="logout()">
+            <span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN ADMINISTRATIVE STAGE -->
+    <main class="flex-1 min-w-0 p-4 md:p-6 lg:p-8 space-y-6 w-full">
+      <!-- Stage Header & Global Actions -->
+      <section class="flex flex-col space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <!-- <span class="text-label-sm font-label-sm text-primary tracking-widest uppercase">Admin Telemetry // Incident Response</span> -->
+              <!-- <span class="text-outline">•</span> -->
+              <!-- <span class="text-label-sm font-label-sm text-on-surface-variant font-mono">HIPAA &amp; FDA 21 CFR Part 11</span> -->
+            </div>
+            <h1 class="font-headline-lg text-2xl lg:text-3xl font-bold text-on-surface tracking-tight mt-1">
+              Patient &amp; Clinical Support Tickets
+            </h1>
+            <p class="font-body-md text-body-sm text-on-surface-variant mt-0.5">
+              Inbound Chatbot Escalations, Device Troubleshooting Cases, Clinical Queries &amp; Priority Hardware Support
+            </p>
+          </div>
+          <div class="flex items-center flex-wrap gap-2.5">
+            <button onclick="location.reload()"
+              class="flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-surface-container-high/80 border border-outline-variant/40 hover:border-primary/40 text-on-surface font-label-md text-label-md transition-all duration-150">
+              <span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+              <span>Sync Tickets</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- METRIC CARDS (5-GRID) -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Metric 1: Total Active Tickets -->
+        <div class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Active Tickets</span>
+            <div class="w-7 h-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-sm" data-icon="confirmation_number">confirmation_number</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">284</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-primary font-semibold">+14 today</span>
+              <span class="text-on-surface-variant">• 88.2% on-schedule</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Open: 42</span>
+            <span>Pending: 29</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Pending Tickets -->
+        <div class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Pending Tickets</span>
+            <div class="w-7 h-7 rounded bg-[#eab308]/20 border border-[#eab308]/30 flex items-center justify-center text-[#facc15]">
+              <span class="material-symbols-outlined text-sm" data-icon="pending_actions">pending_actions</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-[#facc15] tracking-tight font-bold">29</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-[#facc15] font-semibold">+4 today</span>
+              <span class="text-on-surface-variant">• In Queue</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Awaiting Patient: 11</span>
+            <span class="text-[#facc15]">Staff Review: 18</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: Resolved Tickets -->
+        <div class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Resolved Tickets</span>
+            <div class="w-7 h-7 rounded bg-[#16a34a]/20 border border-[#16a34a]/30 flex items-center justify-center text-[#4ade80]">
+              <span class="material-symbols-outlined text-sm" data-icon="task_alt">task_alt</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-[#4ade80] tracking-tight font-bold">213</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-[#4ade80] font-semibold">+18 today</span>
+              <span class="text-on-surface-variant">• 94.8% resolution</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Auto-Resolved: 168</span>
+            <span class="text-[#4ade80]">CSAT: 4.9</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Rejected Tickets -->
+        <div class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Rejected Tickets</span>
+            <div class="w-7 h-7 rounded bg-[#f43f5e]/20 border border-[#f43f5e]/30 flex items-center justify-center text-[#fb7185]">
+              <span class="material-symbols-outlined text-sm" data-icon="cancel">cancel</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-[#fb7185] tracking-tight font-bold">14</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-[#fb7185] font-semibold">+2 today</span>
+              <span class="text-on-surface-variant">• 4.9% rate</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>Ineligible: 9</span>
+            <span class="text-on-surface-variant">Duplicate: 5</span>
+          </div>
+        </div>
+
+        <!-- Metric 5: Cancelled Tickets -->
+        <div class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Cancelled Tickets</span>
+            <div class="w-7 h-7 rounded bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-outline">
+              <span class="material-symbols-outlined text-sm" data-icon="cancel_presentation">cancel_presentation</span>
+            </div>
+          </div>
+          <div class="mt-3">
+            <div class="font-headline-lg text-headline-lg text-outline tracking-tight font-bold">8</div>
+            <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
+              <span class="text-outline font-semibold">-3 this week</span>
+              <span class="text-on-surface-variant">• Voided</span>
+            </div>
+          </div>
+          <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
+            <span>User Cancelled: 5</span>
+            <span class="text-on-surface-variant">Duplicate: 3</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- TICKETS LEDGER SECTION -->
+      <section class="pb-8">
+        <div class="w-full rounded-xl bg-surface-container-low/70 backdrop-blur-md border border-outline-variant/30 flex flex-col overflow-hidden">
+          <!-- Panel Header & Filter Controls -->
+          <div class="p-5 border-b border-outline-variant/30 bg-surface-container-lowest/60 flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <span class="material-symbols-outlined text-primary text-xl" data-icon="receipt_long">receipt_long</span>
+                <div>
+                  <h2 class="font-headline-sm text-sm font-semibold text-on-surface tracking-tight">Active Support Tickets Ledger</h2>
+                  <p class="font-label-sm text-label-sm text-on-surface-variant">Live patient support queues routed from Spark Chatbot &amp; Clinical Portals</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface-variant text-xs font-mono" id="ticket-count-badge">
+                  Showing 10 tickets
+                </span>
+              </div>
+            </div>
+
+            <!-- Filter Bar & Search Inputs -->
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-1">
+              <!-- Quick Status Tabs -->
+              <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar font-label-sm text-xs">
+                <button onclick="filterTickets('all')" id="tab-all"
+                  class="filter-tab px-3 py-1.5 rounded-lg bg-primary-container text-on-primary-container font-semibold transition-all">
+                  All (10)
+                </button>
+                <button onclick="filterTickets('pending')" id="tab-pending"
+                  class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
+                  Pending (6)
+                </button>
+                <button onclick="filterTickets('resolved')" id="tab-resolved"
+                  class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
+                  Resolved Tickets (2)
+                </button>
+                <button onclick="filterTickets('rejected')" id="tab-rejected"
+                  class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
+                  Rejected (1)
+                </button>
+                <button onclick="filterTickets('cancelled')" id="tab-cancelled"
+                  class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
+                  Cancelled (1)
+                </button>
+              </div>
+
+              <!-- Search Input -->
+              <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                <div class="relative flex-1 sm:w-72">
+                  <span class="material-symbols-outlined absolute left-2.5 top-2 text-xs text-outline" data-icon="search">search</span>
+                  <input type="text" id="ticket-search" oninput="searchTickets()"
+                    placeholder="Search ticket, patient, issue..."
+                    class="w-full pl-8 pr-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-xs text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none font-sans" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-outline-variant/30 bg-surface-container-lowest/40 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                  <th class="py-3 px-4">Ticket ID</th>
+                  <th class="py-3 px-3">Patient Name</th>
+                  <th class="py-3 px-3">Gmail ID</th>
+                  <th class="py-3 px-3">Issue Subject</th>
+                  <th class="py-3 px-3">Status</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-tbody" class="divide-y divide-outline-variant/20 font-sans text-xs">
+                <!-- TICKET 1 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Urgent" data-device="TENS 7000" onclick="openTicketDetail(1)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9201</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_t4w8z6ll9</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Robert Vance</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">robert.vance@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Cardiac Pacemaker Contraindication Inquired during lumbar setup">
+                      Cardiac Pacemaker Contraindication during lumbar setup
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-1" onchange="handleTableStatusChange(this, 1)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 2 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="High" data-device="IF4D" onclick="openTicketDetail(2)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9198</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_x7b4m1vv9</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Elena Rostova</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">elena.rostova@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Quad-polar lead impedance open circuit error upon channel activation">
+                      Quad-polar lead impedance open circuit error upon activation
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-2" onchange="handleTableStatusChange(this, 2)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 3 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="High" data-device="TENS 7000" onclick="openTicketDetail(3)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9195</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_w3f8j9aa1</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">David Miller</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">david.miller@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Patient reports sharp burning sensation at electrode pad borders">
+                      Sharp burning sensation at electrode pad borders
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-3" onchange="handleTableStatusChange(this, 3)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 4 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Normal" data-device="TENS 7000" onclick="openTicketDetail(4)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9190</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_d4p9q2cc5</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Patricia Gomez</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">patricia.gomez@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="9V battery compartment slide latch jammed, replacement unit request">
+                      9V battery slide latch jammed, replacement guidance
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-4" onchange="handleTableStatusChange(this, 4)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 5 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Normal" data-device="CPAP" onclick="openTicketDetail(5)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9184</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_m8k1l3tt4</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Arthur Pendelton</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">arthur.pendelton@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Medicare Part B DME cross-billing pre-authorization forms">
+                      Medicare Part B DME cross-billing pre-auth documents
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-5" onchange="handleTableStatusChange(this, 5)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 6 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Normal" data-device="InTENSity 10" onclick="openTicketDetail(6)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9179</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_p0v2r8zz6</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Jessica Wu</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">jessica.wu@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="InTENSity 10 digital pre-set program customization question">
+                      InTENSity 10 program customization for cervical therapy
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-6" onchange="handleTableStatusChange(this, 6)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 7 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="rejected" data-priority="Urgent" data-device="TENS 7000" onclick="openTicketDetail(7)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9172</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_q5h3n7kk2</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Gregory House</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">gregory.house@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Inquiry on overnight sleeping use of TENS - Sleep apnea warning flag">
+                      Inquiry on overnight sleeping use of TENS - Safety Advisory
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-7" onchange="handleTableStatusChange(this, 7)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#f43f5e]/20 text-[#fb7185] border-[#f43f5e]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]" selected>Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 8 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="cancelled" data-priority="Normal" data-device="Electrodes" onclick="openTicketDetail(8)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9168</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_b7e1x5qq3</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Brenda Walsh</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">brenda.walsh@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Electrode hydrogel drying after 12 sessions, replacement batch order">
+                      Electrode hydrogel premature drying, replacement batch order
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-8" onchange="handleTableStatusChange(this, 8)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-slate-700/40 text-slate-300 border-slate-600/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]" selected>Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 9 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="resolved" data-priority="Normal" data-device="TENS 7000" onclick="openTicketDetail(9)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9150</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_c2y9v4mm8</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Michael Scott</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">michael.scott@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Mode difference clarification: Burst vs Normal vs Modulation mode">
+                      Mode difference clarification: Burst vs Normal vs Modulation
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-9" onchange="handleTableStatusChange(this, 9)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#16a34a]/20 text-[#4ade80] border-[#16a34a]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]" selected>Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+
+                <!-- TICKET 10 -->
+                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="resolved" data-priority="Normal" data-device="Electrodes" onclick="openTicketDetail(10)">
+                  <td class="py-3.5 px-4 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9142</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono">spark_l9k5p3vv7</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-medium text-on-surface">Kelly Kapoor</div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="font-mono text-xs text-on-surface">kelly.kapoor@gmail.com</div>
+                  </td>
+                  <td class="py-3.5 px-3 max-w-[340px]">
+                    <div class="text-on-surface font-medium truncate" title="Dual channel lead wire cleaning procedure & maintenance inquiry">
+                      Dual channel lead wire cleaning &amp; maintenance inquiry
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-3 whitespace-nowrap">
+                    <div class="inline-block" onclick="event.stopPropagation()">
+                      <select id="row-status-10" onchange="handleTableStatusChange(this, 10)"
+                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#16a34a]/20 text-[#4ade80] border-[#16a34a]/40 focus:ring-1 focus:ring-primary">
+                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
+                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]" selected>Resolved Tickets</option>
+                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
+                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
+                      </select>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
+                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="px-5 py-3 border-t border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest/60 font-label-sm text-label-sm text-on-surface-variant">
+            <div>
+              Showing <span class="text-on-surface font-semibold" id="pagination-info">1-10</span> of <span class="text-on-surface font-semibold">284</span> support tickets
+            </div>
+            <div class="flex items-center space-x-1">
+              <button class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs">Prev</button>
+              <button class="px-2.5 py-1 rounded bg-primary-container/30 border border-primary/50 text-primary font-semibold text-xs">1</button>
+              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">2</button>
+              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">3</button>
+              <span class="px-1 text-on-surface-variant">...</span>
+              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">29</button>
+              <button class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- TICKET INSPECTOR SLIDE-OVER DRAWER -->
+  <div id="ticket-drawer" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div onclick="closeTicketDetail()" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"></div>
+
+    <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+      <div class="pointer-events-auto w-screen max-w-2xl bg-surface-container-lowest border-l border-outline-variant/30 shadow-2xl flex flex-col justify-between">
+        <!-- Drawer Header -->
+        <div class="px-6 py-5 border-b border-outline-variant/30 bg-surface-container-low/70 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <span class="material-symbols-outlined text-primary text-2xl" data-icon="confirmation_number">confirmation_number</span>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="font-headline-sm text-base font-bold text-on-surface" id="drawer-ticket-id">#TKT-9201</h3>
+                <span id="drawer-status-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-error-container/30 text-error border border-error/30">Clinical Escalation</span>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-0.5 font-mono" id="drawer-session-id">Origin Session: spark_t4w8z6ll9_1775622419085</p>
+            </div>
+          </div>
+          <button onclick="closeTicketDetail()" class="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors">
+            <span class="material-symbols-outlined text-lg" data-icon="close">close</span>
+          </button>
+        </div>
+
+        <!-- Drawer Body Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+          <!-- Patient Summary & Device Card -->
+          <div class="p-4 rounded-xl bg-surface-container-low/80 border border-outline-variant/30 grid grid-cols-2 gap-4">
+            <div>
+              <span class="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider block">Patient Name</span>
+              <span class="font-medium text-sm text-on-surface mt-0.5 block" id="drawer-patient-name">Robert Vance</span>
+              <span class="text-xs text-on-surface-variant font-mono" id="drawer-patient-contact">robert.vance@gmail.com • (555) 234-8910</span>
+            </div>
+            <div>
+              <span class="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider block">Associated Equipment</span>
+              <span class="font-medium text-sm text-primary mt-0.5 block" id="drawer-device">TENS 7000 Dual Channel</span>
+              <span class="text-xs text-on-surface-variant font-mono">Serial: SN-7000-88319-V4</span>
+            </div>
+          </div>
+
+          <!-- Problem Description -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-label-sm uppercase tracking-wider text-on-surface-variant">Inquiry Description &amp; Escalation Trigger</h4>
+            <div class="p-4 rounded-lg bg-[#071c33]/90 border border-[#143860] text-xs text-on-surface leading-relaxed" id="drawer-issue-desc">
+              Patient asked if they could safely apply electrode pads across the chest and back while having an implanted Medtronic pacemaker. Spark Chatbot immediately triggered safety contraindication protocols, instructed the patient to halt treatment, and escalated this case for physician review.
+            </div>
+          </div>
+
+          <!-- Transcript Preview Excerpt -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-label-sm uppercase tracking-wider text-primary flex items-center gap-1.5 font-mono">
+                <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+                <span>Spark Bot Transcript Record</span>
+              </h4>
+              <a href="session-logs.html" class="text-xs text-secondary hover:underline font-mono flex items-center gap-1">
+                <span>View Full Telemetry</span>
+                <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span>
+              </a>
+            </div>
+            <div class="space-y-2.5 font-sans">
+              <div class="px-4 py-3 rounded-lg bg-[#071c33]/90 border border-[#143860] flex items-center gap-3">
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-[#0284c7] text-white shrink-0 font-sans">USER</span>
+                <span class="text-white text-[13px] font-sans font-normal" id="drawer-transcript-user">Is it safe to use electrotherapy if I have a cardiac pacemaker or ICD implant?</span>
+              </div>
+              <div class="px-4 py-3 rounded-lg bg-[#071c33]/90 border border-[#143860] flex items-start gap-3">
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-[#16a34a] text-white shrink-0 mt-0.5 font-sans">BOT</span>
+                <p class="text-[#e2e8f0] text-[13px] leading-relaxed font-sans font-normal" id="drawer-transcript-bot">
+                  <strong class="text-error font-semibold">ABSOLUTE CONTRAINDICATION:</strong> Electrotherapy devices (TENS, EMS, IF, Microcurrent) must NEVER be used by patients with cardiac pacemakers, implanted cardioverter defibrillators (ICDs), or any active electronic medical implants. Electrical impulses can disrupt life-sustaining cardiac rhythm management.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clinical Action & Workflow Settings -->
+          <div class="space-y-3 pt-2 border-t border-outline-variant/30">
+            <h4 class="text-xs font-label-sm uppercase tracking-wider text-on-surface-variant">Update Ticket Status</h4>
+            <div>
+              <label class="text-[11px] text-on-surface-variant block mb-1">Status</label>
+              <select id="modal-status-select" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs text-on-surface focus:border-primary focus:outline-none">
+                <option value="pending">Pending</option>
+                <option value="resolved">Resolved Tickets</option>
+                <option value="rejected">Rejected</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drawer Footer Actions -->
+        <div class="p-5 border-t border-outline-variant/30 bg-surface-container-low/80 flex items-center justify-between">
+          <button onclick="closeTicketDetail()" class="px-4 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface text-xs hover:border-primary/40 transition-colors">
+            Cancel
+          </button>
+          <div class="flex items-center space-x-2">
+            <button onclick="saveTicketUpdate()" class="px-4 py-2 rounded-lg bg-primary text-on-primary font-semibold text-xs hover:brightness-110 active:scale-95 transition-all">
+              Save &amp; Transmit Update
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION TOAST -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden px-4 py-3 rounded-xl bg-surface-container-high border border-primary/40 text-on-surface shadow-2xl flex items-center space-x-2 font-sans text-xs">
+    <span class="material-symbols-outlined text-primary text-sm" data-icon="check_circle">check_circle</span>
+    <span id="toast-message">Ticket record successfully saved</span>
+  </div>
+
+  <script>
+    // Live Clock Display
+    function updateClock() {
+      const clockElements = document.querySelectorAll('.utc-clock-display, #utc-clock');
+      if (clockElements.length > 0) {
+        const now = new Date();
+        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        const month = months[now.getMonth()];
+        const day = String(now.getDate()).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        const secs = String(now.getSeconds()).padStart(2, '0');
+        const str = `LIVE: ${month} ${day}, ${year} • ${hours}:${mins}:${secs}`;
+        clockElements.forEach(el => el.textContent = str);
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Hydrate User Profile
+    const adminEmail = localStorage.getItem("adminEmail") || sessionStorage.getItem("adminEmail");
+    if (adminEmail) {
+      const nameEls = document.querySelectorAll(".user-profile-name, #tickets-user-name");
+      nameEls.forEach(el => { el.textContent = adminEmail.split('@')[0]; });
+    }
+
+    // Ticket Data Store
+    const ticketsData = {
+      1: {
+        id: "#TKT-9201",
+        session: "spark_t4w8z6ll9_1775622419085",
+        patient: "Robert Vance",
+        contact: "robert.vance@gmail.com • (555) 234-8910",
+        device: "TENS 7000 Dual Channel",
+        priority: "Urgent",
+        status: "Pending",
+        statusVal: "pending",
+        assignee: "Dr. Miller (Cardiology Lead)",
+        desc: "Patient asked if they could safely apply electrode pads across the chest and back while having an implanted Medtronic pacemaker. Spark Chatbot immediately triggered safety contraindication protocols, instructed the patient to halt treatment, and escalated this case for physician review.",
+        userQ: "Is it safe to use electrotherapy if I have a cardiac pacemaker or ICD implant?",
+        botA: "ABSOLUTE CONTRAINDICATION: Electrotherapy devices (TENS, EMS, IF, Microcurrent) must NEVER be used by patients with cardiac pacemakers, implanted cardioverter defibrillators (ICDs), or any active electronic medical implants. Electrical impulses can disrupt life-sustaining cardiac rhythm management."
+      },
+      2: {
+        id: "#TKT-9198",
+        session: "spark_x7b4m1vv9_1775623991042",
+        patient: "Elena Rostova",
+        contact: "elena.rostova@gmail.com • (555) 481-9920",
+        device: "IF4D Interferential Unit",
+        priority: "High",
+        status: "Pending",
+        statusVal: "pending",
+        assignee: "Alex Jenkins",
+        desc: "Patient receives lead impedance open circuit warning on the IF4D when ramping current on Channel 2. Lead wire connections and gel electrode adhesion require clinical hardware troubleshooting.",
+        userQ: "How do I fix the quad-polar lead impedance error on my IF4D device?",
+        botA: "A lead impedance error on the IF4D indicates open circuit resistance between the 4 intersecting electrode pads. Check that all 4 lead wire pins are firmly inserted into the output jacks, apply a drop of conductive gel to re-moisten the reusable electrodes, and ensure pad adhesive has continuous skin contact across the targeted interferential field."
+      },
+      3: {
+        id: "#TKT-9195",
+        session: "spark_w3f8j9aa1_1775623880199",
+        patient: "David Miller",
+        contact: "david.miller@gmail.com • (555) 912-3341",
+        device: "TENS 7000 Dual Channel",
+        priority: "High",
+        status: "Pending",
+        statusVal: "pending",
+        assignee: "Sarah Connor, PT",
+        desc: "Patient reports intense prickling and skin redness underneath lower lumbar electrode placement during 80Hz stimulation. Advised to stop session and inspect skin barrier.",
+        userQ: "Why am I experiencing a high amplitude sharp burning sensation?",
+        botA: "A sharp burning or stinging sensation usually indicates uneven electrode contact, worn conductive gel, or dry skin edges causing hot-spot current concentration. Rotate both channel intensity dials to '0' and turn off the device immediately. Inspect the pads for peeling, clean the skin surface with water only, and replace pads if adhesive is deteriorated."
+      },
+      4: {
+        id: "#TKT-9190",
+        session: "spark_d4p9q2cc5_1775623712990",
+        patient: "Patricia Gomez",
+        contact: "patricia.gomez@gmail.com • (555) 301-4490",
+        device: "TENS 7000 Dual Channel",
+        priority: "Normal",
+        status: "Pending",
+        statusVal: "pending",
+        assignee: "Liam Hayes",
+        desc: "Patient unable to slide open 9V battery compartment cover. Hardware guidance or replacement door latch needed under warranty.",
+        userQ: "How do I open the 9V battery compartment latch on the TENS 7000?",
+        botA: "To open the battery compartment on the TENS 7000, gently press downward on the textured thumb grip located on the front slide-cover and slide it down toward the bottom of the unit. Ensure you align the positive (+) and negative (-) terminals correctly when inserting the 9V alkaline battery before sliding the cover back until it clicks."
+      },
+      5: {
+        id: "#TKT-9184",
+        session: "spark_m8k1l3tt4_1775623544108",
+        patient: "Arthur Pendelton",
+        contact: "arthur.pendelton@gmail.com • (555) 771-8890",
+        device: "CPAP / BiPAP Device",
+        priority: "Normal",
+        status: "Pending",
+        statusVal: "pending",
+        assignee: "Billing Coordinator",
+        desc: "Inquiry on Medicare Part B DME pre-authorization paperwork for CPAP and compliance monitoring.",
+        userQ: "Does Medicare cover CPAP and BiPAP DME cross-billing insurance?",
+        botA: "Medicare Part B generally covers CPAP and BiPAP therapy under Durable Medical Equipment (DME) benefits when qualifying clinical criteria are met, including a diagnostic sleep study showing an AHI >= 15 (or AHI 5-14 with documented co-morbidities) and initial 90-day compliance tracking with DME cross-billing documentation."
+      },
+      6: {
+        id: "#TKT-9179",
+        session: "spark_p0v2r8zz6_1775623399001",
+        patient: "Jessica Wu",
+        contact: "jessica.wu@gmail.com • (555) 604-1188",
+        device: "InTENSity 10 Digital",
+        priority: "Normal",
+        status: "Pending",
+        statusVal: "pending",
+        assignee: "Liam Hayes",
+        desc: "Request for guidance on customizing frequency and timer settings for preset body-part programs.",
+        userQ: "How do I set up and select the InTENSity 10 digital pre-set program mode?",
+        botA: "Press the 'Mode' button to cycle through the 10 preset body-part programs (Neck, Shoulder, Mid Back, Low Back, Elbow, Wrist, Hip, Knee, Ankle, Foot). Once your target treatment region is highlighted, press 'Set' to confirm the automatic pulse rate and width parameters, then gradually increase intensity using the 'CH1' and 'CH2' up arrows."
+      },
+      7: {
+        id: "#TKT-9172",
+        session: "spark_q5h3n7kk2_1775623108920",
+        patient: "Gregory House",
+        contact: "gregory.house@gmail.com • (555) 888-2391",
+        device: "TENS 7000 Dual Channel",
+        priority: "Urgent",
+        status: "Rejected",
+        statusVal: "rejected",
+        assignee: "Dr. Emily Zhang, MD",
+        desc: "Patient requested sleeping with electrodes active overnight for chronic knee osteoarthritis pain. High safety advisory provided.",
+        userQ: "Can I use the TENS unit while sleeping or overnight for chronic knee osteoarthritis?",
+        botA: "Clinical safety guidelines strongly advise against using a TENS device while asleep. Unconscious movement can dislodge or bend electrodes, causing localized skin burns or unexpected voltage spikes. Your nervous system also requires conscious sensation to alert you if stimulation becomes excessively intense."
+      },
+      8: {
+        id: "#TKT-9168",
+        session: "spark_b7e1x5qq3_1775622704112",
+        patient: "Brenda Walsh",
+        contact: "brenda.walsh@gmail.com • (555) 431-7721",
+        device: "Electrodes & Replacement Pads",
+        priority: "Normal",
+        status: "Cancelled",
+        statusVal: "cancelled",
+        assignee: "Customer Support",
+        desc: "Gel electrode longevity inquiry and request for replacement 2x2 reusable cloth backing pads.",
+        userQ: "How many uses can I get out of the reusable multi-stick gel electrodes before replacing?",
+        botA: "Premium PMT multi-stick hydrogel electrodes typically provide 15 to 30 applications depending on skin moisture, hair density, and proper storage. To maximize longevity, always wash the skin thoroughly with soap and water before applying, and return the pads to their original plastic backing film immediately after each session."
+      },
+      9: {
+        id: "#TKT-9150",
+        session: "spark_c2y9v4mm8_1775622950183",
+        patient: "Michael Scott",
+        contact: "michael.scott@gmail.com • (555) 123-4567",
+        device: "TENS 7000 Dual Channel",
+        priority: "Normal",
+        status: "Resolved Tickets",
+        statusVal: "resolved",
+        assignee: "Spark AI Core",
+        desc: "Automatic deflection: Explanation of Burst, Normal, and Modulation electrotherapy parameters delivered.",
+        userQ: "What is the difference between Burst, Normal, and Modulation mode on TENS 7000?",
+        botA: "Normal mode delivers continuous pulse rate and width for immediate acute pain relief. Burst mode sends cyclical packets of pulses (2 bursts/second) to stimulate endorphin release for deep aching pain. Modulation mode periodically varies pulse width and frequency by 50% to prevent sensory nerve habituation."
+      },
+      10: {
+        id: "#TKT-9142",
+        session: "spark_l9k5p3vv7_1775621890333",
+        patient: "Kelly Kapoor",
+        contact: "kelly.kapoor@gmail.com • (555) 987-6543",
+        device: "Electrodes & Replacement Pads",
+        priority: "Normal",
+        status: "Resolved Tickets",
+        statusVal: "resolved",
+        assignee: "Spark AI Core",
+        desc: "Sanitization protocol for lead wires and storage maintenance.",
+        userQ: "How do I calibrate and clean the dual channel lead wires without damaging the copper core?",
+        botA: "Disconnect lead wires from both the unit jacks and electrode pins before cleaning. Wipe the external silicone sheath with a 70% isopropyl wipe or a lightly moistened microfiber cloth. Do not submerge wires, stretch or yank on cable junctions, or wrap wires tightly around the device housing for storage."
+      }
+    };
+
+    const statusMeta = {
+      'pending': {
+        label: 'Pending',
+        classes: ['bg-[#eab308]/20', 'text-[#facc15]', 'border-[#eab308]/40']
+      },
+      'resolved': {
+        label: 'Resolved Tickets',
+        classes: ['bg-[#16a34a]/20', 'text-[#4ade80]', 'border-[#16a34a]/40']
+      },
+      'rejected': {
+        label: 'Rejected',
+        classes: ['bg-[#f43f5e]/20', 'text-[#fb7185]', 'border-[#f43f5e]/40']
+      },
+      'cancelled': {
+        label: 'Cancelled',
+        classes: ['bg-slate-700/40', 'text-slate-300', 'border-slate-600/40']
+      }
+    };
+
+    function applyTableStatusStyle(selectEl, status) {
+      const allClassNames = [
+        'bg-[#eab308]/20', 'text-[#facc15]', 'border-[#eab308]/40',
+        'bg-[#16a34a]/20', 'text-[#4ade80]', 'border-[#16a34a]/40',
+        'bg-[#f43f5e]/20', 'text-[#fb7185]', 'border-[#f43f5e]/40',
+        'bg-slate-700/40', 'text-slate-300', 'border-slate-600/40'
+      ];
+      selectEl.classList.remove(...allClassNames);
+      const conf = statusMeta[status] || statusMeta['pending'];
+      selectEl.classList.add(...conf.classes);
+    }
+
+    function handleTableStatusChange(selectEl, id) {
+      const newStatus = selectEl.value;
+      applyTableStatusStyle(selectEl, newStatus);
+      const row = selectEl.closest('.ticket-row');
+      if (row) {
+        row.setAttribute('data-status', newStatus);
+      }
+      const label = statusMeta[newStatus]?.label || newStatus;
+      if (ticketsData[id]) {
+        ticketsData[id].status = label;
+        ticketsData[id].statusVal = newStatus;
+      }
+      updateFilterCounts();
+      searchTickets();
+      showToast(`Ticket #${ticketsData[id]?.id || id} status changed to ${label}`);
+    }
+
+    function updateFilterCounts() {
+      const rows = document.querySelectorAll('.ticket-row');
+      let counts = { all: rows.length, pending: 0, resolved: 0, rejected: 0, cancelled: 0 };
+      rows.forEach(r => {
+        const s = r.getAttribute('data-status');
+        if (counts[s] !== undefined) counts[s]++;
+      });
+      const tAll = document.getElementById('tab-all');
+      if (tAll) tAll.textContent = `All (${counts.all})`;
+      const tPending = document.getElementById('tab-pending');
+      if (tPending) tPending.textContent = `Pending (${counts.pending})`;
+      const tResolved = document.getElementById('tab-resolved');
+      if (tResolved) tResolved.textContent = `Resolved Tickets (${counts.resolved})`;
+      const tRejected = document.getElementById('tab-rejected');
+      if (tRejected) tRejected.textContent = `Rejected (${counts.rejected})`;
+      const tCancelled = document.getElementById('tab-cancelled');
+      if (tCancelled) tCancelled.textContent = `Cancelled (${counts.cancelled})`;
+    }
+
+    let activeTicketId = null;
+    let currentFilter = 'all';
+
+    // Filter by Status Tabs
+    function filterTickets(status) {
+      currentFilter = status;
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('bg-primary-container', 'text-on-primary-container', 'font-semibold');
+        tab.classList.add('bg-surface-container', 'border', 'border-outline-variant/30', 'text-on-surface-variant');
+      });
+      const activeTab = document.getElementById(`tab-${status}`);
+      if (activeTab) {
+        activeTab.classList.remove('bg-surface-container', 'border', 'border-outline-variant/30', 'text-on-surface-variant');
+        activeTab.classList.add('bg-primary-container', 'text-on-primary-container', 'font-semibold');
+      }
+      searchTickets();
+    }
+
+    // Search Filter
+    function searchTickets() {
+      const q = document.getElementById('ticket-search').value.toLowerCase();
+
+      const rows = document.querySelectorAll('.ticket-row');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const rowStatus = row.getAttribute('data-status');
+        const text = row.textContent.toLowerCase();
+
+        const matchStatus = (currentFilter === 'all' || rowStatus === currentFilter);
+        const matchQuery = text.includes(q);
+
+        if (matchStatus && matchQuery) {
+          row.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('ticket-count-badge').textContent = `Showing ${visibleCount} tickets`;
+      document.getElementById('pagination-info').textContent = `1-${visibleCount}`;
+    }
+
+    // Open Ticket Detail Drawer
+    function openTicketDetail(id) {
+      const t = ticketsData[id];
+      if (!t) return;
+      activeTicketId = id;
+
+      document.getElementById('drawer-ticket-id').textContent = t.id;
+      document.getElementById('drawer-session-id').textContent = `Origin Session: ${t.session}`;
+      document.getElementById('drawer-patient-name').textContent = t.patient;
+      document.getElementById('drawer-patient-contact').textContent = t.contact;
+      document.getElementById('drawer-device').textContent = t.device;
+      document.getElementById('drawer-issue-desc').textContent = t.desc;
+      document.getElementById('drawer-transcript-user').textContent = t.userQ;
+      document.getElementById('drawer-transcript-bot').innerHTML = t.botA;
+
+      const sBadge = document.getElementById('drawer-status-badge');
+      sBadge.textContent = t.status;
+      const conf = statusMeta[t.statusVal] || statusMeta['pending'];
+      sBadge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold border font-sans ' + conf.classes.join(' ');
+
+      document.getElementById('modal-status-select').value = t.statusVal;
+
+      document.getElementById('ticket-drawer').classList.remove('hidden');
+    }
+
+    function closeTicketDetail() {
+      document.getElementById('ticket-drawer').classList.add('hidden');
+      activeTicketId = null;
+    }
+
+    function saveTicketUpdate() {
+      const newStatus = document.getElementById('modal-status-select').value;
+      if (activeTicketId && ticketsData[activeTicketId]) {
+        ticketsData[activeTicketId].statusVal = newStatus;
+        const label = statusMeta[newStatus]?.label || newStatus;
+        ticketsData[activeTicketId].status = label;
+        const rowSelect = document.getElementById(`row-status-${activeTicketId}`);
+        if (rowSelect) {
+          rowSelect.value = newStatus;
+          applyTableStatusStyle(rowSelect, newStatus);
+          const row = rowSelect.closest('.ticket-row');
+          if (row) row.setAttribute('data-status', newStatus);
+        }
+        updateFilterCounts();
+        searchTickets();
+        showToast("Ticket #" + ticketsData[activeTicketId].id + " updated to " + label);
+      }
+      closeTicketDetail();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-message').textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    // Initialize all table status selects on load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.table-status-select').forEach(sel => {
+        applyTableStatusStyle(sel, sel.value);
+      });
+      updateFilterCounts();
+    });
+  </script>
+</body>
+
+</html>
