@@ -6,13 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PMT Spark Admin Portal</title>
   <script>
-    // Automatic smart redirect based on session authentication state
+    // Environment & Session Aware Smart Redirect
+    const isLocalDev = window.location.hostname === "localhost" || 
+                       window.location.hostname === "127.0.0.1" || 
+                       window.location.protocol === "file:";
     const hasToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
-    if (hasToken && isAuth) {
-      window.location.replace("overview.html");
-    } else {
-      window.location.replace("login.html");
+    const targetPath = (hasToken && isAuth)
+      ? (isLocalDev ? "overview.html" : "/admin/overview")
+      : (isLocalDev ? "login.html" : "/admin/login");
+    window.location.replace(targetPath);
+
+    // Auto-resolve anchor tags for local development
+    if (isLocalDev) {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("a[href^='/admin/']").forEach(a => {
+          const path = a.getAttribute("href").replace(/^\/admin\//, "");
+          a.setAttribute("href", path + ".html");
+        });
+      });
     }
   </script>
   <style>
@@ -78,14 +90,14 @@
     <h1>Spark Admin Portal</h1>
     <p>Redirecting to secure login console...</p>
     <div class="links">
-      <a href="login.html">1. Admin Login Screen</a>
-      <a href="overview.html">2. Operations & Telemetry Overview</a>
-      <a href="knowledge-base.html">3. Knowledge Base & Q&A Manager</a>
-      <a href="session-logs.html">4. Chat Logs & Session Duration</a>
-      <a href="support-tickets.html">5. Patient & Clinical Support Tickets</a>
-      <a href="token-usage.html">6. Token Usage & Consumption Telemetry</a>
-      <a href="fallbacks-rules.html">7. Fallbacks & Rules Manager</a>
-      <a href="settings-access.html">8. System Settings & Access Control</a>
+      <a href="/admin/login">1. Admin Login Screen</a>
+      <a href="/admin/overview">2. Operations & Telemetry Overview</a>
+      <a href="/admin/knowledge-base">3. Knowledge Base & Q&A Manager</a>
+      <a href="/admin/session-logs">4. Chat Logs & Session Duration</a>
+      <a href="/admin/support-tickets">5. Patient & Clinical Support Tickets</a>
+      <a href="/admin/token-usage">6. Token Usage & Consumption Telemetry</a>
+      <a href="/admin/fallbacks-rules">7. Fallbacks & Rules Manager</a>
+      <a href="/admin/settings-access">8. System Settings & Access Control</a>
     </div>
   </div>
 </body>

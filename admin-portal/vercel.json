@@ -1,0 +1,21 @@
+{
+  "rewrites": [
+    { "source": "/admin/login", "destination": "/login.html" },
+    { "source": "/admin/overview", "destination": "/overview.html" },
+    { "source": "/admin/knowledge-base", "destination": "/knowledge-base.html" },
+    { "source": "/admin/session-logs", "destination": "/session-logs.html" },
+    { "source": "/admin/support-tickets", "destination": "/support-tickets.html" },
+    { "source": "/admin/token-usage", "destination": "/token-usage.html" },
+    { "source": "/admin/fallbacks-rules", "destination": "/fallbacks-rules.html" },
+    { "source": "/admin/settings-access", "destination": "/settings-access.html" },
+    { "source": "/admin", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/overview", "destination": "/overview.html" },
+    { "source": "/knowledge-base", "destination": "/knowledge-base.html" },
+    { "source": "/session-logs", "destination": "/session-logs.html" },
+    { "source": "/support-tickets", "destination": "/support-tickets.html" },
+    { "source": "/token-usage", "destination": "/token-usage.html" },
+    { "source": "/fallbacks-rules", "destination": "/fallbacks-rules.html" },
+    { "source": "/settings-access", "destination": "/settings-access.html" }
+  ]
+}

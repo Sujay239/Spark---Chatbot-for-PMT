@@ -458,7 +458,10 @@
 
           // Seamless redirect to overview console
           setTimeout(() => {
-            window.location.href = "overview.html";
+            const isLocalDev = window.location.hostname === "localhost" || 
+                               window.location.hostname === "127.0.0.1" || 
+                               window.location.protocol === "file:";
+            window.location.href = isLocalDev ? "overview.html" : "/admin/overview";
           }, 450);
         } else {
           // Response Case 2: Unauthorized { "status": 401, "success": false, "message": "Unauthorized" }

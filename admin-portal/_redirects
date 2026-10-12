@@ -1,0 +1,18 @@
+# PMT Spark AI Core - Netlify & Cloudflare Pages Rewrites
+/admin/login           /login.html           200
+/admin/overview        /overview.html        200
+/admin/knowledge-base  /knowledge-base.html  200
+/admin/session-logs    /session-logs.html    200
+/admin/support-tickets /support-tickets.html 200
+/admin/token-usage     /token-usage.html     200
+/admin/fallbacks-rules /fallbacks-rules.html 200
+/admin/settings-access /settings-access.html 200
+/admin                 /index.html           200
+/login                 /login.html           200
+/overview              /overview.html        200
+/knowledge-base        /knowledge-base.html  200
+/session-logs          /session-logs.html    200
+/support-tickets       /support-tickets.html 200
+/token-usage           /token-usage.html     200
+/fallbacks-rules       /fallbacks-rules.html 200
+/settings-access       /settings-access.html 200

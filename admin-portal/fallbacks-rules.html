@@ -4,12 +4,15 @@
 <head>
   <link rel="icon" type="image/png" href="logo.png" />
   <script>
-    // Route Protection: Redirect unauthenticated requests to login
+    // Environment & Route Protection: Redirect unauthenticated requests to login
+    const isLocalDev = window.location.hostname === "localhost" || 
+                       window.location.hostname === "127.0.0.1" || 
+                       window.location.protocol === "file:";
     if (
       (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
       (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
     ) {
-      window.location.replace("login.html");
+      window.location.replace(isLocalDev ? "login.html" : "/admin/login");
     }
 
     function logout() {
@@ -17,7 +20,17 @@
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("adminEmail");
       sessionStorage.clear();
-      window.location.href = "login.html";
+      window.location.href = isLocalDev ? "login.html" : "/admin/login";
+    }
+
+    // Auto-resolve internal links for local dev (Live Server / localhost)
+    if (isLocalDev) {
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("a[href^='/admin/']").forEach(el => {
+          const route = el.getAttribute("href").replace(/^\/admin\//, "");
+          el.setAttribute("href", route + ".html");
+        });
+      });
     }
   </script>
   <meta charset="utf-8" />
@@ -207,7 +220,7 @@
           Telemetry Engine</div>
         <!-- 1. Overview -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
-          href="overview.html">
+          href="/admin/overview">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl group-hover:text-primary"
               data-icon="dashboard">dashboard</span>
@@ -216,7 +229,7 @@
         </a>
         <!-- 2. Chat Logs & Sessions -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
-          href="session-logs.html">
+          href="/admin/session-logs">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="forum">forum</span>
             <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
@@ -226,7 +239,7 @@
         </a>
         <!-- 3. Support Tickets -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
-          href="support-tickets.html">
+          href="/admin/support-tickets">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="confirmation_number">confirmation_number</span>
             <span class="text-body-md font-body-md">Support Tickets</span>
@@ -236,7 +249,7 @@
         </a>
         <!-- 4. Questions & KB -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
-          href="knowledge-base.html">
+          href="/admin/knowledge-base">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl group-hover:text-primary"
               data-icon="menu_book">menu_book</span>
@@ -247,7 +260,7 @@
         </a>
         <!-- 5. Token Usage -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
-          href="token-usage.html">
+          href="/admin/token-usage">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl group-hover:text-primary"
               data-icon="token">token</span>
@@ -256,7 +269,7 @@
         </a>
         <!-- 6. Fallbacks & Rules (ACTIVE) -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium shadow-[0_0_15px_-3px_rgba(0,172,160,0.35)] cyan-glow-sm transition-all duration-200 group"
-          href="fallbacks-rules.html">
+          href="/admin/fallbacks-rules">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl"
               data-icon="alt_route">alt_route</span>
@@ -265,7 +278,7 @@
         </a>
         <!-- 7. Settings & Access -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
-          href="settings-access.html">
+          href="/admin/settings-access">
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-xl group-hover:text-primary"
               data-icon="settings">settings</span>

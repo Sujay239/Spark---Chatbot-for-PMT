@@ -1,0 +1,36 @@
+# PMT Spark AI Core - Apache / LiteSpeed / Hostinger URL Rewrites
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # If an existing file or directory is requested directly, serve it
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Route custom prefix paths (/admin/*)
+  RewriteRule ^admin/login/?$ login.html [L,QSA]
+  RewriteRule ^admin/overview/?$ overview.html [L,QSA]
+  RewriteRule ^admin/knowledge-base/?$ knowledge-base.html [L,QSA]
+  RewriteRule ^admin/session-logs/?$ session-logs.html [L,QSA]
+  RewriteRule ^admin/support-tickets/?$ support-tickets.html [L,QSA]
+  RewriteRule ^admin/token-usage/?$ token-usage.html [L,QSA]
+  RewriteRule ^admin/fallbacks-rules/?$ fallbacks-rules.html [L,QSA]
+  RewriteRule ^admin/settings-access/?$ settings-access.html [L,QSA]
+  RewriteRule ^admin/?$ index.html [L,QSA]
+
+  # Route direct paths (if deployed inside an /admin/ subdirectory)
+  RewriteRule ^login/?$ login.html [L,QSA]
+  RewriteRule ^overview/?$ overview.html [L,QSA]
+  RewriteRule ^knowledge-base/?$ knowledge-base.html [L,QSA]
+  RewriteRule ^session-logs/?$ session-logs.html [L,QSA]
+  RewriteRule ^support-tickets/?$ support-tickets.html [L,QSA]
+  RewriteRule ^token-usage/?$ token-usage.html [L,QSA]
+  RewriteRule ^fallbacks-rules/?$ fallbacks-rules.html [L,QSA]
+  RewriteRule ^settings-access/?$ settings-access.html [L,QSA]
+  RewriteRule ^$ index.html [L,QSA]
+</IfModule>
+
+# Fallback Header & MIME types
+<IfModule mod_mime.c>
+  AddType text/html .html
+</IfModule>
