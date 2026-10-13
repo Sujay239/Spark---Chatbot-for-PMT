@@ -380,8 +380,7 @@
             <span class="material-symbols-outlined text-xl group-hover:text-primary" data-icon="forum">forum</span>
             <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
           </div>
-          <span id="nav-sessions-count"
-            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container-high text-primary border border-primary/20 font-mono">--</span>
+          
         </a>
         <!-- 3. Support Tickets -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
@@ -391,8 +390,7 @@
               data-icon="confirmation_number">confirmation_number</span>
             <span class="text-body-md font-body-md">Support Tickets</span>
           </div>
-          <span id="nav-tickets-count"
-            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20 font-mono">--</span>
+         
         </a>
         <!-- 4. Questions & KB -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
@@ -402,8 +400,7 @@
               data-icon="menu_book">menu_book</span>
             <span class="text-body-md font-body-md">Questions &amp; KB</span>
           </div>
-          <span id="nav-kb-count"
-            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-mono">--</span>
+         
         </a>
         <!-- 5. Token Usage -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
@@ -1298,41 +1295,36 @@
         }
       }
 
+      // 0. Filter and sanitize real support requests (ZERO fake/mock fallbacks)
+      const validRequests = (Array.isArray(data.recent_support_requests) ? data.recent_support_requests : [])
+        .filter(r => r && (r.id || r.name || r.email || r.message));
+      data.recent_support_requests = validRequests;
+
+      // Ensure support submissions count is accurate:
+      // If there are no valid requests recorded, ensure ticket counts strictly reflect 0
+      // (guards against phantom "1" returned when an n8n Supabase node outputs [{ json: {} }] on empty tables)
+      if (validRequests.length === 0) {
+        if (data.kpi) data.kpi.support_submissions = 0;
+        if (data.sidebar_counts) data.sidebar_counts.support_tickets = "0";
+        const tVal = document.getElementById("kpi-tickets-val");
+        if (tVal) tVal.textContent = "0 Pending";
+        const navTick = document.getElementById("nav-tickets-count");
+        if (navTick) navTick.textContent = "0";
+      }
+
       // 5. Update counts on both tab badges
       const tabCountChat = document.getElementById("tab-count-chat");
       if (tabCountChat) {
-        tabCountChat.textContent = (data.kpi && data.kpi.active_sessions) || (data.recent_sessions ? data.recent_sessions.length : 0);
-      }
-
-      // Provide fallback support requests list if not yet provided by older webhook version
-      if (!data.recent_support_requests && data.kpi && data.kpi.support_submissions > 0) {
-        data.recent_support_requests = [
-          {
-            id: "f7ad08df-5a1c-4a63-adf5-5b5fad191e2a",
-            sessionId: "spark_0jim11up5_1787661867176",
-            name: "sujay kotal",
-            email: "sujaykumarkotal49@gmail.com",
-            phone: "8145288507",
-            message: "How you can help me?",
-            status: "Pending",
-            timestamp: "Aug 25, 2026"
-          },
-          {
-            id: "19aafa1f-2da2-416d-bfcb-e31b0f76a246",
-            sessionId: "spark_gawfn7u85_1787663927808",
-            name: "sujay kotal",
-            email: "sujaykumarkotal49@gmail.com",
-            phone: "8145288507",
-            message: "dfsdfsdf dfsd gsg g fdg dfad f.",
-            status: "Pending",
-            timestamp: "Aug 25, 2026"
-          }
-        ];
+        tabCountChat.textContent = (data.kpi && data.kpi.active_sessions != null)
+          ? data.kpi.active_sessions
+          : (data.recent_sessions ? data.recent_sessions.length : 0);
       }
 
       const tabCountSupport = document.getElementById("tab-count-support");
       if (tabCountSupport) {
-        tabCountSupport.textContent = (data.kpi && data.kpi.support_submissions) || (data.recent_support_requests ? data.recent_support_requests.length : 0);
+        tabCountSupport.textContent = (data.kpi && data.kpi.support_submissions != null)
+          ? data.kpi.support_submissions
+          : validRequests.length;
       }
 
       // Render whichever table tab is active
@@ -1483,7 +1475,7 @@
       const tbody = document.getElementById("recent-sessions-tbody");
       if (!tbody) return;
 
-      let filtered = requests || [];
+      let filtered = (requests || []).filter(r => r && (r.id || r.name || r.email || r.message));
       if (overviewSearchQuery) {
         filtered = filtered.filter(r =>
           (r.name && r.name.toLowerCase().includes(overviewSearchQuery)) ||
@@ -1496,7 +1488,9 @@
 
       const tabCount = document.getElementById("tab-count-support");
       if (tabCount) {
-        const total = (cachedTelemetryData && cachedTelemetryData.kpi && cachedTelemetryData.kpi.support_submissions) || filtered.length;
+        const total = (cachedTelemetryData && cachedTelemetryData.kpi && cachedTelemetryData.kpi.support_submissions != null)
+          ? cachedTelemetryData.kpi.support_submissions
+          : filtered.length;
         tabCount.textContent = total;
       }
 

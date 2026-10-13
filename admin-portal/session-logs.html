@@ -255,9 +255,7 @@
             <span class="material-symbols-outlined text-xl" data-icon="forum">forum</span>
             <span class="text-body-md font-body-md">Chat Logs &amp; Sessions</span>
           </div>
-          <span
-            id="nav-chat-count"
-            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface/20 text-on-primary-container border border-white/20 font-mono">1.5k</span>
+         
         </a>
         <!-- 3. Support Tickets -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
@@ -267,9 +265,7 @@
               data-icon="confirmation_number">confirmation_number</span>
             <span class="text-body-md font-body-md">Support Tickets</span>
           </div>
-          <span
-            id="nav-tickets-count"
-            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-error-container/40 text-error border border-error/20 font-mono whitespace-nowrap">0 pending</span>
+         
         </a>
         <!-- 4. Questions & KB -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
@@ -279,9 +275,7 @@
               data-icon="menu_book">menu_book</span>
             <span class="text-body-md font-body-md">Questions &amp; KB</span>
           </div>
-          <span
-            id="nav-kb-count"
-            class="px-1.5 py-0.5 rounded text-label-sm font-label-sm bg-surface-container text-on-surface-variant font-mono">113</span>
+        
         </a>
         <!-- 5. Token Usage -->
         <a class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container/40 transition-colors duration-150 group"
@@ -766,7 +760,6 @@
     let liveStreamTimer = null;
 
     const N8N_SESSION_LOGS_URL = "https://n8n.srv917960.hstgr.cloud/webhook/spark-session-logs";
-    const LOCAL_DATA_FALLBACK = "data/sessions-telemetry.json";
     const USER_DEFAULT_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmVzSW4iOjM2MDAsImlhdCI6MTc5MTQ0NjY2N30.7UegdwC6cfL9NuaTVKulBgMFRjAfl-zwbJr6LF6Rf0U";
 
     function getAuthToken() {
@@ -777,7 +770,7 @@
              USER_DEFAULT_AUTH_TOKEN;
     }
 
-    // --- Fetch Session Logs from n8n or fallback ---
+    // --- Fetch Session Logs purely from live n8n webhook (ZERO local fallbacks) ---
     async function fetchSessionLogs(isManualRefresh = false) {
       const refreshBtnIcon = document.getElementById("refresh-icon");
       if (refreshBtnIcon) refreshBtnIcon.classList.add("animate-spin");
@@ -799,7 +792,7 @@
       let data = null;
       const token = getAuthToken();
 
-      // 1. Try n8n webhook with 12s timeout for large telemetry payload
+      // 1. Fetch live sessions from n8n webhook
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -818,26 +811,13 @@
         if (resp.ok) {
           const json = await resp.json();
           const payload = Array.isArray(json) ? json[0] : json;
-          if (payload && Array.isArray(payload.sessions) && payload.sessions.length > 0) {
+          if (payload && Array.isArray(payload.sessions)) {
             data = payload;
-            console.log("Loaded dynamic sessions from n8n webhook:", data.sessions.length);
+            console.log("Loaded live sessions from n8n webhook:", data.sessions.length);
           }
         }
       } catch (err) {
-        console.warn("n8n webhook check (falling back to verified telemetry dataset):", err.message);
-      }
-
-      // 2. If n8n not yet available or failed, load local verified dataset
-      if (!data) {
-        try {
-          const resp = await fetch(LOCAL_DATA_FALLBACK);
-          if (resp.ok) {
-            data = await resp.json();
-            console.log("Loaded verified telemetry dataset:", data.sessions?.length);
-          }
-        } catch (err) {
-          console.error("Failed to load local telemetry dataset:", err);
-        }
+        console.warn("n8n live webhook error:", err.message);
       }
 
       if (refreshBtnIcon) {
@@ -849,7 +829,7 @@
           tbody.innerHTML = `
             <tr>
               <td colspan="6" class="py-8 text-center text-error font-mono text-xs">
-                Unable to load session telemetry. Please check server connection.
+                Unable to load session telemetry from live webhook. Please check server connection.
               </td>
             </tr>
           `;
@@ -899,21 +879,21 @@
       const geoBreakdownEl = document.getElementById("metric-geo-breakdown");
       const msgBreakdownEl = document.getElementById("metric-messages-breakdown");
 
-      if (avgDurEl) avgDurEl.textContent = summaryData.avg_duration_formatted || "10m 22s";
+      if (avgDurEl) avgDurEl.textContent = summaryData.avg_duration_formatted || (allSessions.length > 0 ? "--" : "0m 00s");
       if (activeSessEl) {
-        const count = summaryData.total_sessions || allSessions.length;
+        const count = summaryData.total_sessions != null ? summaryData.total_sessions : allSessions.length;
         activeSessEl.textContent = count.toLocaleString();
       }
 
       let geoPct = summaryData.geo_resolved_pct;
       if (geoPct === null || geoPct === undefined) {
         const withIp = allSessions.filter(s => s.ipAddress && s.ipAddress !== 'null').length;
-        geoPct = allSessions.length > 0 ? ((withIp / allSessions.length) * 100).toFixed(1) : "96.8";
+        geoPct = allSessions.length > 0 ? ((withIp / allSessions.length) * 100).toFixed(1) : "0";
       }
       if (geoEl) geoEl.textContent = geoPct + "%";
 
       if (totalMsgsEl) {
-        const msgs = summaryData.total_messages || 1636;
+        const msgs = summaryData.total_messages != null ? summaryData.total_messages : allSessions.reduce((acc, s) => acc + (s.conversation ? s.conversation.length : 0), 0);
         totalMsgsEl.textContent = msgs.toLocaleString();
       }
 
@@ -922,13 +902,13 @@
         if (topCountries && !topCountries.toLowerCase().includes("unavailable")) {
           geoBreakdownEl.innerHTML = `<span>${escapeHtml(topCountries)}</span>`;
         } else {
-          geoBreakdownEl.innerHTML = `<span>Top: US 58%</span><span>IN 38%</span>`;
+          geoBreakdownEl.innerHTML = `<span>${allSessions.length > 0 ? "Global Node" : "No active sessions"}</span>`;
         }
       }
 
       if (msgBreakdownEl) {
-        const automated = summaryData.automated_pct || "98.6";
-        const escalated = summaryData.escalated_pct || "1.4";
+        const automated = summaryData.automated_pct != null ? summaryData.automated_pct : (allSessions.length > 0 ? "100" : "0");
+        const escalated = summaryData.escalated_pct != null ? summaryData.escalated_pct : "0";
         msgBreakdownEl.innerHTML = `<span>Automated: ${automated}%</span><span class="text-primary">Escalated: ${escalated}%</span>`;
       }
     }
@@ -937,7 +917,7 @@
     function updateSidebarCounts() {
       const navChat = document.getElementById("nav-chat-count");
       if (navChat) {
-        const total = summaryData.total_sessions || allSessions.length;
+        const total = summaryData.total_sessions != null ? summaryData.total_sessions : allSessions.length;
         navChat.textContent = total > 1000 ? (total / 1000).toFixed(1) + 'k' : total;
       }
     }
