@@ -181,6 +181,38 @@
     .cyan-glow-sm {
       box-shadow: 0 0 15px -3px rgba(0, 172, 160, 0.35);
     }
+
+    .status-select {
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: none !important;
+      padding-right: 2rem !important;
+      color-scheme: dark;
+    }
+
+    .status-select::-ms-expand {
+      display: none;
+    }
+
+    .status-option-pending {
+      color: #facc15 !important;
+      background-color: #0b1b2d !important;
+    }
+
+    .status-option-resolved {
+      color: #4ade80 !important;
+      background-color: #0b1b2d !important;
+    }
+
+    .status-option-rejected {
+      color: #fb7185 !important;
+      background-color: #0b1b2d !important;
+    }
+
+    .status-option-cancelled {
+      color: #94a3b8 !important;
+      background-color: #0b1b2d !important;
+    }
   </style>
 </head>
 
@@ -333,7 +365,7 @@
             </p>
           </div>
           <div class="flex items-center flex-wrap gap-2.5">
-            <button onclick="location.reload()"
+            <button id="sync-tickets-button" onclick="fetchTickets()"
               class="flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-surface-container-high/80 border border-outline-variant/40 hover:border-primary/40 text-on-surface font-label-md text-label-md transition-all duration-150">
               <span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
               <span>Sync Tickets</span>
@@ -344,24 +376,24 @@
 
       <!-- METRIC CARDS (5-GRID) -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- Metric 1: Total Active Tickets -->
+        <!-- Metric 1: Total Support Tickets -->
         <div class="p-4 rounded-xl bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 flex flex-col justify-between">
           <div class="flex items-center justify-between">
-            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Active Tickets</span>
+            <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Support Tickets</span>
             <div class="w-7 h-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
               <span class="material-symbols-outlined text-sm" data-icon="confirmation_number">confirmation_number</span>
             </div>
           </div>
           <div class="mt-3">
-            <div class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">284</div>
+            <div id="metric-total" class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">—</div>
             <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
-              <span class="text-primary font-semibold">+14 today</span>
-              <span class="text-on-surface-variant">• 88.2% on-schedule</span>
+              <span id="metric-total-today" class="text-primary font-semibold">— today</span>
+              <span class="text-on-surface-variant">• Live webhook data</span>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
-            <span>Open: 42</span>
-            <span>Pending: 29</span>
+            <span id="metric-total-open">Open: —</span>
+            <span id="metric-last-sync">Not synced</span>
           </div>
         </div>
 
@@ -374,15 +406,15 @@
             </div>
           </div>
           <div class="mt-3">
-            <div class="font-headline-lg text-headline-lg text-[#facc15] tracking-tight font-bold">29</div>
+            <div id="metric-pending" class="font-headline-lg text-headline-lg text-[#facc15] tracking-tight font-bold">—</div>
             <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
-              <span class="text-[#facc15] font-semibold">+4 today</span>
+              <span id="metric-pending-today" class="text-[#facc15] font-semibold">— today</span>
               <span class="text-on-surface-variant">• In Queue</span>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
-            <span>Awaiting Patient: 11</span>
-            <span class="text-[#facc15]">Staff Review: 18</span>
+            <span id="metric-pending-rate">Rate: —</span>
+            <span class="text-[#facc15]">Live status</span>
           </div>
         </div>
 
@@ -395,15 +427,15 @@
             </div>
           </div>
           <div class="mt-3">
-            <div class="font-headline-lg text-headline-lg text-[#4ade80] tracking-tight font-bold">213</div>
+            <div id="metric-resolved" class="font-headline-lg text-headline-lg text-[#4ade80] tracking-tight font-bold">—</div>
             <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
-              <span class="text-[#4ade80] font-semibold">+18 today</span>
-              <span class="text-on-surface-variant">• 94.8% resolution</span>
+              <span id="metric-resolved-today" class="text-[#4ade80] font-semibold">— today</span>
+              <span class="text-on-surface-variant">• Resolution status</span>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
-            <span>Auto-Resolved: 168</span>
-            <span class="text-[#4ade80]">CSAT: 4.9</span>
+            <span id="metric-resolved-rate">Rate: —</span>
+            <span class="text-[#4ade80]">Live status</span>
           </div>
         </div>
 
@@ -416,15 +448,15 @@
             </div>
           </div>
           <div class="mt-3">
-            <div class="font-headline-lg text-headline-lg text-[#fb7185] tracking-tight font-bold">14</div>
+            <div id="metric-rejected" class="font-headline-lg text-headline-lg text-[#fb7185] tracking-tight font-bold">—</div>
             <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
-              <span class="text-[#fb7185] font-semibold">+2 today</span>
-              <span class="text-on-surface-variant">• 4.9% rate</span>
+              <span id="metric-rejected-today" class="text-[#fb7185] font-semibold">— today</span>
+              <span class="text-on-surface-variant">• Rejection status</span>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
-            <span>Ineligible: 9</span>
-            <span class="text-on-surface-variant">Duplicate: 5</span>
+            <span id="metric-rejected-rate">Rate: —</span>
+            <span class="text-on-surface-variant">Live status</span>
           </div>
         </div>
 
@@ -437,15 +469,15 @@
             </div>
           </div>
           <div class="mt-3">
-            <div class="font-headline-lg text-headline-lg text-outline tracking-tight font-bold">8</div>
+            <div id="metric-cancelled" class="font-headline-lg text-headline-lg text-outline tracking-tight font-bold">—</div>
             <div class="flex items-center space-x-1.5 mt-1 font-label-sm text-label-sm">
-              <span class="text-outline font-semibold">-3 this week</span>
-              <span class="text-on-surface-variant">• Voided</span>
+              <span id="metric-cancelled-today" class="text-outline font-semibold">— today</span>
+              <span class="text-on-surface-variant">• Cancellation status</span>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-label-sm text-[10px] text-on-surface-variant">
-            <span>User Cancelled: 5</span>
-            <span class="text-on-surface-variant">Duplicate: 3</span>
+            <span id="metric-cancelled-rate">Rate: —</span>
+            <span class="text-on-surface-variant">Live status</span>
           </div>
         </div>
       </section>
@@ -465,7 +497,7 @@
               </div>
               <div class="flex items-center space-x-2">
                 <span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface-variant text-xs font-mono" id="ticket-count-badge">
-                  Showing 10 tickets
+                  Loading tickets…
                 </span>
               </div>
             </div>
@@ -476,23 +508,23 @@
               <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar font-label-sm text-xs">
                 <button onclick="filterTickets('all')" id="tab-all"
                   class="filter-tab px-3 py-1.5 rounded-lg bg-primary-container text-on-primary-container font-semibold transition-all">
-                  All (10)
+                  All (—)
                 </button>
                 <button onclick="filterTickets('pending')" id="tab-pending"
                   class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
-                  Pending (6)
+                  Pending (—)
                 </button>
                 <button onclick="filterTickets('resolved')" id="tab-resolved"
                   class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
-                  Resolved Tickets (2)
+                  Resolved (—)
                 </button>
                 <button onclick="filterTickets('rejected')" id="tab-rejected"
                   class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
-                  Rejected (1)
+                  Rejected (—)
                 </button>
                 <button onclick="filterTickets('cancelled')" id="tab-cancelled"
                   class="filter-tab px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface transition-all">
-                  Cancelled (1)
+                  Cancelled (—)
                 </button>
               </div>
 
@@ -514,362 +546,16 @@
               <thead>
                 <tr class="border-b border-outline-variant/30 bg-surface-container-lowest/40 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
                   <th class="py-3 px-4">Ticket ID</th>
-                  <th class="py-3 px-3">Patient Name</th>
-                  <th class="py-3 px-3">Gmail ID</th>
+                  <th class="py-3 px-3">Requester Name</th>
+                  <th class="py-3 px-3">Email Address</th>
                   <th class="py-3 px-3">Issue Subject</th>
                   <th class="py-3 px-3">Status</th>
                   <th class="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="tickets-tbody" class="divide-y divide-outline-variant/20 font-sans text-xs">
-                <!-- TICKET 1 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Urgent" data-device="TENS 7000" onclick="openTicketDetail(1)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9201</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_t4w8z6ll9</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Robert Vance</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">robert.vance@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Cardiac Pacemaker Contraindication Inquired during lumbar setup">
-                      Cardiac Pacemaker Contraindication during lumbar setup
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-1" onchange="handleTableStatusChange(this, 1)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 2 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="High" data-device="IF4D" onclick="openTicketDetail(2)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9198</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_x7b4m1vv9</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Elena Rostova</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">elena.rostova@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Quad-polar lead impedance open circuit error upon channel activation">
-                      Quad-polar lead impedance open circuit error upon activation
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-2" onchange="handleTableStatusChange(this, 2)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 3 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="High" data-device="TENS 7000" onclick="openTicketDetail(3)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9195</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_w3f8j9aa1</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">David Miller</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">david.miller@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Patient reports sharp burning sensation at electrode pad borders">
-                      Sharp burning sensation at electrode pad borders
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-3" onchange="handleTableStatusChange(this, 3)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 4 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Normal" data-device="TENS 7000" onclick="openTicketDetail(4)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9190</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_d4p9q2cc5</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Patricia Gomez</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">patricia.gomez@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="9V battery compartment slide latch jammed, replacement unit request">
-                      9V battery slide latch jammed, replacement guidance
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-4" onchange="handleTableStatusChange(this, 4)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 5 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Normal" data-device="CPAP" onclick="openTicketDetail(5)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9184</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_m8k1l3tt4</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Arthur Pendelton</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">arthur.pendelton@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Medicare Part B DME cross-billing pre-authorization forms">
-                      Medicare Part B DME cross-billing pre-auth documents
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-5" onchange="handleTableStatusChange(this, 5)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 6 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="pending" data-priority="Normal" data-device="InTENSity 10" onclick="openTicketDetail(6)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9179</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_p0v2r8zz6</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Jessica Wu</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">jessica.wu@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="InTENSity 10 digital pre-set program customization question">
-                      InTENSity 10 program customization for cervical therapy
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-6" onchange="handleTableStatusChange(this, 6)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#eab308]/20 text-[#facc15] border-[#eab308]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]" selected>Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 7 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="rejected" data-priority="Urgent" data-device="TENS 7000" onclick="openTicketDetail(7)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9172</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_q5h3n7kk2</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Gregory House</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">gregory.house@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Inquiry on overnight sleeping use of TENS - Sleep apnea warning flag">
-                      Inquiry on overnight sleeping use of TENS - Safety Advisory
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-7" onchange="handleTableStatusChange(this, 7)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#f43f5e]/20 text-[#fb7185] border-[#f43f5e]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]" selected>Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 8 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="cancelled" data-priority="Normal" data-device="Electrodes" onclick="openTicketDetail(8)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9168</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_b7e1x5qq3</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Brenda Walsh</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">brenda.walsh@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Electrode hydrogel drying after 12 sessions, replacement batch order">
-                      Electrode hydrogel premature drying, replacement batch order
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-8" onchange="handleTableStatusChange(this, 8)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-slate-700/40 text-slate-300 border-slate-600/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]">Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]" selected>Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 9 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="resolved" data-priority="Normal" data-device="TENS 7000" onclick="openTicketDetail(9)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9150</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_c2y9v4mm8</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Michael Scott</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">michael.scott@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Mode difference clarification: Burst vs Normal vs Modulation mode">
-                      Mode difference clarification: Burst vs Normal vs Modulation
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-9" onchange="handleTableStatusChange(this, 9)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#16a34a]/20 text-[#4ade80] border-[#16a34a]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]" selected>Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-
-                <!-- TICKET 10 -->
-                <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors" data-status="resolved" data-priority="Normal" data-device="Electrodes" onclick="openTicketDetail(10)">
-                  <td class="py-3.5 px-4 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface font-semibold">#TKT-9142</div>
-                    <div class="text-[10px] text-on-surface-variant font-mono">spark_l9k5p3vv7</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-medium text-on-surface">Kelly Kapoor</div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="font-mono text-xs text-on-surface">kelly.kapoor@gmail.com</div>
-                  </td>
-                  <td class="py-3.5 px-3 max-w-[340px]">
-                    <div class="text-on-surface font-medium truncate" title="Dual channel lead wire cleaning procedure & maintenance inquiry">
-                      Dual channel lead wire cleaning &amp; maintenance inquiry
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-3 whitespace-nowrap">
-                    <div class="inline-block" onclick="event.stopPropagation()">
-                      <select id="row-status-10" onchange="handleTableStatusChange(this, 10)"
-                        class="table-status-select px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none bg-[#16a34a]/20 text-[#4ade80] border-[#16a34a]/40 focus:ring-1 focus:ring-primary">
-                        <option value="pending" class="bg-[#0b1b2d] text-[#facc15]">Pending</option>
-                        <option value="resolved" class="bg-[#0b1b2d] text-[#4ade80]" selected>Resolved Tickets</option>
-                        <option value="rejected" class="bg-[#0b1b2d] text-[#fb7185]">Rejected</option>
-                        <option value="cancelled" class="bg-[#0b1b2d] text-[#94a3b8]">Cancelled</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4 whitespace-nowrap text-right">
-                    <button class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">
-                      Inspect
-                    </button>
-                  </td>
+              <tbody id="tickets-tbody" class="divide-y divide-outline-variant/20 font-sans text-xs" aria-live="polite">
+                <tr>
+                  <td colspan="6" class="py-10 px-4 text-center text-on-surface-variant">Loading support tickets…</td>
                 </tr>
               </tbody>
             </table>
@@ -878,16 +564,12 @@
           <!-- Pagination Bar -->
           <div class="px-5 py-3 border-t border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest/60 font-label-sm text-label-sm text-on-surface-variant">
             <div>
-              Showing <span class="text-on-surface font-semibold" id="pagination-info">1-10</span> of <span class="text-on-surface font-semibold">284</span> support tickets
+              Showing <span class="text-on-surface font-semibold" id="pagination-info">0-0</span> of <span id="pagination-total" class="text-on-surface font-semibold">0</span> support tickets
             </div>
             <div class="flex items-center space-x-1">
-              <button class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs">Prev</button>
-              <button class="px-2.5 py-1 rounded bg-primary-container/30 border border-primary/50 text-primary font-semibold text-xs">1</button>
-              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">2</button>
-              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">3</button>
-              <span class="px-1 text-on-surface-variant">...</span>
-              <button class="px-2.5 py-1 rounded hover:bg-surface-container text-on-surface-variant text-xs">29</button>
-              <button class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs">Next</button>
+              <button id="pagination-prev" onclick="changePage(-1)" class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs disabled:opacity-40 disabled:cursor-not-allowed">Prev</button>
+              <span id="pagination-page" class="px-2.5 py-1 rounded bg-primary-container/30 border border-primary/50 text-primary font-semibold text-xs">Page 1 of 1</span>
+              <button id="pagination-next" onclick="changePage(1)" class="px-2 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40 text-xs disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
             </div>
           </div>
         </div>
@@ -908,10 +590,10 @@
             <span class="material-symbols-outlined text-primary text-2xl" data-icon="confirmation_number">confirmation_number</span>
             <div>
               <div class="flex items-center space-x-2">
-                <h3 class="font-headline-sm text-base font-bold text-on-surface" id="drawer-ticket-id">#TKT-9201</h3>
-                <span id="drawer-status-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-error-container/30 text-error border border-error/30">Clinical Escalation</span>
+                <h3 class="font-headline-sm text-base font-bold text-on-surface" id="drawer-ticket-id">Ticket</h3>
+                <span id="drawer-status-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold border">Status</span>
               </div>
-              <p class="text-xs text-on-surface-variant mt-0.5 font-mono" id="drawer-session-id">Origin Session: spark_t4w8z6ll9_1775622419085</p>
+              <p class="text-xs text-on-surface-variant mt-0.5 font-mono" id="drawer-session-id">Origin Session: —</p>
             </div>
           </div>
           <button onclick="closeTicketDetail()" class="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors">
@@ -921,25 +603,25 @@
 
         <!-- Drawer Body Content -->
         <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-          <!-- Patient Summary & Device Card -->
+          <!-- Requester and submission summary -->
           <div class="p-4 rounded-xl bg-surface-container-low/80 border border-outline-variant/30 grid grid-cols-2 gap-4">
             <div>
-              <span class="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider block">Patient Name</span>
-              <span class="font-medium text-sm text-on-surface mt-0.5 block" id="drawer-patient-name">Robert Vance</span>
-              <span class="text-xs text-on-surface-variant font-mono" id="drawer-patient-contact">robert.vance@gmail.com • (555) 234-8910</span>
+              <span class="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider block">Requester Name</span>
+              <span class="font-medium text-sm text-on-surface mt-0.5 block" id="drawer-patient-name">—</span>
+              <span class="text-xs text-on-surface-variant font-mono" id="drawer-patient-contact">—</span>
             </div>
             <div>
-              <span class="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider block">Associated Equipment</span>
-              <span class="font-medium text-sm text-primary mt-0.5 block" id="drawer-device">TENS 7000 Dual Channel</span>
-              <span class="text-xs text-on-surface-variant font-mono">Serial: SN-7000-88319-V4</span>
+              <span class="text-[11px] font-label-sm text-on-surface-variant uppercase tracking-wider block">Submitted At</span>
+              <span class="font-medium text-sm text-primary mt-0.5 block" id="drawer-device">—</span>
+              <span id="drawer-record-id" class="text-xs text-on-surface-variant font-mono break-all">Ticket ID: —</span>
             </div>
           </div>
 
           <!-- Problem Description -->
           <div class="space-y-2">
-            <h4 class="text-xs font-label-sm uppercase tracking-wider text-on-surface-variant">Inquiry Description &amp; Escalation Trigger</h4>
+            <h4 class="text-xs font-label-sm uppercase tracking-wider text-on-surface-variant">Support Request Message</h4>
             <div class="p-4 rounded-lg bg-[#071c33]/90 border border-[#143860] text-xs text-on-surface leading-relaxed" id="drawer-issue-desc">
-              Patient asked if they could safely apply electrode pads across the chest and back while having an implanted Medtronic pacemaker. Spark Chatbot immediately triggered safety contraindication protocols, instructed the patient to halt treatment, and escalated this case for physician review.
+              —
             </div>
           </div>
 
@@ -948,23 +630,18 @@
             <div class="flex items-center justify-between">
               <h4 class="text-xs font-label-sm uppercase tracking-wider text-primary flex items-center gap-1.5 font-mono">
                 <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
-                <span>Spark Bot Transcript Record</span>
+                <span>Request Record</span>
               </h4>
-              <a href="/admin/session-logs" class="text-xs text-secondary hover:underline font-mono flex items-center gap-1">
-                <span>View Full Telemetry</span>
-                <span class="material-symbols-outlined text-xs" data-icon="open_in_new">open_in_new</span>
-              </a>
+              <span id="drawer-relative-time" class="text-xs text-secondary font-mono">—</span>
             </div>
             <div class="space-y-2.5 font-sans">
               <div class="px-4 py-3 rounded-lg bg-[#071c33]/90 border border-[#143860] flex items-center gap-3">
-                <span class="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-[#0284c7] text-white shrink-0 font-sans">USER</span>
-                <span class="text-white text-[13px] font-sans font-normal" id="drawer-transcript-user">Is it safe to use electrotherapy if I have a cardiac pacemaker or ICD implant?</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-[#0284c7] text-white shrink-0 font-sans">FORM</span>
+                <span class="text-white text-[13px] font-sans font-normal" id="drawer-transcript-user">—</span>
               </div>
               <div class="px-4 py-3 rounded-lg bg-[#071c33]/90 border border-[#143860] flex items-start gap-3">
-                <span class="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-[#16a34a] text-white shrink-0 mt-0.5 font-sans">BOT</span>
-                <p class="text-[#e2e8f0] text-[13px] leading-relaxed font-sans font-normal" id="drawer-transcript-bot">
-                  <strong class="text-error font-semibold">ABSOLUTE CONTRAINDICATION:</strong> Electrotherapy devices (TENS, EMS, IF, Microcurrent) must NEVER be used by patients with cardiac pacemakers, implanted cardioverter defibrillators (ICDs), or any active electronic medical implants. Electrical impulses can disrupt life-sustaining cardiac rhythm management.
-                </p>
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider uppercase bg-[#16a34a] text-white shrink-0 mt-0.5 font-sans">SESSION</span>
+                <p class="text-[#e2e8f0] text-[13px] leading-relaxed font-sans font-normal break-all" id="drawer-transcript-bot">—</p>
               </div>
             </div>
           </div>
@@ -974,24 +651,38 @@
             <h4 class="text-xs font-label-sm uppercase tracking-wider text-on-surface-variant">Update Ticket Status</h4>
             <div>
               <label class="text-[11px] text-on-surface-variant block mb-1">Status</label>
-              <select id="modal-status-select" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs text-on-surface focus:border-primary focus:outline-none">
-                <option value="pending">Pending</option>
-                <option value="resolved">Resolved Tickets</option>
-                <option value="rejected">Rejected</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+              <div class="relative">
+                <select id="modal-status-select" onchange="applyTableStatusStyle(this, this.value)"
+                  class="status-select w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-xs text-on-surface focus:border-primary focus:outline-none">
+                  <option value="pending" class="status-option-pending">Pending</option>
+                  <option value="resolved" class="status-option-resolved">Resolved</option>
+                  <option value="rejected" class="status-option-rejected">Rejected</option>
+                  <option value="cancelled" class="status-option-cancelled">Cancelled</option>
+                </select>
+                <span class="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-base text-on-surface-variant" aria-hidden="true">expand_more</span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Drawer Footer Actions -->
-        <div class="p-5 border-t border-outline-variant/30 bg-surface-container-low/80 flex items-center justify-between">
-          <button onclick="closeTicketDetail()" class="px-4 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface text-xs hover:border-primary/40 transition-colors">
-            Cancel
-          </button>
+        <div class="p-5 border-t border-outline-variant/30 bg-surface-container-low/80 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="closeTicketDetail()" class="px-4 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface text-xs hover:border-primary/40 transition-colors">
+              Cancel
+            </button>
+            <a id="drawer-call-button" href="#" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-[#16a34a]/15 border border-[#16a34a]/40 text-[#4ade80] text-xs hover:bg-[#16a34a]/25 transition-colors">
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">call</span>
+              <span>Call</span>
+            </a>
+            <a id="drawer-email-button" href="#" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/10 border border-secondary/40 text-secondary text-xs hover:bg-secondary/20 transition-colors">
+              <span class="material-symbols-outlined text-sm" aria-hidden="true">mail</span>
+              <span>Email</span>
+            </a>
+          </div>
           <div class="flex items-center space-x-2">
-            <button onclick="saveTicketUpdate()" class="px-4 py-2 rounded-lg bg-primary text-on-primary font-semibold text-xs hover:brightness-110 active:scale-95 transition-all">
-              Save &amp; Transmit Update
+            <button id="update-ticket-button" onclick="saveTicketUpdate()" class="px-4 py-2 rounded-lg bg-primary text-on-primary font-semibold text-xs hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              Update Ticket Status
             </button>
           </div>
         </div>
@@ -1032,283 +723,312 @@
       nameEls.forEach(el => { el.textContent = adminEmail.split('@')[0]; });
     }
 
-    // Ticket Data Store
-    const ticketsData = {
-      1: {
-        id: "#TKT-9201",
-        session: "spark_t4w8z6ll9_1775622419085",
-        patient: "Robert Vance",
-        contact: "robert.vance@gmail.com • (555) 234-8910",
-        device: "TENS 7000 Dual Channel",
-        priority: "Urgent",
-        status: "Pending",
-        statusVal: "pending",
-        assignee: "Dr. Miller (Cardiology Lead)",
-        desc: "Patient asked if they could safely apply electrode pads across the chest and back while having an implanted Medtronic pacemaker. Spark Chatbot immediately triggered safety contraindication protocols, instructed the patient to halt treatment, and escalated this case for physician review.",
-        userQ: "Is it safe to use electrotherapy if I have a cardiac pacemaker or ICD implant?",
-        botA: "ABSOLUTE CONTRAINDICATION: Electrotherapy devices (TENS, EMS, IF, Microcurrent) must NEVER be used by patients with cardiac pacemakers, implanted cardioverter defibrillators (ICDs), or any active electronic medical implants. Electrical impulses can disrupt life-sustaining cardiac rhythm management."
-      },
-      2: {
-        id: "#TKT-9198",
-        session: "spark_x7b4m1vv9_1775623991042",
-        patient: "Elena Rostova",
-        contact: "elena.rostova@gmail.com • (555) 481-9920",
-        device: "IF4D Interferential Unit",
-        priority: "High",
-        status: "Pending",
-        statusVal: "pending",
-        assignee: "Alex Jenkins",
-        desc: "Patient receives lead impedance open circuit warning on the IF4D when ramping current on Channel 2. Lead wire connections and gel electrode adhesion require clinical hardware troubleshooting.",
-        userQ: "How do I fix the quad-polar lead impedance error on my IF4D device?",
-        botA: "A lead impedance error on the IF4D indicates open circuit resistance between the 4 intersecting electrode pads. Check that all 4 lead wire pins are firmly inserted into the output jacks, apply a drop of conductive gel to re-moisten the reusable electrodes, and ensure pad adhesive has continuous skin contact across the targeted interferential field."
-      },
-      3: {
-        id: "#TKT-9195",
-        session: "spark_w3f8j9aa1_1775623880199",
-        patient: "David Miller",
-        contact: "david.miller@gmail.com • (555) 912-3341",
-        device: "TENS 7000 Dual Channel",
-        priority: "High",
-        status: "Pending",
-        statusVal: "pending",
-        assignee: "Sarah Connor, PT",
-        desc: "Patient reports intense prickling and skin redness underneath lower lumbar electrode placement during 80Hz stimulation. Advised to stop session and inspect skin barrier.",
-        userQ: "Why am I experiencing a high amplitude sharp burning sensation?",
-        botA: "A sharp burning or stinging sensation usually indicates uneven electrode contact, worn conductive gel, or dry skin edges causing hot-spot current concentration. Rotate both channel intensity dials to '0' and turn off the device immediately. Inspect the pads for peeling, clean the skin surface with water only, and replace pads if adhesive is deteriorated."
-      },
-      4: {
-        id: "#TKT-9190",
-        session: "spark_d4p9q2cc5_1775623712990",
-        patient: "Patricia Gomez",
-        contact: "patricia.gomez@gmail.com • (555) 301-4490",
-        device: "TENS 7000 Dual Channel",
-        priority: "Normal",
-        status: "Pending",
-        statusVal: "pending",
-        assignee: "Liam Hayes",
-        desc: "Patient unable to slide open 9V battery compartment cover. Hardware guidance or replacement door latch needed under warranty.",
-        userQ: "How do I open the 9V battery compartment latch on the TENS 7000?",
-        botA: "To open the battery compartment on the TENS 7000, gently press downward on the textured thumb grip located on the front slide-cover and slide it down toward the bottom of the unit. Ensure you align the positive (+) and negative (-) terminals correctly when inserting the 9V alkaline battery before sliding the cover back until it clicks."
-      },
-      5: {
-        id: "#TKT-9184",
-        session: "spark_m8k1l3tt4_1775623544108",
-        patient: "Arthur Pendelton",
-        contact: "arthur.pendelton@gmail.com • (555) 771-8890",
-        device: "CPAP / BiPAP Device",
-        priority: "Normal",
-        status: "Pending",
-        statusVal: "pending",
-        assignee: "Billing Coordinator",
-        desc: "Inquiry on Medicare Part B DME pre-authorization paperwork for CPAP and compliance monitoring.",
-        userQ: "Does Medicare cover CPAP and BiPAP DME cross-billing insurance?",
-        botA: "Medicare Part B generally covers CPAP and BiPAP therapy under Durable Medical Equipment (DME) benefits when qualifying clinical criteria are met, including a diagnostic sleep study showing an AHI >= 15 (or AHI 5-14 with documented co-morbidities) and initial 90-day compliance tracking with DME cross-billing documentation."
-      },
-      6: {
-        id: "#TKT-9179",
-        session: "spark_p0v2r8zz6_1775623399001",
-        patient: "Jessica Wu",
-        contact: "jessica.wu@gmail.com • (555) 604-1188",
-        device: "InTENSity 10 Digital",
-        priority: "Normal",
-        status: "Pending",
-        statusVal: "pending",
-        assignee: "Liam Hayes",
-        desc: "Request for guidance on customizing frequency and timer settings for preset body-part programs.",
-        userQ: "How do I set up and select the InTENSity 10 digital pre-set program mode?",
-        botA: "Press the 'Mode' button to cycle through the 10 preset body-part programs (Neck, Shoulder, Mid Back, Low Back, Elbow, Wrist, Hip, Knee, Ankle, Foot). Once your target treatment region is highlighted, press 'Set' to confirm the automatic pulse rate and width parameters, then gradually increase intensity using the 'CH1' and 'CH2' up arrows."
-      },
-      7: {
-        id: "#TKT-9172",
-        session: "spark_q5h3n7kk2_1775623108920",
-        patient: "Gregory House",
-        contact: "gregory.house@gmail.com • (555) 888-2391",
-        device: "TENS 7000 Dual Channel",
-        priority: "Urgent",
-        status: "Rejected",
-        statusVal: "rejected",
-        assignee: "Dr. Emily Zhang, MD",
-        desc: "Patient requested sleeping with electrodes active overnight for chronic knee osteoarthritis pain. High safety advisory provided.",
-        userQ: "Can I use the TENS unit while sleeping or overnight for chronic knee osteoarthritis?",
-        botA: "Clinical safety guidelines strongly advise against using a TENS device while asleep. Unconscious movement can dislodge or bend electrodes, causing localized skin burns or unexpected voltage spikes. Your nervous system also requires conscious sensation to alert you if stimulation becomes excessively intense."
-      },
-      8: {
-        id: "#TKT-9168",
-        session: "spark_b7e1x5qq3_1775622704112",
-        patient: "Brenda Walsh",
-        contact: "brenda.walsh@gmail.com • (555) 431-7721",
-        device: "Electrodes & Replacement Pads",
-        priority: "Normal",
-        status: "Cancelled",
-        statusVal: "cancelled",
-        assignee: "Customer Support",
-        desc: "Gel electrode longevity inquiry and request for replacement 2x2 reusable cloth backing pads.",
-        userQ: "How many uses can I get out of the reusable multi-stick gel electrodes before replacing?",
-        botA: "Premium PMT multi-stick hydrogel electrodes typically provide 15 to 30 applications depending on skin moisture, hair density, and proper storage. To maximize longevity, always wash the skin thoroughly with soap and water before applying, and return the pads to their original plastic backing film immediately after each session."
-      },
-      9: {
-        id: "#TKT-9150",
-        session: "spark_c2y9v4mm8_1775622950183",
-        patient: "Michael Scott",
-        contact: "michael.scott@gmail.com • (555) 123-4567",
-        device: "TENS 7000 Dual Channel",
-        priority: "Normal",
-        status: "Resolved Tickets",
-        statusVal: "resolved",
-        assignee: "Spark AI Core",
-        desc: "Automatic deflection: Explanation of Burst, Normal, and Modulation electrotherapy parameters delivered.",
-        userQ: "What is the difference between Burst, Normal, and Modulation mode on TENS 7000?",
-        botA: "Normal mode delivers continuous pulse rate and width for immediate acute pain relief. Burst mode sends cyclical packets of pulses (2 bursts/second) to stimulate endorphin release for deep aching pain. Modulation mode periodically varies pulse width and frequency by 50% to prevent sensory nerve habituation."
-      },
-      10: {
-        id: "#TKT-9142",
-        session: "spark_l9k5p3vv7_1775621890333",
-        patient: "Kelly Kapoor",
-        contact: "kelly.kapoor@gmail.com • (555) 987-6543",
-        device: "Electrodes & Replacement Pads",
-        priority: "Normal",
-        status: "Resolved Tickets",
-        statusVal: "resolved",
-        assignee: "Spark AI Core",
-        desc: "Sanitization protocol for lead wires and storage maintenance.",
-        userQ: "How do I calibrate and clean the dual channel lead wires without damaging the copper core?",
-        botA: "Disconnect lead wires from both the unit jacks and electrode pins before cleaning. Wipe the external silicone sheath with a 70% isopropyl wipe or a lightly moistened microfiber cloth. Do not submerge wires, stretch or yank on cable junctions, or wrap wires tightly around the device housing for storage."
-      }
-    };
+    // Dynamic ticket data from the n8n support-request webhook.
+    const TICKETS_WEBHOOK_URL = 'https://n8n.srv917960.hstgr.cloud/webhook/support-requests-ticket';
+    const PAGE_SIZE = 10;
+    const POLL_INTERVAL_MS = 30000;
+    let ticketsData = [];
+    let activeTicketId = null;
+    let currentFilter = 'all';
+    let currentPage = 1;
+    let isFetchingTickets = false;
 
     const statusMeta = {
-      'pending': {
-        label: 'Pending',
-        classes: ['bg-[#eab308]/20', 'text-[#facc15]', 'border-[#eab308]/40']
-      },
-      'resolved': {
-        label: 'Resolved Tickets',
-        classes: ['bg-[#16a34a]/20', 'text-[#4ade80]', 'border-[#16a34a]/40']
-      },
-      'rejected': {
-        label: 'Rejected',
-        classes: ['bg-[#f43f5e]/20', 'text-[#fb7185]', 'border-[#f43f5e]/40']
-      },
-      'cancelled': {
-        label: 'Cancelled',
-        classes: ['bg-slate-700/40', 'text-slate-300', 'border-slate-600/40']
-      }
+      pending: { label: 'Pending', classes: ['bg-[#eab308]/20', 'text-[#facc15]', 'border-[#eab308]/40'] },
+      resolved: { label: 'Resolved', classes: ['bg-[#16a34a]/20', 'text-[#4ade80]', 'border-[#16a34a]/40'] },
+      rejected: { label: 'Rejected', classes: ['bg-[#f43f5e]/20', 'text-[#fb7185]', 'border-[#f43f5e]/40'] },
+      cancelled: { label: 'Cancelled', classes: ['bg-slate-700/40', 'text-slate-300', 'border-slate-600/40'] }
     };
 
-    function applyTableStatusStyle(selectEl, status) {
-      const allClassNames = [
-        'bg-[#eab308]/20', 'text-[#facc15]', 'border-[#eab308]/40',
-        'bg-[#16a34a]/20', 'text-[#4ade80]', 'border-[#16a34a]/40',
-        'bg-[#f43f5e]/20', 'text-[#fb7185]', 'border-[#f43f5e]/40',
-        'bg-slate-700/40', 'text-slate-300', 'border-slate-600/40'
-      ];
-      selectEl.classList.remove(...allClassNames);
-      const conf = statusMeta[status] || statusMeta['pending'];
-      selectEl.classList.add(...conf.classes);
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
-    function handleTableStatusChange(selectEl, id) {
-      const newStatus = selectEl.value;
-      applyTableStatusStyle(selectEl, newStatus);
-      const row = selectEl.closest('.ticket-row');
-      if (row) {
-        row.setAttribute('data-status', newStatus);
+    function normalizeStatus(value) {
+      const status = String(value || 'pending').trim().toLowerCase();
+      if (status === 'resolved tickets') return 'resolved';
+      return statusMeta[status] ? status : 'pending';
+    }
+
+    function normalizePayload(payload) {
+      if (Array.isArray(payload)) return payload;
+      if (Array.isArray(payload?.data)) return payload.data;
+      if (Array.isArray(payload?.tickets)) return payload.tickets;
+      if (Array.isArray(payload?.body)) return payload.body;
+      if (payload && typeof payload === 'object' && (payload.id || payload.session_id)) return [payload];
+      return [];
+    }
+
+    function normalizeTicket(record, index) {
+      const rawCreatedAt = String(record?.created_at || '');
+      const parsedDate = rawCreatedAt ? new Date(rawCreatedAt) : null;
+      const id = String(record?.id || record?.ticket_id || `ticket-${index + 1}`);
+      return {
+        id,
+        displayId: `#TKT-${id.split('-')[0].toUpperCase()}`,
+        session: String(record?.session_id || ''),
+        name: String(record?.name || 'Unknown requester'),
+        email: String(record?.email || ''),
+        phone: String(record?.phone || ''),
+        message: String(record?.message || ''),
+        createdAt: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : null,
+        statusVal: normalizeStatus(record?.status)
+      };
+    }
+
+    function formatTimestamp(date) {
+      return date ? new Intl.DateTimeFormat(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }).format(date) : 'Timestamp unavailable';
+    }
+
+    function formatRelativeTime(date) {
+      if (!date) return 'Time unavailable';
+      const seconds = Math.round((date.getTime() - Date.now()) / 1000);
+      const absolute = Math.abs(seconds);
+      const divisor = absolute >= 86400 ? 86400 : absolute >= 3600 ? 3600 : absolute >= 60 ? 60 : 1;
+      const unit = divisor === 86400 ? 'day' : divisor === 3600 ? 'hour' : divisor === 60 ? 'minute' : 'second';
+      return new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' })
+        .format(Math.round(seconds / divisor), unit);
+    }
+
+    function isToday(date) {
+      if (!date) return false;
+      const now = new Date();
+      return date.getFullYear() === now.getFullYear()
+        && date.getMonth() === now.getMonth()
+        && date.getDate() === now.getDate();
+    }
+
+    function percentage(count, total) {
+      return total ? `${((count / total) * 100).toFixed(1)}%` : '0.0%';
+    }
+
+    function setText(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    }
+
+    function getPhoneHref(phone) {
+      const safePhone = String(phone || '').trim().replace(/[^\d+*#,;]/g, '');
+      return safePhone ? `tel:${safePhone}` : '';
+    }
+
+    function getEmailHref(email) {
+      const safeEmail = String(email || '').trim();
+      return safeEmail ? `mailto:${encodeURIComponent(safeEmail)}` : '';
+    }
+
+    function configureContactLink(elementId, href, label) {
+      const link = document.getElementById(elementId);
+      if (!link) return;
+      if (href) {
+        link.href = href;
+        link.setAttribute('aria-label', label);
+        link.classList.remove('hidden');
+        link.classList.add('inline-flex');
+      } else {
+        link.removeAttribute('href');
+        link.removeAttribute('aria-label');
+        link.classList.add('hidden');
+        link.classList.remove('inline-flex');
       }
-      const label = statusMeta[newStatus]?.label || newStatus;
-      if (ticketsData[id]) {
-        ticketsData[id].status = label;
-        ticketsData[id].statusVal = newStatus;
-      }
-      updateFilterCounts();
-      searchTickets();
-      showToast(`Ticket #${ticketsData[id]?.id || id} status changed to ${label}`);
+    }
+
+    function updateMetrics() {
+      const counts = { pending: 0, resolved: 0, rejected: 0, cancelled: 0 };
+      const today = { pending: 0, resolved: 0, rejected: 0, cancelled: 0 };
+      ticketsData.forEach(ticket => {
+        counts[ticket.statusVal]++;
+        if (isToday(ticket.createdAt)) today[ticket.statusVal]++;
+      });
+      const total = ticketsData.length;
+      const todayTotal = Object.values(today).reduce((sum, count) => sum + count, 0);
+      setText('metric-total', total);
+      setText('metric-total-today', `${todayTotal} today`);
+      setText('metric-total-open', `Open: ${counts.pending}`);
+      ['pending', 'resolved', 'rejected', 'cancelled'].forEach(status => {
+        setText(`metric-${status}`, counts[status]);
+        setText(`metric-${status}-today`, `${today[status]} today`);
+        setText(`metric-${status}-rate`, `Rate: ${percentage(counts[status], total)}`);
+      });
     }
 
     function updateFilterCounts() {
-      const rows = document.querySelectorAll('.ticket-row');
-      let counts = { all: rows.length, pending: 0, resolved: 0, rejected: 0, cancelled: 0 };
-      rows.forEach(r => {
-        const s = r.getAttribute('data-status');
-        if (counts[s] !== undefined) counts[s]++;
-      });
-      const tAll = document.getElementById('tab-all');
-      if (tAll) tAll.textContent = `All (${counts.all})`;
-      const tPending = document.getElementById('tab-pending');
-      if (tPending) tPending.textContent = `Pending (${counts.pending})`;
-      const tResolved = document.getElementById('tab-resolved');
-      if (tResolved) tResolved.textContent = `Resolved Tickets (${counts.resolved})`;
-      const tRejected = document.getElementById('tab-rejected');
-      if (tRejected) tRejected.textContent = `Rejected (${counts.rejected})`;
-      const tCancelled = document.getElementById('tab-cancelled');
-      if (tCancelled) tCancelled.textContent = `Cancelled (${counts.cancelled})`;
+      const counts = { all: ticketsData.length, pending: 0, resolved: 0, rejected: 0, cancelled: 0 };
+      ticketsData.forEach(ticket => counts[ticket.statusVal]++);
+      setText('tab-all', `All (${counts.all})`);
+      setText('tab-pending', `Pending (${counts.pending})`);
+      setText('tab-resolved', `Resolved (${counts.resolved})`);
+      setText('tab-rejected', `Rejected (${counts.rejected})`);
+      setText('tab-cancelled', `Cancelled (${counts.cancelled})`);
     }
 
-    let activeTicketId = null;
-    let currentFilter = 'all';
+    function applyTableStatusStyle(select, status) {
+      select.classList.remove(...Object.values(statusMeta).flatMap(meta => meta.classes));
+      select.classList.add(...(statusMeta[status] || statusMeta.pending).classes);
+    }
 
-    // Filter by Status Tabs
+    function getFilteredTickets() {
+      const query = (document.getElementById('ticket-search')?.value || '').trim().toLowerCase();
+      return ticketsData.filter(ticket => {
+        const matchesStatus = currentFilter === 'all' || ticket.statusVal === currentFilter;
+        const text = [
+          ticket.id, ticket.displayId, ticket.session, ticket.name,
+          ticket.email, ticket.phone, ticket.message, ticket.statusVal
+        ].join(' ').toLowerCase();
+        return matchesStatus && text.includes(query);
+      });
+    }
+
+    function ticketRowHtml(ticket) {
+      const index = ticketsData.indexOf(ticket);
+      const callHref = getPhoneHref(ticket.phone);
+      const emailHref = getEmailHref(ticket.email);
+      const options = Object.entries(statusMeta).map(([value, meta]) =>
+        `<option value="${value}" class="status-option-${value}" ${ticket.statusVal === value ? 'selected' : ''}>${meta.label}</option>`
+      ).join('');
+      const callButton = callHref
+        ? `<a href="${escapeHtml(callHref)}" onclick="event.stopPropagation()" aria-label="Call ${escapeHtml(ticket.name)}" title="Call ${escapeHtml(ticket.phone)}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#16a34a]/15 border border-[#16a34a]/40 text-[#4ade80] hover:bg-[#16a34a]/25 transition-colors text-xs"><span class="material-symbols-outlined text-sm" aria-hidden="true">call</span><span class="hidden xl:inline">Call</span></a>`
+        : '';
+      const emailButton = emailHref
+        ? `<a href="${escapeHtml(emailHref)}" onclick="event.stopPropagation()" aria-label="Email ${escapeHtml(ticket.name)}" title="Email ${escapeHtml(ticket.email)}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary/10 border border-secondary/40 text-secondary hover:bg-secondary/20 transition-colors text-xs"><span class="material-symbols-outlined text-sm" aria-hidden="true">mail</span><span class="hidden xl:inline">Email</span></a>`
+        : '';
+
+      return `
+        <tr class="ticket-row hover:bg-surface-container-high/30 cursor-pointer transition-colors"
+          data-status="${escapeHtml(ticket.statusVal)}" onclick="openTicketDetail(${index})">
+          <td class="py-3.5 px-4 whitespace-nowrap">
+            <div class="font-mono text-xs text-on-surface font-semibold">${escapeHtml(ticket.displayId)}</div>
+            <div class="text-[10px] text-on-surface-variant font-mono" title="${escapeHtml(ticket.session)}">${escapeHtml(ticket.session || 'No session')}</div>
+          </td>
+          <td class="py-3.5 px-3 whitespace-nowrap">
+            <div class="font-medium text-on-surface">${escapeHtml(ticket.name)}</div>
+            <div class="text-[10px] text-on-surface-variant">${escapeHtml(formatTimestamp(ticket.createdAt))}</div>
+          </td>
+          <td class="py-3.5 px-3 whitespace-nowrap">
+            <div class="font-mono text-xs text-on-surface">${escapeHtml(ticket.email || '—')}</div>
+          </td>
+          <td class="py-3.5 px-3 max-w-[340px]">
+            <div class="text-on-surface font-medium truncate" title="${escapeHtml(ticket.message)}">${escapeHtml(ticket.message || 'No message provided')}</div>
+          </td>
+          <td class="py-3.5 px-3 whitespace-nowrap">
+            <div class="relative inline-block" onclick="event.stopPropagation()">
+              <select id="row-status-${index}" onchange="handleTableStatusChange(this, ${index})"
+                class="status-select table-status-select min-w-[112px] px-2.5 py-1 rounded text-[10px] font-semibold font-sans border transition-all cursor-pointer outline-none focus:ring-1 focus:ring-primary">${options}</select>
+              <span class="material-symbols-outlined pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant" aria-hidden="true">expand_more</span>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 whitespace-nowrap text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              ${callButton}
+              ${emailButton}
+              <button onclick="event.stopPropagation(); openTicketDetail(${index})" class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 text-on-surface hover:text-primary transition-colors text-xs">Inspect</button>
+            </div>
+          </td>
+        </tr>`;
+    }
+
+    function renderTickets() {
+      const tbody = document.getElementById('tickets-tbody');
+      const filtered = getFilteredTickets();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages);
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const pageTickets = filtered.slice(start, start + PAGE_SIZE);
+
+      if (pageTickets.length) {
+        tbody.innerHTML = pageTickets.map(ticketRowHtml).join('');
+        tbody.querySelectorAll('.table-status-select')
+          .forEach(select => applyTableStatusStyle(select, select.value));
+      } else {
+        const message = ticketsData.length
+          ? 'No tickets match the current filter.'
+          : 'No support tickets were returned by the webhook.';
+        tbody.innerHTML = `<tr><td colspan="6" class="py-10 px-4 text-center text-on-surface-variant">${message}</td></tr>`;
+      }
+
+      const rangeStart = filtered.length ? start + 1 : 0;
+      const rangeEnd = Math.min(start + PAGE_SIZE, filtered.length);
+      setText('ticket-count-badge', filtered.length === ticketsData.length
+        ? `Showing ${filtered.length} tickets`
+        : `Showing ${filtered.length} of ${ticketsData.length}`);
+      setText('pagination-info', `${rangeStart}-${rangeEnd}`);
+      setText('pagination-total', filtered.length);
+      setText('pagination-page', `Page ${currentPage} of ${totalPages}`);
+      document.getElementById('pagination-prev').disabled = currentPage <= 1;
+      document.getElementById('pagination-next').disabled = currentPage >= totalPages;
+    }
+
     function filterTickets(status) {
       currentFilter = status;
+      currentPage = 1;
       document.querySelectorAll('.filter-tab').forEach(tab => {
         tab.classList.remove('bg-primary-container', 'text-on-primary-container', 'font-semibold');
         tab.classList.add('bg-surface-container', 'border', 'border-outline-variant/30', 'text-on-surface-variant');
       });
       const activeTab = document.getElementById(`tab-${status}`);
-      if (activeTab) {
-        activeTab.classList.remove('bg-surface-container', 'border', 'border-outline-variant/30', 'text-on-surface-variant');
-        activeTab.classList.add('bg-primary-container', 'text-on-primary-container', 'font-semibold');
-      }
-      searchTickets();
+      activeTab?.classList.remove('bg-surface-container', 'border', 'border-outline-variant/30', 'text-on-surface-variant');
+      activeTab?.classList.add('bg-primary-container', 'text-on-primary-container', 'font-semibold');
+      renderTickets();
     }
 
-    // Search Filter
     function searchTickets() {
-      const q = document.getElementById('ticket-search').value.toLowerCase();
-
-      const rows = document.querySelectorAll('.ticket-row');
-      let visibleCount = 0;
-
-      rows.forEach(row => {
-        const rowStatus = row.getAttribute('data-status');
-        const text = row.textContent.toLowerCase();
-
-        const matchStatus = (currentFilter === 'all' || rowStatus === currentFilter);
-        const matchQuery = text.includes(q);
-
-        if (matchStatus && matchQuery) {
-          row.classList.remove('hidden');
-          visibleCount++;
-        } else {
-          row.classList.add('hidden');
-        }
-      });
-
-      document.getElementById('ticket-count-badge').textContent = `Showing ${visibleCount} tickets`;
-      document.getElementById('pagination-info').textContent = `1-${visibleCount}`;
+      currentPage = 1;
+      renderTickets();
     }
 
-    // Open Ticket Detail Drawer
-    function openTicketDetail(id) {
-      const t = ticketsData[id];
-      if (!t) return;
-      activeTicketId = id;
+    function changePage(offset) {
+      currentPage += offset;
+      renderTickets();
+    }
 
-      document.getElementById('drawer-ticket-id').textContent = t.id;
-      document.getElementById('drawer-session-id').textContent = `Origin Session: ${t.session}`;
-      document.getElementById('drawer-patient-name').textContent = t.patient;
-      document.getElementById('drawer-patient-contact').textContent = t.contact;
-      document.getElementById('drawer-device').textContent = t.device;
-      document.getElementById('drawer-issue-desc').textContent = t.desc;
-      document.getElementById('drawer-transcript-user').textContent = t.userQ;
-      document.getElementById('drawer-transcript-bot').innerHTML = t.botA;
+    async function handleTableStatusChange(select, index) {
+      const ticket = ticketsData[index];
+      if (!ticket) return;
+      const previousStatus = ticket.statusVal;
+      const newStatus = normalizeStatus(select.value);
+      if (newStatus === previousStatus) return;
 
-      const sBadge = document.getElementById('drawer-status-badge');
-      sBadge.textContent = t.status;
-      const conf = statusMeta[t.statusVal] || statusMeta['pending'];
-      sBadge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold border font-sans ' + conf.classes.join(' ');
+      select.disabled = true;
+      try {
+        await updateTicketStatus(ticket, newStatus);
+      } catch (error) {
+        console.error('Ticket status update failed:', error);
+        select.value = previousStatus;
+        applyTableStatusStyle(select, previousStatus);
+        showToast(`Update failed: ${error.message || 'Unable to update ticket'}`);
+      } finally {
+        select.disabled = false;
+      }
+    }
 
-      document.getElementById('modal-status-select').value = t.statusVal;
+    function openTicketDetail(index) {
+      const ticket = ticketsData[index];
+      if (!ticket) return;
+      activeTicketId = ticket.id;
+      setText('drawer-ticket-id', ticket.displayId);
+      setText('drawer-session-id', `Origin Session: ${ticket.session || 'Unavailable'}`);
+      setText('drawer-patient-name', ticket.name);
+      setText('drawer-patient-contact', [ticket.email, ticket.phone].filter(Boolean).join(' • ') || 'No contact details');
+      setText('drawer-device', formatTimestamp(ticket.createdAt));
+      setText('drawer-record-id', `Ticket ID: ${ticket.id}`);
+      setText('drawer-issue-desc', ticket.message || 'No message was provided.');
+      setText('drawer-transcript-user', ticket.message || 'No message was provided.');
+      setText('drawer-transcript-bot', `Session ${ticket.session || 'not supplied'}`);
+      setText('drawer-relative-time', formatRelativeTime(ticket.createdAt));
+      configureContactLink('drawer-call-button', getPhoneHref(ticket.phone), `Call ${ticket.name} at ${ticket.phone}`);
+      configureContactLink('drawer-email-button', getEmailHref(ticket.email), `Email ${ticket.name} at ${ticket.email}`);
 
+      const badge = document.getElementById('drawer-status-badge');
+      const meta = statusMeta[ticket.statusVal];
+      badge.textContent = meta.label;
+      badge.className = 'px-2 py-0.5 rounded text-[10px] font-semibold border font-sans ' + meta.classes.join(' ');
+      const modalStatusSelect = document.getElementById('modal-status-select');
+      modalStatusSelect.value = ticket.statusVal;
+      applyTableStatusStyle(modalStatusSelect, ticket.statusVal);
       document.getElementById('ticket-drawer').classList.remove('hidden');
     }
 
@@ -1317,41 +1037,179 @@
       activeTicketId = null;
     }
 
-    function saveTicketUpdate() {
-      const newStatus = document.getElementById('modal-status-select').value;
-      if (activeTicketId && ticketsData[activeTicketId]) {
-        ticketsData[activeTicketId].statusVal = newStatus;
-        const label = statusMeta[newStatus]?.label || newStatus;
-        ticketsData[activeTicketId].status = label;
-        const rowSelect = document.getElementById(`row-status-${activeTicketId}`);
-        if (rowSelect) {
-          rowSelect.value = newStatus;
-          applyTableStatusStyle(rowSelect, newStatus);
-          const row = rowSelect.closest('.ticket-row');
-          if (row) row.setAttribute('data-status', newStatus);
-        }
-        updateFilterCounts();
-        searchTickets();
-        showToast("Ticket #" + ticketsData[activeTicketId].id + " updated to " + label);
+    async function saveTicketUpdate() {
+      const ticket = ticketsData.find(item => item.id === activeTicketId);
+      if (!ticket) return;
+
+      const statusSelect = document.getElementById('modal-status-select');
+      const updateButton = document.getElementById('update-ticket-button');
+      const newStatus = normalizeStatus(statusSelect.value);
+      if (newStatus === ticket.statusVal) {
+        closeTicketDetail();
+        return;
       }
-      closeTicketDetail();
+
+      statusSelect.disabled = true;
+      updateButton.disabled = true;
+      updateButton.textContent = 'Updating…';
+
+      try {
+        await updateTicketStatus(ticket, newStatus);
+        closeTicketDetail();
+      } catch (error) {
+        console.error('Ticket status update failed:', error);
+        statusSelect.value = ticket.statusVal;
+        applyTableStatusStyle(statusSelect, ticket.statusVal);
+        showToast(`Update failed: ${error.message || 'Unable to update ticket'}`);
+      } finally {
+        statusSelect.disabled = false;
+        updateButton.disabled = false;
+        updateButton.textContent = 'Update Ticket Status';
+      }
     }
 
-    function showToast(msg) {
+    function showToast(message) {
       const toast = document.getElementById('toast');
-      document.getElementById('toast-message').textContent = msg;
+      setText('toast-message', message);
       toast.classList.remove('hidden');
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3500);
+      window.setTimeout(() => toast.classList.add('hidden'), 3500);
     }
 
-    // Initialize all table status selects on load
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.table-status-select').forEach(sel => {
-        applyTableStatusStyle(sel, sel.value);
+    function renderFetchError(message) {
+      document.getElementById('tickets-tbody').innerHTML = `
+        <tr><td colspan="6" class="py-10 px-4 text-center">
+          <div class="text-error font-medium">Unable to load support tickets.</div>
+          <div class="text-on-surface-variant mt-1">${escapeHtml(message)}</div>
+          <button onclick="fetchTickets()" class="mt-3 px-3 py-1.5 rounded bg-surface-container border border-outline-variant/30 text-on-surface hover:border-primary/40">Retry</button>
+        </td></tr>`;
+      setText('ticket-count-badge', 'Sync failed');
+    }
+
+    function getAuthToken() {
+      return localStorage.getItem('authToken')
+        || sessionStorage.getItem('authToken')
+        || localStorage.getItem('adminToken')
+        || sessionStorage.getItem('adminToken')
+        || '';
+    }
+
+    async function updateTicketStatus(ticket, newStatus) {
+      const authToken = getAuthToken();
+      if (!authToken) {
+        throw new Error('Authentication token is missing. Please sign in again.');
+      }
+
+      const response = await fetch(TICKETS_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          id: ticket.id,
+          status: newStatus
+        }),
+        cache: 'no-store'
       });
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Your admin session is unauthorized or has expired. Please sign in again.');
+      }
+      if (!response.ok) {
+        throw new Error(`Update webhook returned HTTP ${response.status}`);
+      }
+
+      const responseText = await response.text();
+      if (responseText.trim()) {
+        try {
+          const result = JSON.parse(responseText);
+          if (result?.success === false) {
+            throw new Error(result.message || result.error || 'The update webhook rejected the request.');
+          }
+        } catch (error) {
+          if (error instanceof SyntaxError) {
+            console.warn('Update webhook returned a non-JSON success response.');
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      ticket.statusVal = newStatus;
+      updateMetrics();
       updateFilterCounts();
+      renderTickets();
+      showToast(`${ticket.displayId} updated to ${statusMeta[newStatus].label}`);
+      await fetchTickets({ silent: true });
+    }
+
+    async function fetchTickets({ silent = false } = {}) {
+      if (isFetchingTickets) return;
+      isFetchingTickets = true;
+      const syncButton = document.getElementById('sync-tickets-button');
+      const authToken = getAuthToken();
+      if (syncButton) syncButton.disabled = true;
+      if (!silent && !ticketsData.length) setText('ticket-count-badge', 'Loading tickets…');
+
+      try {
+        if (!authToken) {
+          throw new Error('Authentication token is missing. Please sign in again.');
+        }
+
+        const response = await fetch(TICKETS_WEBHOOK_URL, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${authToken}`
+          },
+          cache: 'no-store'
+        });
+        if (response.status === 401 || response.status === 403) {
+          throw new Error('Your admin session is unauthorized or has expired. Please sign in again.');
+        }
+        if (!response.ok) throw new Error(`Webhook returned HTTP ${response.status}`);
+        const rawText = await response.text();
+        if (!rawText.trim()) {
+          throw new Error('The webhook returned an empty response. Check the n8n authentication and response nodes.');
+        }
+        const payload = JSON.parse(rawText);
+        ticketsData = normalizePayload(payload).map(normalizeTicket)
+          .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+        currentPage = 1;
+        updateMetrics();
+        updateFilterCounts();
+        renderTickets();
+        setText('metric-last-sync', `Synced ${new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`);
+        if (!silent) {
+          showToast(`Loaded ${ticketsData.length} support ticket${ticketsData.length === 1 ? '' : 's'}`);
+        }
+      } catch (error) {
+        console.error('Support ticket sync failed:', error);
+        if (!ticketsData.length) {
+          renderFetchError(error instanceof SyntaxError
+            ? 'The webhook returned invalid JSON.'
+            : error.message || 'Network request failed.');
+        } else if (!silent) {
+          showToast('Ticket sync failed; showing the last loaded data.');
+        }
+      } finally {
+        isFetchingTickets = false;
+        if (syncButton) syncButton.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateMetrics();
+      updateFilterCounts();
+      fetchTickets();
+      window.setInterval(() => fetchTickets({ silent: true }), POLL_INTERVAL_MS);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') fetchTickets({ silent: true });
+      });
     });
   </script>
 </body>
