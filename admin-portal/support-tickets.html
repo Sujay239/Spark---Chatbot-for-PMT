@@ -4,28 +4,53 @@
 
 <head>
   <link rel="icon" type="image/png" href="logo.png" />
+  <style id="auth-guard-style">
+    html { display: none !important; }
+  </style>
   <script>
-    // Environment & Route Protection: Redirect unauthenticated requests to login
-    const isLocalDev = window.location.hostname === "localhost" || 
-                       window.location.hostname === "127.0.0.1" || 
-                       window.location.protocol === "file:";
-    if (
-      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
-      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
-    ) {
-      window.location.replace(isLocalDev ? "login.html" : "/admin/login");
-    }
+    // Strict Route Protection: Redirect unauthenticated requests to login immediately
+    (function() {
+      const isLocalDev = window.location.hostname === "localhost" || 
+                         window.location.hostname === "127.0.0.1" || 
+                         window.location.protocol === "file:" ||
+                         window.location.pathname.endsWith(".html") ||
+                         !window.location.pathname.startsWith("/admin/");
+      window.isLocalDev = isLocalDev;
+
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
+
+      if (!token || !isAuth || !token.trim()) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("adminEmail");
+        sessionStorage.clear();
+        window.location.replace(isLocalDev ? "login.html" : "/admin/login");
+        throw new Error("Unauthorized access. Redirecting to login...");
+      } else {
+        document.documentElement.style.display = "";
+        const guard = document.getElementById("auth-guard-style");
+        if (guard) guard.remove();
+      }
+    })();
 
     function logout() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("adminEmail");
       sessionStorage.clear();
-      window.location.href = isLocalDev ? "login.html" : "/admin/login";
+      const isLocal = window.isLocalDev !== undefined ? window.isLocalDev : (
+        window.location.hostname === "localhost" || 
+        window.location.hostname === "127.0.0.1" || 
+        window.location.protocol === "file:" ||
+        window.location.pathname.endsWith(".html") ||
+        !window.location.pathname.startsWith("/admin/")
+      );
+      window.location.replace(isLocal ? "login.html" : "/admin/login");
     }
 
     // Auto-resolve internal links for local dev (Live Server / localhost)
-    if (isLocalDev) {
+    if (window.isLocalDev) {
       document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a[href^='/admin/']").forEach(el => {
           const route = el.getAttribute("href").replace(/^\/admin\//, "");
@@ -671,20 +696,110 @@
             <button onclick="closeTicketDetail()" class="px-4 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface text-xs hover:border-primary/40 transition-colors">
               Cancel
             </button>
-            <a id="drawer-call-button" href="#" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-[#16a34a]/15 border border-[#16a34a]/40 text-[#4ade80] text-xs hover:bg-[#16a34a]/25 transition-colors">
+            <a id="drawer-call-button" href="#" onclick="handleDrawerCallClick(event)" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-[#16a34a]/15 border border-[#16a34a]/40 text-[#4ade80] text-xs hover:bg-[#16a34a]/25 transition-colors cursor-pointer">
               <span class="material-symbols-outlined text-sm" aria-hidden="true">call</span>
               <span>Call</span>
             </a>
-            <a id="drawer-email-button" href="#" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/10 border border-secondary/40 text-secondary text-xs hover:bg-secondary/20 transition-colors">
+            <button id="drawer-email-button" type="button" onclick="openEmailModalForActiveTicket()" class="hidden items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary/10 border border-secondary/40 text-secondary text-xs hover:bg-secondary/20 transition-colors cursor-pointer">
               <span class="material-symbols-outlined text-sm" aria-hidden="true">mail</span>
               <span>Email</span>
-            </a>
+            </button>
           </div>
           <div class="flex items-center space-x-2">
             <button id="update-ticket-button" onclick="saveTicketUpdate()" class="px-4 py-2 rounded-lg bg-primary text-on-primary font-semibold text-xs hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
               Update Ticket Status
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL CUSTOMER MODAL (WEBMAIL & DESKTOP DISPATCH) -->
+  <div id="email-action-modal" class="fixed inset-0 z-[60] overflow-hidden hidden" role="dialog" aria-modal="true">
+    <div onclick="closeEmailModal()" class="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+      <div class="relative w-full max-w-md rounded-2xl bg-surface-container-low border border-outline-variant/40 shadow-2xl p-6 overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3.5 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-secondary/15 border border-secondary/30 flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined text-lg" aria-hidden="true">mail</span>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-on-surface">Email Customer</h3>
+              <p class="text-[11px] text-on-surface-variant font-mono" id="email-modal-ticket-ref">#TKT-...</p>
+            </div>
+          </div>
+          <button onclick="closeEmailModal()" class="p-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer">
+            <span class="material-symbols-outlined text-base">close</span>
+          </button>
+        </div>
+
+        <!-- Recipient Card with Copy -->
+        <div class="mt-4 p-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between">
+          <div class="truncate mr-3">
+            <div class="text-xs font-semibold text-on-surface truncate" id="email-modal-customer-name">Customer Name</div>
+            <div class="text-xs text-secondary font-mono truncate" id="email-modal-customer-email">customer@domain.com</div>
+          </div>
+          <button type="button" onclick="copyModalEmail()" class="shrink-0 px-2.5 py-1 rounded-lg bg-surface-container border border-outline-variant/40 hover:border-primary/50 text-[11px] font-medium text-on-surface hover:text-primary transition-colors flex items-center gap-1 cursor-pointer">
+            <span class="material-symbols-outlined text-xs">content_copy</span>
+            <span id="email-modal-copy-label">Copy</span>
+          </button>
+        </div>
+
+        <!-- Dispatch Options -->
+        <div class="mt-4 space-y-2">
+          <!-- Gmail Web -->
+          <a id="email-modal-gmail-btn" target="_blank" rel="noopener noreferrer"
+            class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 hover:border-primary/50 text-on-surface transition-all group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-7 h-7 rounded-lg bg-[#EA4335]/15 border border-[#EA4335]/40 flex items-center justify-center text-[#EA4335]">
+                <span class="material-symbols-outlined text-sm font-bold">mail</span>
+              </div>
+              <div class="text-left">
+                <div class="text-xs font-semibold group-hover:text-primary transition-colors">Open in Gmail Web</div>
+                <div class="text-[10px] text-on-surface-variant">Opens webmail compose tab via mail.google.com</div>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-sm text-outline group-hover:text-primary transition-colors">open_in_new</span>
+          </a>
+
+          <!-- Outlook Web -->
+          <a id="email-modal-outlook-btn" target="_blank" rel="noopener noreferrer"
+            class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 hover:border-primary/50 text-on-surface transition-all group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-7 h-7 rounded-lg bg-[#0078D4]/15 border border-[#0078D4]/40 flex items-center justify-center text-[#0078D4]">
+                <span class="material-symbols-outlined text-sm font-bold">mark_email_read</span>
+              </div>
+              <div class="text-left">
+                <div class="text-xs font-semibold group-hover:text-primary transition-colors">Open in Outlook Web</div>
+                <div class="text-[10px] text-on-surface-variant">Office 365 / Outlook.live.com composer</div>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-sm text-outline group-hover:text-primary transition-colors">open_in_new</span>
+          </a>
+
+          <!-- Desktop Mail Client (mailto) -->
+          <a id="email-modal-default-btn"
+            class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 hover:border-primary/50 text-on-surface transition-all group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-7 h-7 rounded-lg bg-surface-bright border border-outline-variant/40 flex items-center justify-center text-on-surface">
+                <span class="material-symbols-outlined text-sm">devices</span>
+              </div>
+              <div class="text-left">
+                <div class="text-xs font-semibold group-hover:text-primary transition-colors">Default Desktop App (Outlook / Mail)</div>
+                <div class="text-[10px] text-on-surface-variant">Direct mailto: protocol for system mail app</div>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-sm text-outline group-hover:text-primary transition-colors">arrow_forward</span>
+          </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between text-[11px] text-on-surface-variant">
+          <span>Opens directly with customer &amp; ticket filled</span>
+          <button type="button" onclick="closeEmailModal()" class="text-on-surface hover:text-primary font-medium cursor-pointer">Done</button>
         </div>
       </div>
     </div>
@@ -760,6 +875,20 @@
       return [];
     }
 
+    function cleanEmailAddress(email) {
+      if (!email) return '';
+      let clean = String(email).trim().replace(/^mailto:/i, '');
+      const bracketMatch = clean.match(/<([^>]+)>/);
+      if (bracketMatch) clean = bracketMatch[1].trim();
+      try {
+        if (clean.includes('%40') || clean.includes('%20')) {
+          clean = decodeURIComponent(clean);
+        }
+      } catch (_) {}
+      clean = clean.replace(/^["']|["']$/g, '').trim();
+      return clean;
+    }
+
     function normalizeTicket(record, index) {
       const rawCreatedAt = String(record?.created_at || '');
       const parsedDate = rawCreatedAt ? new Date(rawCreatedAt) : null;
@@ -769,8 +898,8 @@
         displayId: `#TKT-${id.split('-')[0].toUpperCase()}`,
         session: String(record?.session_id || ''),
         name: String(record?.name || 'Unknown requester'),
-        email: String(record?.email || ''),
-        phone: String(record?.phone || ''),
+        email: cleanEmailAddress(record?.email),
+        phone: String(record?.phone || '').trim(),
         message: String(record?.message || ''),
         createdAt: parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate : null,
         statusVal: normalizeStatus(record?.status)
@@ -816,9 +945,14 @@
       return safePhone ? `tel:${safePhone}` : '';
     }
 
-    function getEmailHref(email) {
-      const safeEmail = String(email || '').trim();
-      return safeEmail ? `mailto:${encodeURIComponent(safeEmail)}` : '';
+    function getEmailHref(email, subject = '') {
+      const safeEmail = cleanEmailAddress(email);
+      if (!safeEmail || !safeEmail.includes('@')) return '';
+      let href = `mailto:${safeEmail}`;
+      if (subject) {
+        href += `?subject=${encodeURIComponent(subject)}`;
+      }
+      return href;
     }
 
     function configureContactLink(elementId, href, label) {
@@ -891,10 +1025,10 @@
         `<option value="${value}" class="status-option-${value}" ${ticket.statusVal === value ? 'selected' : ''}>${meta.label}</option>`
       ).join('');
       const callButton = callHref
-        ? `<a href="${escapeHtml(callHref)}" onclick="event.stopPropagation()" aria-label="Call ${escapeHtml(ticket.name)}" title="Call ${escapeHtml(ticket.phone)}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#16a34a]/15 border border-[#16a34a]/40 text-[#4ade80] hover:bg-[#16a34a]/25 transition-colors text-xs"><span class="material-symbols-outlined text-sm" aria-hidden="true">call</span><span class="hidden xl:inline">Call</span></a>`
+        ? `<a href="${escapeHtml(callHref)}" onclick="event.stopPropagation(); handleCallClick('${escapeHtml(ticket.phone)}');" aria-label="Call ${escapeHtml(ticket.name)}" title="Call ${escapeHtml(ticket.phone)}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#16a34a]/15 border border-[#16a34a]/40 text-[#4ade80] hover:bg-[#16a34a]/25 transition-colors text-xs cursor-pointer"><span class="material-symbols-outlined text-sm" aria-hidden="true">call</span><span class="hidden xl:inline">Call</span></a>`
         : '';
-      const emailButton = emailHref
-        ? `<a href="${escapeHtml(emailHref)}" onclick="event.stopPropagation()" aria-label="Email ${escapeHtml(ticket.name)}" title="Email ${escapeHtml(ticket.email)}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary/10 border border-secondary/40 text-secondary hover:bg-secondary/20 transition-colors text-xs"><span class="material-symbols-outlined text-sm" aria-hidden="true">mail</span><span class="hidden xl:inline">Email</span></a>`
+      const emailButton = ticket.email
+        ? `<button type="button" onclick="event.stopPropagation(); openEmailModalForTicket(${index})" aria-label="Email ${escapeHtml(ticket.name)}" title="Email ${escapeHtml(ticket.email)}" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary/10 border border-secondary/40 text-secondary hover:bg-secondary/20 transition-colors text-xs cursor-pointer"><span class="material-symbols-outlined text-sm" aria-hidden="true">mail</span><span class="hidden xl:inline">Email</span></button>`
         : '';
 
       return `
@@ -1005,6 +1139,90 @@
       }
     }
 
+    let currentEmailModalTicket = null;
+
+    function handleCallClick(phone) {
+      if (!phone) return;
+      navigator.clipboard.writeText(String(phone).trim()).then(() => {
+        showToast(`Phone ${phone} copied to clipboard`);
+      }).catch(() => {});
+    }
+
+    function handleDrawerCallClick(event) {
+      const ticket = ticketsData.find(item => item.id === activeTicketId);
+      if (ticket?.phone) handleCallClick(ticket.phone);
+    }
+
+    function openEmailModal(ticket) {
+      if (!ticket || !ticket.email) {
+        showToast('No customer email found for this ticket.');
+        return;
+      }
+      currentEmailModalTicket = ticket;
+      const email = cleanEmailAddress(ticket.email);
+      const name = ticket.name || 'Customer';
+      const displayId = ticket.displayId || 'Support Ticket';
+      const subject = `Re: PMT Support Request (${displayId})`;
+
+      setText('email-modal-ticket-ref', `${displayId} • ${ticket.session || 'Direct Request'}`);
+      setText('email-modal-customer-name', name);
+      setText('email-modal-customer-email', email);
+      setText('email-modal-copy-label', 'Copy');
+
+      // 1. Gmail Web Direct Link (mail.google.com compose window)
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}`;
+      const gmailBtn = document.getElementById('email-modal-gmail-btn');
+      if (gmailBtn) gmailBtn.href = gmailUrl;
+
+      // 2. Outlook Web Direct Link (office.com / live.com)
+      const outlookUrl = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(email)}&subject=${encodeURIComponent(subject)}`;
+      const outlookBtn = document.getElementById('email-modal-outlook-btn');
+      if (outlookBtn) outlookBtn.href = outlookUrl;
+
+      // 3. Desktop App (Standard RFC 6068 mailto)
+      const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+      const defaultBtn = document.getElementById('email-modal-default-btn');
+      if (defaultBtn) defaultBtn.href = mailtoUrl;
+
+      const modal = document.getElementById('email-action-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeEmailModal() {
+      const modal = document.getElementById('email-action-modal');
+      if (modal) modal.classList.add('hidden');
+      currentEmailModalTicket = null;
+    }
+
+    function copyModalEmail() {
+      if (!currentEmailModalTicket?.email) return;
+      const email = cleanEmailAddress(currentEmailModalTicket.email);
+      navigator.clipboard.writeText(email).then(() => {
+        setText('email-modal-copy-label', 'Copied!');
+        showToast(`Copied ${email} to clipboard`);
+        setTimeout(() => setText('email-modal-copy-label', 'Copy'), 2200);
+      }).catch(() => {
+        showToast(`Email: ${email}`);
+      });
+    }
+
+    function openEmailModalForTicket(index) {
+      const ticket = ticketsData[index];
+      if (ticket) openEmailModal(ticket);
+    }
+
+    function openEmailModalForActiveTicket() {
+      const ticket = ticketsData.find(item => item.id === activeTicketId);
+      if (ticket) openEmailModal(ticket);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeEmailModal();
+        closeTicketDetail();
+      }
+    });
+
     function openTicketDetail(index) {
       const ticket = ticketsData[index];
       if (!ticket) return;
@@ -1019,8 +1237,33 @@
       setText('drawer-transcript-user', ticket.message || 'No message was provided.');
       setText('drawer-transcript-bot', `Session ${ticket.session || 'not supplied'}`);
       setText('drawer-relative-time', formatRelativeTime(ticket.createdAt));
-      configureContactLink('drawer-call-button', getPhoneHref(ticket.phone), `Call ${ticket.name} at ${ticket.phone}`);
-      configureContactLink('drawer-email-button', getEmailHref(ticket.email), `Email ${ticket.name} at ${ticket.email}`);
+
+      const drawerCallBtn = document.getElementById('drawer-call-button');
+      if (drawerCallBtn) {
+        const callHref = getPhoneHref(ticket.phone);
+        if (callHref) {
+          drawerCallBtn.href = callHref;
+          drawerCallBtn.classList.remove('hidden');
+          drawerCallBtn.classList.add('inline-flex');
+          drawerCallBtn.setAttribute('aria-label', `Call ${ticket.name} at ${ticket.phone}`);
+        } else {
+          drawerCallBtn.removeAttribute('href');
+          drawerCallBtn.classList.add('hidden');
+          drawerCallBtn.classList.remove('inline-flex');
+        }
+      }
+
+      const drawerEmailBtn = document.getElementById('drawer-email-button');
+      if (drawerEmailBtn) {
+        if (ticket.email) {
+          drawerEmailBtn.classList.remove('hidden');
+          drawerEmailBtn.classList.add('inline-flex');
+          drawerEmailBtn.setAttribute('aria-label', `Email ${ticket.name} at ${ticket.email}`);
+        } else {
+          drawerEmailBtn.classList.add('hidden');
+          drawerEmailBtn.classList.remove('inline-flex');
+        }
+      }
 
       const badge = document.getElementById('drawer-status-badge');
       const meta = statusMeta[ticket.statusVal];
@@ -1114,7 +1357,8 @@
       });
 
       if (response.status === 401 || response.status === 403) {
-        throw new Error('Your admin session is unauthorized or has expired. Please sign in again.');
+        setTimeout(logout, 1200);
+        throw new Error('Your admin session is unauthorized or has expired. Redirecting to login...');
       }
       if (!response.ok) {
         throw new Error(`Update webhook returned HTTP ${response.status}`);
@@ -1154,7 +1398,8 @@
 
       try {
         if (!authToken) {
-          throw new Error('Authentication token is missing. Please sign in again.');
+          setTimeout(logout, 1200);
+          throw new Error('Authentication token is missing. Redirecting to login...');
         }
 
         const response = await fetch(TICKETS_WEBHOOK_URL, {
@@ -1166,7 +1411,8 @@
           cache: 'no-store'
         });
         if (response.status === 401 || response.status === 403) {
-          throw new Error('Your admin session is unauthorized or has expired. Please sign in again.');
+          setTimeout(logout, 1200);
+          throw new Error('Your admin session is unauthorized or has expired. Redirecting to login...');
         }
         if (!response.ok) throw new Error(`Webhook returned HTTP ${response.status}`);
         const rawText = await response.text();

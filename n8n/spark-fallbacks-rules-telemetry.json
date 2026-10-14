@@ -1,0 +1,369 @@
+{
+  "name": "Spark - Fallbacks & Rules Telemetry",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "spark-fallbacks-rules",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Authorization, Content-Type, x-api-key, x-auth-token"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        300
+      ],
+      "id": "webhook-post-node",
+      "name": "Webhook (POST)"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "spark-fallbacks-rules",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Authorization, Content-Type, x-api-key, x-auth-token"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        500
+      ],
+      "id": "webhook-get-node",
+      "name": "Webhook (GET)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================= AUTHENTICATION & VALIDATION =================\nconst headers = $json.headers || {};\nconst query = $json.query || {};\nconst body = $json.body || {};\n\n// 1. Detect CORS OPTIONS Preflight\nconst method = (headers['x-forwarded-method'] || $json.method || '').toUpperCase();\nif (method === 'OPTIONS') {\n  return [{\n    json: {\n      isPreflight: true,\n      isAuthorized: true,\n      statusCode: 200\n    }\n  }];\n}\n\n// 2. Extract Auth Token from Headers, Query, or Body\nconst rawAuth =\n  headers.authorization ||\n  headers.Authorization ||\n  headers['x-api-key'] ||\n  headers['x-auth-token'] ||\n  query.token ||\n  body.token ||\n  '';\n\nconst token = String(rawAuth).replace(/^Bearer\\s+/i, '').trim();\n\n// Validate Token Presence (permissive length check consistent with overview & session logs)\nconst isValid = token.length >= 8;\n\nif (!isValid) {\n  return [{\n    json: {\n      isPreflight: false,\n      isAuthorized: false,\n      statusCode: 401,\n      error: 'Unauthorized',\n      message: 'Authentication failed: Missing or invalid authorization token. Access denied.'\n    }\n  }];\n}\n\n// 3. PostgreSQL Query to fetch chat memory entries\nconst sqlQuery = `SELECT \n  id, \n  session_id, \n  role, \n  message, \n  created_at \nFROM public.chat_memory \nORDER BY created_at ASC;`;\n\nreturn [{\n  json: {\n    isPreflight: false,\n    isAuthorized: true,\n    statusCode: 200,\n    sqlQuery: sqlQuery,\n    tokenPreview: token.substring(0, 10) + '...',\n    authenticatedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        400
+      ],
+      "id": "auth-check-node",
+      "name": "Validate Auth & Build Query"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-is-preflight",
+              "leftValue": "={{ $json.isPreflight }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "id": "preflight-check-node",
+      "name": "Is Preflight?"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Authorization, Content-Type, x-api-key, x-auth-token"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        200
+      ],
+      "id": "respond-preflight-node",
+      "name": "Respond 200 Preflight"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-is-auth",
+              "leftValue": "={{ $json.isAuthorized }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        700,
+        500
+      ],
+      "id": "auth-check-if-node",
+      "name": "Is Authorized?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"status\": 401,\n  \"error\": \"Unauthorized\",\n  \"message\": \"Authentication failed: Missing or invalid authorization token. Access denied.\"\n}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        600
+      ],
+      "id": "respond-401-unauthorized-node",
+      "name": "Respond 401 Unauthorized"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $('Validate Auth & Build Query').item.json.sqlQuery }}"
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        960,
+        400
+      ],
+      "id": "execute-postgres-query-node",
+      "name": "Execute Postgres Query (chat_memory)",
+      "credentials": {
+        "postgres": {
+          "id": "fyxl43WRvTWVDiig",
+          "name": "sujay supabse"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================= IDENTIFY FALLBACKS FROM CHAT_MEMORY =================\nlet rows = [];\ntry {\n  rows = $('Execute Postgres Query (chat_memory)').all().map(i => i.json).filter(r => r && (r.id || r.session_id));\n} catch (e) {\n  rows = [];\n}\n\n// 1. Group messages by session_id in chronological order\nconst sessionMap = new Map();\nrows.forEach(r => {\n  if (!r || !r.session_id) return;\n  const sId = String(r.session_id).trim();\n  if (!sessionMap.has(sId)) {\n    sessionMap.set(sId, []);\n  }\n  sessionMap.get(sId).push({\n    id: r.id,\n    sessionId: sId,\n    role: (r.role || 'user').toLowerCase().trim(),\n    message: String(r.message || '').trim(),\n    createdAt: r.created_at ? new Date(r.created_at) : new Date()\n  });\n});\n\n// Guardrail signature patterns\nconst PATTERNS = {\n  CAROTID: {\n    regex: /carotid|front of (my )?neck|throat|anterior neck/i,\n    intent: 'SAFETY_CAROTID_PLACEMENT',\n    reason: 'Absolute Anatomical Contraindication: Risk of acute hypotension or bradycardia. Placement strictly prohibited.',\n    category: 'Safety',\n    severity: 'critical'\n  },\n  CARDIAC: {\n    regex: /pacemaker|defibrillator|implanted (cardiac|heart)|icd/i,\n    intent: 'CONTRAINDICATION_CARDIAC_DEVICE',\n    reason: 'Absolute Clinical Contraindication: Implanted cardiac pacemaker/ICD electrical interference risk. Mandatory physician clearance.',\n    category: 'Safety',\n    severity: 'critical'\n  },\n  PREGNANCY: {\n    regex: /pregnan|trimester|expecting a baby/i,\n    intent: 'CONTRAINDICATION_PREGNANCY_EMS',\n    reason: 'Clinical Caution: Electrotherapy requires certified OB/GYN clearance during pregnancy.',\n    category: 'Safety',\n    severity: 'high'\n  },\n  HARDWARE_FIRE: {\n    regex: /spark|smoking|burnt|burning|melted|shocking me|fire|exploded|thermal runaway/i,\n    intent: 'HARDWARE_THERMAL_RUNAWAY',\n    reason: 'Catastrophic Hardware Fault: Fire/electrical hazard requiring immediate emergency disconnection.',\n    category: 'Hardware',\n    severity: 'critical'\n  },\n  HARDWARE_NO_OUTPUT: {\n    regex: /zero stimulation|no stimulation|channel (1|2) not working|no output/i,\n    intent: 'HARDWARE_CHANNEL_NO_OUTPUT',\n    reason: 'Lead Wire / Circuit Disconnect: Channel continuity or output amplifier issue.',\n    category: 'Hardware',\n    severity: 'medium'\n  },\n  PEDIATRIC: {\n    regex: /toddler|baby|infant|swallowed.*(wire|pin|electrode)|child.*mouth/i,\n    intent: 'EMERGENCY_FOREIGN_BODY_INGESTION',\n    reason: 'Acute Pediatric Emergency: Device indicated for adult use only; Poison Control / emergency dispatch rule.',\n    category: 'Emergency',\n    severity: 'critical'\n  },\n  PHARMACEUTICAL: {\n    regex: /dosage.*(ibuprofen|tylenol|aspirin|advil|mg|pill)|what dose/i,\n    intent: 'PHARMACEUTICAL_ADVICE_REQUEST',\n    reason: 'Medical Scope Exceeded: Spark AI does not dispense pharmacological dosing recommendations.',\n    category: 'Policy',\n    severity: 'medium'\n  },\n  OVERNIGHT: {\n    regex: /bypass.*(timer|shutoff)|sleep with.*overnight|run.*all night/i,\n    intent: 'OVERNIGHT_UNSUPERVISED_USE',\n    reason: 'Sleep Hazard Policy: Overnight stimulation increases risk of skin necrosis; override rejected.',\n    category: 'Policy',\n    severity: 'high'\n  },\n  OUT_OF_DOMAIN: {\n    regex: /write (me )?a (poem|essay|story)|recipe for|weather in|who won the/i,\n    intent: 'OUT_OF_CONTEXT_REQUEST',\n    reason: 'Domain Boundary Policy: Inquired about non-PMT topic; off-topic guardrail activated.',\n    category: 'Domain',\n    severity: 'info'\n  },\n  TYPO: {\n    regex: /^[a-z]{1,2}$|^[^\\w\\s]+$/i,\n    intent: 'TYPO_OR_GIBBERISH',\n    reason: 'Input Hygiene Guardrail: Low-entropy or unreadable text detected in prompt.',\n    category: 'Validation',\n    severity: 'info'\n  }\n};\n\nconst identifiedFallbacks = [];\nconst seenKeys = new Set();\n\nsessionMap.forEach((messages, sId) => {\n  // Sort ascending by time\n  messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());\n\n  for (let i = 0; i < messages.length; i++) {\n    const cur = messages[i];\n\n    // Method A: If message is from assistant and contains a known fallback response\n    if (cur.role === 'assistant') {\n      const text = cur.message.toLowerCase();\n      let matchedIntent = null;\n      let matchedReason = null;\n      let matchedCategory = 'Fallback';\n      let matchedSeverity = 'medium';\n\n      if (text.includes(\"sorry, i couldn't find a relevant answer\") || \n          text.includes(\"could not find a relevant answer\") || \n          text.includes(\"contact pmt support directly\")) {\n        matchedIntent = 'KNOWLEDGE_BASE_MISS';\n        matchedReason = 'Knowledge Base Miss: Query did not match verified PMT clinical documentation or device manual.';\n        matchedCategory = 'KB Miss';\n        matchedSeverity = 'medium';\n      } else if (text.includes(\"i specialize exclusively in pmt products\") || \n                 text.includes(\"dedicated pain management technologies (pmt) assistant\")) {\n        matchedIntent = 'OUT_OF_CONTEXT_REQUEST';\n        matchedReason = 'Domain Boundary Policy: Inquired about non-PMT topic; off-topic guardrail activated.';\n        matchedCategory = 'Domain';\n        matchedSeverity = 'info';\n      } else if (text.includes(\"typo detected\")) {\n        matchedIntent = 'TYPO_OR_GIBBERISH';\n        matchedReason = 'Input Hygiene Guardrail: Low-entropy or unreadable text detected in prompt.';\n        matchedCategory = 'Validation';\n        matchedSeverity = 'info';\n      } else if (text.includes(\"pacemaker\") || text.includes(\"defibrillator\")) {\n        matchedIntent = 'CONTRAINDICATION_CARDIAC_DEVICE';\n        matchedReason = 'Clinical Contraindication: Pacemaker/ICD electrical interference hazard. Mandatory physician clearance.';\n        matchedCategory = 'Safety';\n        matchedSeverity = 'critical';\n      } else if (text.includes(\"carotid\") || text.includes(\"front of neck\")) {\n        matchedIntent = 'SAFETY_CAROTID_PLACEMENT';\n        matchedReason = 'Absolute Anatomical Contraindication: Risk of severe bradycardia or acute blood pressure drops.';\n        matchedCategory = 'Safety';\n        matchedSeverity = 'critical';\n      } else if (text.includes(\"pregnant\") || text.includes(\"pregnancy\")) {\n        matchedIntent = 'CONTRAINDICATION_PREGNANCY_EMS';\n        matchedReason = 'Clinical Contraindication: Electrotherapy requires certified OB/GYN clearance during pregnancy.';\n        matchedCategory = 'Safety';\n        matchedSeverity = 'high';\n      } else if (text.includes(\"spark\") || text.includes(\"smoke\") || text.includes(\"burning\")) {\n        matchedIntent = 'HARDWARE_THERMAL_RUNAWAY';\n        matchedReason = 'Catastrophic Hardware Fault: Fire/electrical hazard requiring immediate emergency disconnection.';\n        matchedCategory = 'Hardware';\n        matchedSeverity = 'critical';\n      } else if (text.includes(\"pharmacological\") || text.includes(\"dosage\")) {\n        matchedIntent = 'PHARMACEUTICAL_ADVICE_REQUEST';\n        matchedReason = 'Medical Scope Exceeded: Spark AI does not dispense pharmacological dosing recommendations.';\n        matchedCategory = 'Policy';\n        matchedSeverity = 'medium';\n      }\n\n      if (matchedIntent) {\n        // Find preceding user question in this session\n        let triggerQ = 'Clinical inquiry in session #' + sId;\n        for (let j = i - 1; j >= 0; j--) {\n          if (messages[j].role === 'user' && messages[j].message) {\n            triggerQ = messages[j].message;\n            break;\n          }\n        }\n\n        const dedupKey = sId + '|' + matchedIntent + '|' + triggerQ;\n        if (!seenKeys.has(dedupKey)) {\n          seenKeys.add(dedupKey);\n          identifiedFallbacks.push({\n            id: cur.id || ('FB-' + (identifiedFallbacks.length + 1)),\n            sessionId: sId,\n            triggerQuery: triggerQ,\n            detectedIntent: matchedIntent,\n            fallbackReason: matchedReason,\n            category: matchedCategory,\n            severity: matchedSeverity,\n            timestamp: cur.createdAt.toISOString().replace('T', ' ').slice(0, 19) + ' UTC',\n            rawTimestamp: cur.createdAt.toISOString()\n          });\n        }\n      }\n    }\n\n    // Method B: If message is from user, evaluate against guardrail triggers directly\n    if (cur.role === 'user' && cur.message) {\n      for (const [key, p] of Object.entries(PATTERNS)) {\n        if (p.regex.test(cur.message)) {\n          const dedupKey = sId + '|' + p.intent + '|' + cur.message;\n          if (!seenKeys.has(dedupKey)) {\n            seenKeys.add(dedupKey);\n            identifiedFallbacks.push({\n              id: cur.id || ('FB-' + (identifiedFallbacks.length + 1)),\n              sessionId: sId,\n              triggerQuery: cur.message,\n              detectedIntent: p.intent,\n              fallbackReason: p.reason,\n              category: p.category,\n              severity: p.severity,\n              timestamp: cur.createdAt.toISOString().replace('T', ' ').slice(0, 19) + ' UTC',\n              rawTimestamp: cur.createdAt.toISOString()\n            });\n          }\n          break; // Stop after first matched pattern for this user message\n        }\n      }\n    }\n  }\n});\n\n// Sort identified fallbacks by timestamp descending (newest first)\nidentifiedFallbacks.sort((a, b) => new Date(b.rawTimestamp).getTime() - new Date(a.rawTimestamp).getTime());\n\n// Calculate KPI summary\nlet safetyCount = 0;\nlet kbMissCount = 0;\nlet hardwareCount = 0;\nlet policyCount = 0;\nconst intentMap = {};\n\nidentifiedFallbacks.forEach(f => {\n  if (f.category === 'Safety') safetyCount++;\n  else if (f.category === 'KB Miss') kbMissCount++;\n  else if (f.category === 'Hardware') hardwareCount++;\n  else policyCount++;\n\n  intentMap[f.detectedIntent] = (intentMap[f.detectedIntent] || 0) + 1;\n});\n\nlet topIntent = '--';\nlet maxCount = 0;\nObject.entries(intentMap).forEach(([intent, count]) => {\n  if (count > maxCount) {\n    maxCount = count;\n    topIntent = intent;\n  }\n});\n\nconst kpi = {\n  total_fallbacks: identifiedFallbacks.length,\n  safety_guardrails_count: safetyCount,\n  kb_misses_count: kbMissCount,\n  hardware_faults_count: hardwareCount,\n  policy_violations_count: policyCount,\n  top_intent: topIntent,\n  recent_incident: identifiedFallbacks[0]?.timestamp || 'None recorded'\n};\n\nreturn [{\n  json: {\n    success: true,\n    status: 200,\n    kpi: kpi,\n    fallbacks: identifiedFallbacks,\n    total_count: identifiedFallbacks.length,\n    generated_at: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        400
+      ],
+      "id": "identify-fallbacks-node",
+      "name": "Identify Fallbacks from chat_memory"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1480,
+        400
+      ],
+      "id": "respond-200-fallbacks-node",
+      "name": "Respond 200 Fallbacks Ledger"
+    }
+  ],
+  "connections": {
+    "Webhook (POST)": {
+      "main": [
+        [
+          {
+            "node": "Validate Auth & Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (GET)": {
+      "main": [
+        [
+          {
+            "node": "Validate Auth & Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Auth & Build Query": {
+      "main": [
+        [
+          {
+            "node": "Is Preflight?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Preflight?": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 Preflight",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Authorized?": {
+      "main": [
+        [
+          {
+            "node": "Execute Postgres Query (chat_memory)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 401 Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Postgres Query (chat_memory)": {
+      "main": [
+        [
+          {
+            "node": "Identify Fallbacks from chat_memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identify Fallbacks from chat_memory": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 Fallbacks Ledger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

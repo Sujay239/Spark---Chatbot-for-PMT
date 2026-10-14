@@ -4,26 +4,49 @@
 
 <head>
   <link rel="icon" type="image/png" href="logo.png" />
+  <style id="auth-guard-style">
+    html { display: none !important; }
+  </style>
   <script>
-    // Environment & Route Protection: Redirect unauthenticated requests to login
-    window.isLocalDev = window.location.hostname === "localhost" || 
-                        window.location.hostname === "127.0.0.1" || 
-                        window.location.protocol === "file:" ||
-                        window.location.pathname.endsWith(".html");
+    // Strict Route Protection: Redirect unauthenticated requests to login immediately
+    (function() {
+      const isLocalDev = window.location.hostname === "localhost" || 
+                         window.location.hostname === "127.0.0.1" || 
+                         window.location.protocol === "file:" ||
+                         window.location.pathname.endsWith(".html") ||
+                         !window.location.pathname.startsWith("/admin/");
+      window.isLocalDev = isLocalDev;
 
-    if (
-      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
-      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
-    ) {
-      window.location.replace(window.isLocalDev ? "login.html" : "/admin/login");
-    }
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
+
+      if (!token || !isAuth || !token.trim()) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("adminEmail");
+        sessionStorage.clear();
+        window.location.replace(isLocalDev ? "login.html" : "/admin/login");
+        throw new Error("Unauthorized access. Redirecting to login...");
+      } else {
+        document.documentElement.style.display = "";
+        const guard = document.getElementById("auth-guard-style");
+        if (guard) guard.remove();
+      }
+    })();
 
     function logout() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("adminEmail");
       sessionStorage.clear();
-      window.location.href = window.isLocalDev ? "login.html" : "/admin/login";
+      const isLocal = window.isLocalDev !== undefined ? window.isLocalDev : (
+        window.location.hostname === "localhost" || 
+        window.location.hostname === "127.0.0.1" || 
+        window.location.protocol === "file:" ||
+        window.location.pathname.endsWith(".html") ||
+        !window.location.pathname.startsWith("/admin/")
+      );
+      window.location.replace(isLocal ? "login.html" : "/admin/login");
     }
 
     // Auto-resolve internal links for local dev (Live Server / localhost)
@@ -807,6 +830,11 @@
           signal: controller.signal
         });
         clearTimeout(timeoutId);
+
+        if (resp.status === 401 || resp.status === 403) {
+          setTimeout(logout, 1200);
+          throw new Error("HTTP 401: Unauthorized access. Redirecting to login...");
+        }
 
         if (resp.ok) {
           const json = await resp.json();

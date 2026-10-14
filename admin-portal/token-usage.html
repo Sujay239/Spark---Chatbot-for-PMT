@@ -3,28 +3,53 @@
 
 <head>
   <link rel="icon" type="image/png" href="logo.png" />
+  <style id="auth-guard-style">
+    html { display: none !important; }
+  </style>
   <script>
-    // Environment & Route Protection: Redirect unauthenticated requests to login
-    const isLocalDev = window.location.hostname === "localhost" || 
-                       window.location.hostname === "127.0.0.1" || 
-                       window.location.protocol === "file:";
-    if (
-      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
-      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
-    ) {
-      window.location.replace(isLocalDev ? "login.html" : "/admin/login");
-    }
+    // Strict Route Protection: Redirect unauthenticated requests to login immediately
+    (function() {
+      const isLocalDev = window.location.hostname === "localhost" || 
+                         window.location.hostname === "127.0.0.1" || 
+                         window.location.protocol === "file:" ||
+                         window.location.pathname.endsWith(".html") ||
+                         !window.location.pathname.startsWith("/admin/");
+      window.isLocalDev = isLocalDev;
+
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
+
+      if (!token || !isAuth || !token.trim()) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("adminEmail");
+        sessionStorage.clear();
+        window.location.replace(isLocalDev ? "login.html" : "/admin/login");
+        throw new Error("Unauthorized access. Redirecting to login...");
+      } else {
+        document.documentElement.style.display = "";
+        const guard = document.getElementById("auth-guard-style");
+        if (guard) guard.remove();
+      }
+    })();
 
     function logout() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("adminEmail");
       sessionStorage.clear();
-      window.location.href = isLocalDev ? "login.html" : "/admin/login";
+      const isLocal = window.isLocalDev !== undefined ? window.isLocalDev : (
+        window.location.hostname === "localhost" || 
+        window.location.hostname === "127.0.0.1" || 
+        window.location.protocol === "file:" ||
+        window.location.pathname.endsWith(".html") ||
+        !window.location.pathname.startsWith("/admin/")
+      );
+      window.location.replace(isLocal ? "login.html" : "/admin/login");
     }
 
     // Auto-resolve internal links for local dev (Live Server / localhost)
-    if (isLocalDev) {
+    if (window.isLocalDev) {
       document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a[href^='/admin/']").forEach(el => {
           const route = el.getAttribute("href").replace(/^\/admin\//, "");
@@ -1593,8 +1618,9 @@
         });
         clearTimeout(timeoutId);
 
-        if (response.status === 401) {
-          throw new Error("HTTP 401: Unauthorized access. Missing or invalid authorization token.");
+        if (response.status === 401 || response.status === 403) {
+          setTimeout(logout, 1200);
+          throw new Error("HTTP 401: Unauthorized access. Redirecting to login...");
         }
 
         if (!response.ok) {

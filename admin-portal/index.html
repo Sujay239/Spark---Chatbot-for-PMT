@@ -5,27 +5,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PMT Spark Admin Portal</title>
+  <style>
+    html { display: none !important; }
+  </style>
   <script>
-    // Environment & Session Aware Smart Redirect
-    const isLocalDev = window.location.hostname === "localhost" || 
-                       window.location.hostname === "127.0.0.1" || 
-                       window.location.protocol === "file:";
-    const hasToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
-    const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
-    const targetPath = (hasToken && isAuth)
-      ? (isLocalDev ? "overview.html" : "/admin/overview")
-      : (isLocalDev ? "login.html" : "/admin/login");
-    window.location.replace(targetPath);
-
-    // Auto-resolve anchor tags for local development
-    if (isLocalDev) {
-      document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("a[href^='/admin/']").forEach(a => {
-          const path = a.getAttribute("href").replace(/^\/admin\//, "");
-          a.setAttribute("href", path + ".html");
-        });
-      });
-    }
+    (function() {
+      const isLocalDev = window.location.hostname === "localhost" || 
+                         window.location.hostname === "127.0.0.1" || 
+                         window.location.protocol === "file:" ||
+                         window.location.pathname.endsWith(".html") ||
+                         !window.location.pathname.startsWith("/admin/");
+      const hasToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
+      const targetPath = (hasToken && isAuth)
+        ? (isLocalDev ? "overview.html" : "/admin/overview")
+        : (isLocalDev ? "login.html" : "/admin/login");
+      window.location.replace(targetPath);
+    })();
   </script>
   <style>
     body {

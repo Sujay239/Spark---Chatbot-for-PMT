@@ -362,10 +362,15 @@
  
   <script>
     // Auto-redirect if already authenticated with active token
+    const isLocalDev = window.location.hostname === "localhost" || 
+                       window.location.hostname === "127.0.0.1" || 
+                       window.location.protocol === "file:" ||
+                       window.location.pathname.endsWith(".html") ||
+                       !window.location.pathname.startsWith("/admin/");
     const existingToken = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
-    if (existingToken && isLoggedIn) {
-      window.location.replace("overview.html");
+    if (existingToken && isLoggedIn && existingToken.trim()) {
+      window.location.replace(isLocalDev ? "overview.html" : "/admin/overview");
     }
 
     const loginForm = document.getElementById("spark-login-form");
@@ -460,7 +465,9 @@
           setTimeout(() => {
             const isLocalDev = window.location.hostname === "localhost" || 
                                window.location.hostname === "127.0.0.1" || 
-                               window.location.protocol === "file:";
+                               window.location.protocol === "file:" ||
+                               window.location.pathname.endsWith(".html") ||
+                               !window.location.pathname.startsWith("/admin/");
             window.location.href = isLocalDev ? "overview.html" : "/admin/overview";
           }, 450);
         } else {

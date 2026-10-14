@@ -3,28 +3,53 @@
 
 <head>
   <link rel="icon" type="image/png" href="logo.png" />
+  <style id="auth-guard-style">
+    html { display: none !important; }
+  </style>
   <script>
-    // Environment & Route Protection: Redirect unauthenticated requests to login
-    const isLocalDev = window.location.hostname === "localhost" || 
-                       window.location.hostname === "127.0.0.1" || 
-                       window.location.protocol === "file:";
-    if (
-      (localStorage.getItem("isLoggedIn") !== "true" && sessionStorage.getItem("isLoggedIn") !== "true") ||
-      (!localStorage.getItem("authToken") && !sessionStorage.getItem("authToken"))
-    ) {
-      window.location.replace(isLocalDev ? "login.html" : "/admin/login");
-    }
+    // Strict Route Protection: Redirect unauthenticated requests to login immediately
+    (function() {
+      const isLocalDev = window.location.hostname === "localhost" || 
+                         window.location.hostname === "127.0.0.1" || 
+                         window.location.protocol === "file:" ||
+                         window.location.pathname.endsWith(".html") ||
+                         !window.location.pathname.startsWith("/admin/");
+      window.isLocalDev = isLocalDev;
+
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+      const isAuth = localStorage.getItem("isLoggedIn") === "true" || sessionStorage.getItem("isLoggedIn") === "true";
+
+      if (!token || !isAuth || !token.trim()) {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("adminEmail");
+        sessionStorage.clear();
+        window.location.replace(isLocalDev ? "login.html" : "/admin/login");
+        throw new Error("Unauthorized access. Redirecting to login...");
+      } else {
+        document.documentElement.style.display = "";
+        const guard = document.getElementById("auth-guard-style");
+        if (guard) guard.remove();
+      }
+    })();
 
     function logout() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("adminEmail");
       sessionStorage.clear();
-      window.location.href = isLocalDev ? "login.html" : "/admin/login";
+      const isLocal = window.isLocalDev !== undefined ? window.isLocalDev : (
+        window.location.hostname === "localhost" || 
+        window.location.hostname === "127.0.0.1" || 
+        window.location.protocol === "file:" ||
+        window.location.pathname.endsWith(".html") ||
+        !window.location.pathname.startsWith("/admin/")
+      );
+      window.location.replace(isLocal ? "login.html" : "/admin/login");
     }
 
     // Auto-resolve internal links for local dev (Live Server / localhost)
-    if (isLocalDev) {
+    if (window.isLocalDev) {
       document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("a[href^='/admin/']").forEach(el => {
           const route = el.getAttribute("href").replace(/^\/admin\//, "");
@@ -40,103 +65,53 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
     rel="stylesheet" />
-  <!-- Fonts: Space Grotesk, Geist, JetBrains Mono -->
+  <!-- Fonts: Space Grotesk, Geist, Inter, JetBrains Mono -->
   <link href="https://fonts.googleapis.com" rel="preconnect" />
   <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap"
     rel="stylesheet" />
-  <!-- Tailwind CSS v3 -->
+  <!-- Tailwind CSS v3 with theme plugins -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
       theme: {
         extend: {
-          "colors": {
-            "on-tertiary": "#00354a",
-            "surface-container-low": "#0e1c2e",
-            "tertiary-fixed-dim": "#7bd0ff",
+          colors: {
             "primary": "#56dacd",
-            "inverse-primary": "#006a62",
-            "on-surface": "#d5e3fd",
-            "on-tertiary-container": "#00364b",
-            "tertiary-container": "#00a5de",
-            "surface-container-lowest": "#020e20",
-            "surface-container-high": "#1d2b3e",
-            "primary-fixed-dim": "#56dacd",
-            "surface": "#051426",
             "primary-container": "#00aca0",
             "on-primary-container": "#003934",
-            "on-surface-variant": "#bbc9c6",
-            "surface-tint": "#56dacd",
-            "error": "#ffb4ab",
-            "secondary-container": "#007daa",
-            "background": "#051426",
-            "on-tertiary-fixed-variant": "#004c69",
-            "surface-variant": "#283549",
-            "surface-container": "#122033",
-            "surface-container-highest": "#283549",
-            "outline-variant": "#3c4947",
-            "on-primary-fixed": "#00201d",
-            "secondary-fixed-dim": "#7cd0ff",
-            "inverse-surface": "#d5e3fd",
-            "on-secondary": "#00344a",
-            "on-secondary-container": "#fcfcff",
-            "on-secondary-fixed-variant": "#004c69",
-            "on-tertiary-fixed": "#001e2c",
-            "on-primary-fixed-variant": "#00504a",
-            "outline": "#869491",
-            "on-primary": "#003733",
-            "primary-fixed": "#76f7e9",
-            "secondary-fixed": "#c4e7ff",
-            "on-background": "#d5e3fd",
-            "tertiary-fixed": "#c4e7ff",
-            "on-error": "#690005",
-            "tertiary": "#7bd0ff",
-            "surface-bright": "#2d3a4e",
-            "inverse-on-surface": "#243144",
-            "on-error-container": "#ffdad6",
+            "surface": "#051426",
             "surface-dim": "#051426",
+            "surface-bright": "#2d3a4e",
+            "surface-container-lowest": "#020e20",
+            "surface-container-low": "#0e1c2e",
+            "surface-container": "#122033",
+            "surface-container-high": "#1d2b3e",
+            "surface-container-highest": "#283549",
+            "surface-variant": "#283549",
+            "on-surface": "#d5e3fd",
+            "on-surface-variant": "#bbc9c6",
+            "outline": "#869491",
+            "outline-variant": "#3c4947",
+            "error": "#ffb4ab",
             "error-container": "#93000a",
             "secondary": "#7cd0ff",
-            "on-secondary-fixed": "#001e2c"
+            "tertiary": "#7bd0ff"
           },
-          "borderRadius": {
-            "DEFAULT": "0.125rem",
-            "lg": "0.25rem",
-            "xl": "0.5rem",
-            "full": "0.75rem"
-          },
-          "fontFamily": {
+          fontFamily: {
             "headline-lg": ["Space Grotesk", "sans-serif"],
             "headline-md": ["Space Grotesk", "sans-serif"],
             "headline-sm": ["Space Grotesk", "sans-serif"],
-            "headline-xl": ["Space Grotesk", "sans-serif"],
-            "headline-xl-mobile": ["Space Grotesk", "sans-serif"],
-            "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
-            "body-lg": ["Geist", "sans-serif"],
-            "body-md": ["Geist", "sans-serif"],
-            "body-sm": ["Geist", "sans-serif"],
+            "body-lg": ["Geist", "Inter", "sans-serif"],
+            "body-md": ["Geist", "Inter", "sans-serif"],
+            "body-sm": ["Geist", "Inter", "sans-serif"],
             "label-lg": ["JetBrains Mono", "monospace"],
             "label-md": ["JetBrains Mono", "monospace"],
             "label-sm": ["JetBrains Mono", "monospace"],
-            "sans": ["Geist", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+            "sans": ["Geist", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
             "mono": ["JetBrains Mono", "monospace"]
-          },
-          "fontSize": {
-            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
-            "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }],
-            "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.04em", "fontWeight": "500" }],
-            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
-            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-            "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }],
-            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }],
-            "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.06em", "fontWeight": "500" }],
-            "headline-xl-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-            "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
-            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
-            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }]
           }
         }
       }
@@ -148,6 +123,14 @@
       display: inline-block;
       vertical-align: middle;
       line-height: 1;
+    }
+
+    .font-ui,
+    select,
+    option,
+    input {
+      font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      letter-spacing: -0.01em;
     }
 
     .custom-scrollbar::-webkit-scrollbar {
@@ -179,6 +162,12 @@
     .glow-teal-sm,
     .cyan-glow-sm {
       box-shadow: 0 0 15px -3px rgba(0, 172, 160, 0.35);
+    }
+
+    .glass-tier-1 {
+      background: rgba(18, 32, 51, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
   </style>
 </head>
@@ -285,10 +274,10 @@
         <div
           class="p-2.5 rounded-lg bg-surface-container-lowest/80 border border-outline-variant/30 text-label-sm font-label-sm">
           <div class="flex items-center justify-between text-outline">
-            <span>DIAGNOSTIC NODE</span>
-            <span class="text-primary font-semibold font-mono">14ms</span>
+            <span>DATABASE NODE</span>
+            <span class="text-primary font-semibold font-mono">PostgreSQL</span>
           </div>
-          <div class="text-on-surface mt-1 truncate">Node-East US • Cluster-4A</div>
+          <div class="text-on-surface mt-1 truncate">chat_memory mining engine</div>
         </div>
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
@@ -309,43 +298,169 @@
     <!-- Main Workspace Area -->
     <main class="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8 space-y-6">
       <!-- Page Breadcrumb & Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-outline-variant/20">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-outline-variant/30 pb-5">
         <div>
-          <div class="flex items-center gap-2 text-xs font-mono text-outline mb-1">
-            <span>SPARK AI ENGINE</span>
-            <span>/</span>
-            <span class="text-primary">POLICY GUARDRAILS</span>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <span class="material-symbols-outlined text-primary text-2xl" data-icon="alt_route">alt_route</span>
+            <h1 class="text-2xl sm:text-3xl font-headline-md text-on-surface font-semibold tracking-tight">
+              Fallbacks &amp; Policy Rules
+            </h1>
+            <span id="active-fallbacks-badge" class="px-2.5 py-0.5 rounded text-[11px] font-ui font-semibold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wide">
+              Loading...
+            </span>
+            <span id="db-engine-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-container border border-outline-variant/30 text-outline flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              PostgreSQL Node (chat_memory)
+            </span>
           </div>
-          <h1 class="text-2xl sm:text-3xl font-headline-md text-on-surface font-semibold tracking-tight">
-            Fallbacks &amp; Rules
-          </h1>
+          <p class="text-body-md text-on-surface-variant font-ui">
+            Real-time fallback occurrences and policy triggers identified directly from the clinical chat memory table.
+          </p>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-primary/10 text-primary border border-primary/30">
-            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-            12 ACTIVE POLICIES
-          </span>
+
+        <div class="flex items-center gap-2.5 self-start lg:self-auto">
+          <button id="refresh-btn" onclick="fetchFallbacksTelemetry()"
+            class="px-3.5 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container border border-outline-variant/40 text-on-surface text-xs font-medium font-ui flex items-center gap-2 transition-all cursor-pointer shadow-sm active:scale-95">
+            <span id="refresh-icon" class="material-symbols-outlined text-base">refresh</span>
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      <!-- ONLY TABLE CARD -->
+      <!-- Telemetry Error Banner (Shown directly on screen when Webhook Fails - ZERO FAKE DATA) -->
+      <div id="telemetry-error-banner"
+        class="hidden p-5 rounded-xl border border-error/50 bg-error-container/20 text-on-surface shadow-[0_0_30px_rgba(255,180,171,0.2)] transition-all duration-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-11 h-11 rounded-lg bg-error-container/60 border border-error/50 flex items-center justify-center text-error shrink-0">
+              <span class="material-symbols-outlined text-2xl" data-icon="error">error</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-headline-sm text-headline-sm text-error font-bold tracking-tight">
+                  Failed to get datas
+                </h2>
+                <span
+                  class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-error/20 text-error border border-error/40 font-mono">
+                  ERROR
+                </span>
+              </div>
+              <p id="telemetry-error-message" class="text-body-sm font-body-sm text-on-surface-variant mt-1 font-mono">
+                Could not retrieve fallback records from n8n webhook.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button onclick="fetchFallbacksTelemetry()"
+              class="px-4 py-2 rounded-lg bg-error-container hover:bg-error-container/80 text-error font-semibold text-body-sm border border-error/50 flex items-center gap-2 cursor-pointer transition-colors shadow-sm">
+              <span class="material-symbols-outlined text-base" data-icon="refresh">refresh</span>
+              <span>Retry</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Fallback KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1: Total Fallbacks -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span class="font-ui font-medium uppercase tracking-wider text-[11px]">TOTAL FALLBACKS</span>
+            <span class="material-symbols-outlined text-primary text-base" data-icon="alt_route">alt_route</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span id="kpi-total-fallbacks" class="text-2xl font-bold font-mono text-on-surface">--</span>
+            <span class="text-xs text-primary font-mono font-semibold">chat_memory</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant font-ui">Total fallback occurrences mined from sessions</div>
+        </div>
+
+        <!-- KPI 2: Safety Contraindications -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-red-500/30 space-y-2 bg-red-950/15">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span class="font-ui font-medium uppercase tracking-wider text-[11px] text-red-400">SAFETY CONTRAINDICATIONS</span>
+            <span class="material-symbols-outlined text-red-400 text-base" data-icon="security">security</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span id="kpi-safety-count" class="text-2xl font-bold font-mono text-red-300">--</span>
+            <span class="text-xs text-red-400 font-mono font-semibold">High Priority</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant font-ui">Carotid, cardiac, pregnancy, pediatric safety warnings</div>
+        </div>
+
+        <!-- KPI 3: KB Misses -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-amber-500/30 space-y-2 bg-amber-950/15">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span class="font-ui font-medium uppercase tracking-wider text-[11px] text-amber-400">KB COVERAGE MISSES</span>
+            <span class="material-symbols-outlined text-amber-400 text-base" data-icon="help_center">help_center</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span id="kpi-kb-misses" class="text-2xl font-bold font-mono text-amber-300">--</span>
+            <span class="text-xs text-amber-400 font-mono font-semibold">Unmatched</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant font-ui">Unanswered queries routed to human support</div>
+        </div>
+
+        <!-- KPI 4: Hardware & Scope Breaches -->
+        <div class="glass-tier-1 p-4 rounded-xl border border-sky-500/30 space-y-2 bg-sky-950/15">
+          <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+            <span class="font-ui font-medium uppercase tracking-wider text-[11px] text-sky-400">HARDWARE &amp; SCOPE</span>
+            <span class="material-symbols-outlined text-sky-400 text-base" data-icon="warning">warning</span>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <span id="kpi-hardware-count" class="text-2xl font-bold font-mono text-sky-300">--</span>
+            <span class="text-xs text-sky-400 font-mono font-semibold">Policy Guard</span>
+          </div>
+          <div class="text-[11px] text-on-surface-variant font-ui">Thermal faults, lead disconnects &amp; dosage requests</div>
+        </div>
+      </div>
+
+      <!-- MAIN TABLE CARD: Trigger Query & Fallback Ledger -->
       <div class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl overflow-hidden shadow-lg backdrop-blur-md">
         <!-- Table Toolbar -->
-        <div class="p-4 sm:p-5 border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
+        <div class="p-4 sm:p-5 border-b border-outline-variant/30 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5 flex-wrap">
             <span class="material-symbols-outlined text-primary text-xl" data-icon="rule">rule</span>
-            <h2 class="text-base font-semibold text-on-surface">Trigger Query &amp; Fallback Ledger</h2>
-            <span id="rule-count-badge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-surface-container border border-outline-variant/30 text-on-surface-variant">
-              Showing 12 rules
+            <h2 class="text-base font-semibold text-on-surface font-ui">Live Trigger Query &amp; Fallback Ledger</h2>
+            <span id="rule-count-subbadge" class="px-2 py-0.5 rounded text-[11px] font-mono bg-surface-container border border-outline-variant/30 text-on-surface-variant">
+              Mined from chat_memory
             </span>
           </div>
 
-          <!-- Search Input -->
-          <div class="relative w-full sm:w-80">
-            <span class="material-symbols-outlined absolute left-3 top-2.5 text-sm text-outline" data-icon="search">search</span>
-            <input type="text" id="rule-search" oninput="filterRulesTable()"
-              placeholder="Filter by trigger query, intent, or reason..."
-              class="w-full pl-9 pr-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-xs text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none font-sans" />
+          <!-- Controls: Category Filter + Search Box -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <!-- Category Filter Ribbon -->
+            <div class="flex items-center rounded-lg border border-outline-variant/30 bg-surface-container-high/60 p-0.5 text-xs font-ui">
+              <button onclick="setCategoryFilter('all')" id="cat-btn-all"
+                class="px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold transition-all cursor-pointer text-[11px]">
+                All
+              </button>
+              <button onclick="setCategoryFilter('Safety')" id="cat-btn-Safety"
+                class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]">
+                Safety
+              </button>
+              <button onclick="setCategoryFilter('Hardware')" id="cat-btn-Hardware"
+                class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]">
+                Hardware
+              </button>
+              <button onclick="setCategoryFilter('KB Miss')" id="cat-btn-KBMiss"
+                class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]">
+                KB Miss
+              </button>
+              <button onclick="setCategoryFilter('Policy')" id="cat-btn-Policy"
+                class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]">
+                Policy
+              </button>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative w-full sm:w-72">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-sm text-outline" data-icon="search">search</span>
+              <input type="text" id="rule-search" oninput="applyFilters()"
+                placeholder="Search queries, intents, reasons..."
+                class="w-full pl-9 pr-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-xs text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none font-ui" />
+            </div>
           </div>
         </div>
 
@@ -355,295 +470,18 @@
             <thead>
               <tr class="border-b border-outline-variant/30 bg-surface-container-lowest/60 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
                 <th class="py-3.5 px-4 font-semibold text-outline w-[34%]">TRIGGER QUERY</th>
-                <th class="py-3.5 px-4 font-semibold text-outline w-[28%]">DETECTED INTENT</th>
-                <th class="py-3.5 px-4 font-semibold text-outline w-[38%]">FALLBACK REASON</th>
+                <th class="py-3.5 px-4 font-semibold text-outline w-[24%]">DETECTED INTENT</th>
+                <th class="py-3.5 px-4 font-semibold text-outline w-[28%]">FALLBACK REASON</th>
+                <th class="py-3.5 px-4 font-semibold text-outline w-[14%] text-right">RECORDED TIME</th>
               </tr>
             </thead>
-            <tbody id="rules-tbody" class="divide-y divide-outline-variant/20 font-sans text-xs">
-              <!-- ROW 1 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "Can I place the TENS pads on the front of my neck or near my carotid artery?"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#ef4444]"></span>
-                    SAFETY_CAROTID_PLACEMENT
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Absolute Anatomical Contraindication:</span>
-                    Risk of severe bradycardia or acute blood pressure drops. Triggers immediate clinical safety warning and redirects to authorized electrode placement guide.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 2 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "My device sparked and began smoking when connected to the wall charger"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#f97316]/15 text-[#fb923c] border-[#f97316]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#f97316]"></span>
-                    HARDWARE_THERMAL_RUNAWAY
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Catastrophic Hardware Fault:</span>
-                    Fire/electrical hazard. Bot immediately instructs emergency disconnection and auto-routes incident to PMT Tier-2 Hardware Safety Investigation.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 3 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "I'm in my first trimester of pregnancy and experiencing severe sciatica pain, can I use high EMS?"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#ec4899]/15 text-[#f472b6] border-[#ec4899]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#ec4899]"></span>
-                    CONTRAINDICATION_PREGNANCY_EMS
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Clinical Contraindication:</span>
-                    Electrotherapy during pregnancy requires certified OB/GYN clearance. Triggers automated clinical caution disclaimer.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 4 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "Can I use Twin Stim Plus if I have an implanted cardiac pacemaker or defibrillator?"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#ef4444]"></span>
-                    CONTRAINDICATION_CARDIAC_DEVICE
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Critical Implant Interference Hazard:</span>
-                    Electrical stimulation disrupts pacemaker pacing cycles. Dispatches absolute restriction advisory and logs emergency alert.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 5 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "The pulses feel like sharp needle pinpricks and burning instead of smooth massage vibration"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#eab308]/15 text-[#facc15] border-[#eab308]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#eab308]"></span>
-                    IMPEDANCE_SKIN_IRRITATION
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Electrode Hydrogel Degradation / High Impedance:</span>
-                    High current density risk. System recommends immediate pad rehydration or gel pad replacement before resuming therapy.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 6 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "Liquid pain medication spilled directly inside the open 9V battery compartment"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#f97316]/15 text-[#fb923c] border-[#f97316]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#f97316]"></span>
-                    LIQUID_INGRESS_HAZARD
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Electrolyte Short-Circuit Hazard:</span>
-                    Liquid ingress in DC terminal. Bot halts usage session and advises battery disposal + PMT technical inspection.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 7 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "My doctor said use 100Hz but didn't specify pulse width, burst mode, or treatment duration"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#38bdf8]/15 text-[#38bdf8] border-[#38bdf8]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#38bdf8]"></span>
-                    PARAM_CLINICAL_AMBIGUITY
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Prescription Protocol Ambiguity:</span>
-                    System restricts arbitrary waveform adjustments without prescription specifics. Routes query to Clinician Support Desk.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 8 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "Can I use this device on my 7-year-old child for growing pains?"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#a855f7]/15 text-[#c084fc] border-[#a855f7]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#a855f7]"></span>
-                    PEDIATRIC_USAGE_UNVERIFIED
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Pediatric Safety Restriction:</span>
-                    PMT electrotherapy devices are indicated solely for adult use unless supervised by a licensed pediatric physical therapist.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 9 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "Device powers on and screen lights up, but zero stimulation comes out of Lead Channel 2"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#eab308]/15 text-[#facc15] border-[#eab308]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#eab308]"></span>
-                    HARDWARE_CHANNEL_NO_OUTPUT
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Lead Wire / Circuit Disconnect:</span>
-                    Potential open circuit in wire pin or blown output amplifier. Triggers Channel Continuity Troubleshooting sequence.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 10 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "What dosage of Ibuprofen should I take while running the TENS 7000 program?"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#64748b]/20 text-[#94a3b8] border-[#64748b]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#94a3b8]"></span>
-                    PHARMACEUTICAL_ADVICE_REQUEST
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Medical Scope Exceeded:</span>
-                    Spark AI does not dispense pharmacological dosing recommendations. Advises consulting attending physician or pharmacist.
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 11 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "Toddler bit into the electrode wire and a metal prong snapped off in their mouth"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#ef4444]"></span>
-                    EMERGENCY_FOREIGN_BODY_INGESTION
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Acute Pediatric Emergency:</span>
-                    Immediate emergency directive displaying local emergency dispatch (911) and US Poison Control hotline (1-800-222-1222).
-                  </div>
-                </td>
-              </tr>
-
-              <!-- ROW 12 -->
-              <tr class="rule-row hover:bg-surface-container-high/30 transition-colors">
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-start gap-2.5">
-                    <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
-                    <span class="text-on-surface font-medium leading-relaxed">
-                      "How can I bypass the automatic 30-minute auto-shutoff timer during overnight sleep?"
-                    </span>
-                  </div>
-                </td>
-                <td class="py-4 px-4 align-top whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium bg-[#f59e0b]/15 text-[#fbbf24] border-[#f59e0b]/30">
-                    <span class="w-1.5 h-1.5 rounded-full bg-[#f59e0b]"></span>
-                    OVERNIGHT_UNSUPERVISED_USE
-                  </span>
-                </td>
-                <td class="py-4 px-4 align-top">
-                  <div class="text-on-surface-variant leading-relaxed font-sans">
-                    <span class="text-on-surface font-medium">Sleep Hazard Policy:</span>
-                    Overnight stimulation increases risk of skin necrosis and thermal irritation. Firmware override requests are strictly rejected by policy.
+            <tbody id="rules-tbody" class="divide-y divide-outline-variant/20 font-ui text-xs">
+              <!-- Dynamically populated from live chat_memory records -->
+              <tr>
+                <td colspan="4" class="py-12 text-center text-outline font-ui text-xs">
+                  <div class="flex flex-col items-center justify-center space-y-2">
+                    <span class="material-symbols-outlined text-3xl text-primary animate-spin">refresh</span>
+                    <span class="font-medium">Connecting to chat_memory PostgreSQL node...</span>
                   </div>
                 </td>
               </tr>
@@ -653,10 +491,10 @@
 
         <!-- Table Footer / Pagination Info -->
         <div class="p-3.5 sm:p-4 border-t border-outline-variant/30 bg-surface-container-lowest/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-on-surface-variant font-mono">
-          <div>Showing 1 to <span id="visible-count">12</span> of 12 rules</div>
+          <div>Showing <span id="visible-count">0</span> of <span id="total-count">0</span> live incidents</div>
           <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
-            <span>All Guardrail Rules Synchronized</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+            <span>PostgreSQL chat_memory Live Synchronized</span>
           </div>
         </div>
       </div>
@@ -677,25 +515,318 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Live search/filter function for the Rules Table
-    function filterRulesTable() {
-      const query = document.getElementById('rule-search').value.toLowerCase().trim();
-      const rows = document.querySelectorAll('.rule-row');
-      let visibleCount = 0;
+    // =========================================================================
+    // STATE & CONFIGURATION
+    // =========================================================================
+    const FALLBACKS_WEBHOOK_URL = "https://n8n.srv917960.hstgr.cloud/webhook/spark-fallbacks-rules";
 
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        if (text.includes(query)) {
-          row.style.display = '';
-          visibleCount++;
+    function getAuthToken() {
+      return localStorage.getItem("authToken") || 
+             sessionStorage.getItem("authToken") || 
+             localStorage.getItem("adminToken") || 
+             sessionStorage.getItem("adminToken") || "";
+    }
+
+    let allFallbacks = [];
+    let activeCategory = "all";
+
+    // =========================================================================
+    // DATA FETCHING ENGINE (STRICTLY REAL DATA FROM CHAT_MEMORY)
+    // =========================================================================
+    async function fetchFallbacksTelemetry() {
+      const refreshIcon = document.getElementById("refresh-icon");
+      if (refreshIcon) refreshIcon.classList.add("animate-spin");
+
+      const token = getAuthToken();
+
+      try {
+        if (!token) {
+          setTimeout(logout, 1200);
+          throw new Error("Authentication token missing. Redirecting to login...");
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 14000);
+
+        const response = await fetch(FALLBACKS_WEBHOOK_URL, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.status === 401 || response.status === 403) {
+          setTimeout(logout, 1200);
+          throw new Error("Unauthorized or session expired. Redirecting to login...");
+        }
+
+        if (!response.ok) {
+          throw new Error(`Webhook returned status ${response.status}: ${response.statusText}`);
+        }
+
+        let raw;
+        try {
+          raw = await response.json();
+        } catch (jsonErr) {
+          throw new Error("Webhook returned an invalid or empty JSON response.");
+        }
+
+        const data = Array.isArray(raw) ? raw[0] : raw;
+
+        if (!data || !data.kpi) {
+          throw new Error("Invalid payload: Webhook did not return expected fallback data structure.");
+        }
+
+        hideErrorState();
+        allFallbacks = data.fallbacks || [];
+        renderKPIs(data.kpi);
+        applyFilters();
+      } catch (err) {
+        const errMsg = err.name === "AbortError"
+          ? "Webhook timed out after 14 seconds. n8n workflow took too long to respond."
+          : (err.message || "Failed to connect to webhook");
+        console.error("Fallbacks webhook fetch failed:", errMsg);
+        showErrorState(errMsg);
+      } finally {
+        if (refreshIcon) {
+          setTimeout(() => refreshIcon.classList.remove("animate-spin"), 400);
+        }
+      }
+    }
+
+    // =========================================================================
+    // ERROR STATE (STRICTLY ZERO FAKE / FALLBACK DATA)
+    // =========================================================================
+    function showErrorState(detail) {
+      allFallbacks = [];
+
+      const banner = document.getElementById("telemetry-error-banner");
+      const msgEl = document.getElementById("telemetry-error-message");
+      if (banner) banner.classList.remove("hidden");
+      if (msgEl) msgEl.textContent = detail || "Could not retrieve fallback records from chat_memory.";
+
+      const dbBadge = document.getElementById("db-engine-badge");
+      if (dbBadge) {
+        dbBadge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-error-container/30 border border-error/40 text-error flex items-center gap-1.5";
+        dbBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Failed to get datas';
+      }
+
+      const activeBadge = document.getElementById("active-fallbacks-badge");
+      if (activeBadge) activeBadge.textContent = "FAILED TO GET DATAS";
+
+      const kpiTotal = document.getElementById("kpi-total-fallbacks");
+      const kpiSafety = document.getElementById("kpi-safety-count");
+      const kpiKb = document.getElementById("kpi-kb-misses");
+      const kpiHw = document.getElementById("kpi-hardware-count");
+
+      if (kpiTotal) kpiTotal.textContent = "--";
+      if (kpiSafety) kpiSafety.textContent = "--";
+      if (kpiKb) kpiKb.textContent = "--";
+      if (kpiHw) kpiHw.textContent = "--";
+
+      const tbody = document.getElementById("rules-tbody");
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-12 text-center text-error font-ui text-xs">
+              <div class="flex flex-col items-center justify-center space-y-2">
+                <span class="material-symbols-outlined text-3xl text-error">error_outline</span>
+                <span class="font-semibold text-sm">Failed to get datas</span>
+                <span class="text-outline text-xs font-mono">${detail || "Could not retrieve fallback events from Postgres chat_memory."}</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+
+      const visibleCount = document.getElementById("visible-count");
+      const totalCount = document.getElementById("total-count");
+      if (visibleCount) visibleCount.textContent = "0";
+      if (totalCount) totalCount.textContent = "0";
+    }
+
+    function hideErrorState() {
+      const banner = document.getElementById("telemetry-error-banner");
+      if (banner) banner.classList.add("hidden");
+
+      const dbBadge = document.getElementById("db-engine-badge");
+      if (dbBadge) {
+        dbBadge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-surface-container border border-outline-variant/30 text-outline flex items-center gap-1.5";
+        dbBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>PostgreSQL Node (chat_memory)';
+      }
+    }
+
+    // =========================================================================
+    // RENDER FUNCTIONS
+    // =========================================================================
+    function renderKPIs(kpi) {
+      const total = kpi.total_fallbacks || 0;
+      const kpiTotal = document.getElementById("kpi-total-fallbacks");
+      const kpiSafety = document.getElementById("kpi-safety-count");
+      const kpiKb = document.getElementById("kpi-kb-misses");
+      const kpiHw = document.getElementById("kpi-hardware-count");
+      const activeBadge = document.getElementById("active-fallbacks-badge");
+
+      if (kpiTotal) kpiTotal.textContent = total.toLocaleString();
+      if (kpiSafety) kpiSafety.textContent = (kpi.safety_guardrails_count || 0).toLocaleString();
+      if (kpiKb) kpiKb.textContent = (kpi.kb_misses_count || 0).toLocaleString();
+      if (kpiHw) kpiHw.textContent = ((kpi.hardware_faults_count || 0) + (kpi.policy_violations_count || 0)).toLocaleString();
+
+      if (activeBadge) {
+        activeBadge.textContent = `${total} LIVE INCIDENTS`;
+      }
+    }
+
+    function setCategoryFilter(cat) {
+      activeCategory = cat;
+
+      const buttons = ["all", "Safety", "Hardware", "KB Miss", "Policy"];
+      buttons.forEach(c => {
+        const btn = document.getElementById(`cat-btn-${c.replace(/\s+/g, '')}`);
+        if (!btn) return;
+        if (c.toLowerCase() === cat.toLowerCase()) {
+          btn.className = "px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold transition-all cursor-pointer text-[11px]";
         } else {
-          row.style.display = 'none';
+          btn.className = "px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]";
         }
       });
 
-      document.getElementById('rule-count-badge').textContent = `Showing ${visibleCount} rules`;
-      document.getElementById('visible-count').textContent = visibleCount;
+      applyFilters();
     }
+
+    function applyFilters() {
+      const query = (document.getElementById("rule-search")?.value || "").toLowerCase().trim();
+      const tbody = document.getElementById("rules-tbody");
+      const visibleCountEl = document.getElementById("visible-count");
+      const totalCountEl = document.getElementById("total-count");
+
+      if (!tbody) return;
+
+      const filtered = allFallbacks.filter(item => {
+        const matchesCat = (activeCategory === "all") || (item.category && item.category.toLowerCase() === activeCategory.toLowerCase());
+        if (!matchesCat) return false;
+
+        if (!query) return true;
+
+        const qText = (item.triggerQuery || "").toLowerCase();
+        const iText = (item.detectedIntent || "").toLowerCase();
+        const rText = (item.fallbackReason || "").toLowerCase();
+        const sText = (item.sessionId || "").toLowerCase();
+
+        return qText.includes(query) || iText.includes(query) || rText.includes(query) || sText.includes(query);
+      });
+
+      if (totalCountEl) totalCountEl.textContent = allFallbacks.length;
+      if (visibleCountEl) visibleCountEl.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        if (allFallbacks.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="py-16 text-center text-on-surface-variant font-ui text-xs">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                  <div class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-2xl">verified_user</span>
+                  </div>
+                  <div class="text-on-surface font-semibold text-sm">No Fallback Incidents Recorded Yet</div>
+                  <div class="text-outline text-xs max-w-md">
+                    All live sessions in <span class="font-mono text-primary">public.chat_memory</span> resolved successfully without triggering guardrail policies or unanswerable fallbacks.
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" class="py-12 text-center text-outline font-ui text-xs">
+                No fallback incidents match your current filter: "${query || activeCategory}".
+              </td>
+            </tr>
+          `;
+        }
+        return;
+      }
+
+      tbody.innerHTML = "";
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-surface-container-high/30 transition-colors";
+
+        // Category/Severity styling for intent badge
+        let badgeCls = "bg-[#64748b]/20 text-[#94a3b8] border-[#64748b]/30";
+        let dotCls = "bg-[#94a3b8]";
+
+        const cat = (item.category || "").toLowerCase();
+        const sev = (item.severity || "").toLowerCase();
+
+        if (cat === "safety" || sev === "critical") {
+          badgeCls = "bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/30";
+          dotCls = "bg-[#ef4444]";
+        } else if (cat === "hardware") {
+          badgeCls = "bg-[#f97316]/15 text-[#fb923c] border-[#f97316]/30";
+          dotCls = "bg-[#f97316]";
+        } else if (cat === "kb miss" || cat === "fallback") {
+          badgeCls = "bg-[#eab308]/15 text-[#facc15] border-[#eab308]/30";
+          dotCls = "bg-[#eab308]";
+        } else if (cat === "domain") {
+          badgeCls = "bg-[#a855f7]/15 text-[#c084fc] border-[#a855f7]/30";
+          dotCls = "bg-[#a855f7]";
+        }
+
+        tr.innerHTML = `
+          <td class="py-4 px-4 align-top">
+            <div class="flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5" data-icon="chat_bubble_outline">chat_bubble_outline</span>
+              <div class="space-y-1">
+                <span class="text-on-surface font-medium leading-relaxed block">
+                  "${escapeHtml(item.triggerQuery)}"
+                </span>
+                <span class="text-[10px] font-mono text-outline block">
+                  Session: <span class="text-primary/90">#${escapeHtml(item.sessionId)}</span>
+                </span>
+              </div>
+            </div>
+          </td>
+          <td class="py-4 px-4 align-top whitespace-nowrap">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded border font-mono text-[11px] font-medium ${badgeCls}">
+              <span class="w-1.5 h-1.5 rounded-full ${dotCls}"></span>
+              ${escapeHtml(item.detectedIntent)}
+            </span>
+          </td>
+          <td class="py-4 px-4 align-top">
+            <div class="text-on-surface-variant leading-relaxed font-ui">
+              ${escapeHtml(item.fallbackReason)}
+            </div>
+          </td>
+          <td class="py-4 px-4 align-top text-right whitespace-nowrap font-mono text-[11px] text-outline">
+            ${escapeHtml(item.timestamp || "Just now")}
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Auto-initialize on DOM load
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchFallbacksTelemetry();
+    });
   </script>
 </body>
 
