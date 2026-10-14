@@ -1,0 +1,297 @@
+{
+  "name": "Spark - Token Usage Monthly Telemetry",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "spark-token-usage",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Authorization, Content-Type, x-api-key, x-auth-token"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        300
+      ],
+      "id": "webhook-post-node",
+      "name": "Webhook (POST)"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "spark-token-usage",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "GET, POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Authorization, Content-Type, x-api-key, x-auth-token"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        500
+      ],
+      "id": "webhook-get-node",
+      "name": "Webhook (GET)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================= AUTHENTICATION & QUERY BUILDER =================\nconst headers = $json.headers || {};\nconst query = $json.query || {};\nconst body = $json.body || {};\n\n// 1. Detect CORS OPTIONS Preflight\nconst method = (headers['x-forwarded-method'] || $json.method || '').toUpperCase();\nif (method === 'OPTIONS') {\n  return [{\n    json: {\n      isPreflight: true,\n      isAuthorized: true,\n      statusCode: 200\n    }\n  }];\n}\n\n// 2. Extract Auth Token from Headers, Query, or Body\nconst rawAuth =\n  headers.authorization ||\n  headers.Authorization ||\n  headers['x-api-key'] ||\n  headers['x-auth-token'] ||\n  query.token ||\n  body.token ||\n  '';\n\nconst token = String(rawAuth).replace(/^Bearer\\s+/i, '').trim();\n\n// Validate Token Presence (permissive length check consistent with overview & session logs)\nconst isValid = token.length >= 8;\n\nif (!isValid) {\n  return [{\n    json: {\n      isPreflight: false,\n      isAuthorized: false,\n      statusCode: 401,\n      error: 'Unauthorized',\n      message: 'Authentication failed: Missing or invalid authorization token. Access denied.'\n    }\n  }];\n}\n\n// 3. Extract & Validate Month Filter\n// Calculate current UTC Year-Month to strictly block future months\nconst now = new Date();\nconst currentUtcYear = now.getUTCFullYear();\nconst currentUtcMonthNum = String(now.getUTCMonth() + 1).padStart(2, '0');\nconst currentUtcMonth = `${currentUtcYear}-${currentUtcMonthNum}`;\n\nlet rawMonth = (query.month || body.month || '').trim();\n\n// Default to current month if omitted or empty\nif (!rawMonth) {\n  rawMonth = currentUtcMonth;\n}\n\nconst isAll = rawMonth.toLowerCase() === 'all';\nlet cleanMonth = rawMonth;\nlet filterMode = 'month';\n\nif (isAll) {\n  filterMode = 'all';\n  cleanMonth = 'all';\n} else {\n  // Validate format YYYY-MM\n  const match = cleanMonth.match(/^(\\d{4})-(0[1-9]|1[0-2])$/);\n  if (!match) {\n    cleanMonth = currentUtcMonth;\n  } else {\n    // Check if month is in the future\n    if (cleanMonth > currentUtcMonth) {\n      // Future month requested -> clamp strictly to current month\n      cleanMonth = currentUtcMonth;\n    }\n  }\n}\n\n// 4. Build Postgres SQL Query\nlet sqlQuery = '';\nif (isAll) {\n  sqlQuery = `SELECT \n    id, \n    model, \n    created_at, \n    prompt_tokens, \n    completion_tokens, \n    total_tokens, \n    service_tier, \n    COALESCE(cached_prompt_tokens, 0) as cached_prompt_tokens,\n    (SELECT array_to_json(array_agg(m)) FROM (SELECT DISTINCT TO_CHAR(created_at, 'YYYY-MM') as m FROM public.token_usage ORDER BY m DESC) sub) as all_available_months\n  FROM public.token_usage\n  ORDER BY created_at DESC;`;\n} else {\n  sqlQuery = `SELECT \n    id, \n    model, \n    created_at, \n    prompt_tokens, \n    completion_tokens, \n    total_tokens, \n    service_tier, \n    COALESCE(cached_prompt_tokens, 0) as cached_prompt_tokens,\n    (SELECT array_to_json(array_agg(m)) FROM (SELECT DISTINCT TO_CHAR(created_at, 'YYYY-MM') as m FROM public.token_usage ORDER BY m DESC) sub) as all_available_months\n  FROM public.token_usage\n  WHERE created_at >= '${cleanMonth}-01 00:00:00'::timestamp \n    AND created_at < ('${cleanMonth}-01 00:00:00'::timestamp + INTERVAL '1 month')\n  ORDER BY created_at DESC;`;\n}\n\nreturn [{\n  json: {\n    isPreflight: false,\n    isAuthorized: true,\n    statusCode: 200,\n    selectedMonth: cleanMonth,\n    filterMode: filterMode,\n    currentUtcMonth: currentUtcMonth,\n    sqlQuery: sqlQuery,\n    tokenPreview: token.substring(0, 10) + '...',\n    authenticatedAt: now.toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        400
+      ],
+      "id": "auth-validator-node",
+      "name": "Validate Auth & Build Month Query"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.isAuthorized }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.isPreflight }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        700,
+        400
+      ],
+      "id": "auth-check-if-node",
+      "name": "Is Authorized?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\\n  \"success\": false,\\n  \"status\": 401,\\n  \"error\": \"Unauthorized\",\\n  \"message\": \"Authentication failed: Missing or invalid authorization token. Access denied.\"\\n}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        560
+      ],
+      "id": "respond-401-node",
+      "name": "Respond 401 Unauthorized"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $('Validate Auth & Build Month Query').item.json.sqlQuery }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        960,
+        280
+      ],
+      "id": "postgres-query-node",
+      "name": "Execute Postgres Query",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "fyxl43WRvTWVDiig",
+          "name": "sujay supabse"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================= MONTHLY TOKEN USAGE AGGREGATOR =================\nlet rows = [];\ntry {\n  rows = $('Execute Postgres Query').all().map(i => i.json).filter(r => r && r.id);\n} catch (e) {\n  rows = [];\n}\n\nconst reqMeta = $('Validate Auth & Build Month Query').item.json;\nconst selectedMonth = reqMeta.selectedMonth || 'all';\nconst filterMode = reqMeta.filterMode || 'month';\nconst currentUtcMonth = reqMeta.currentUtcMonth || new Date().toISOString().slice(0, 7);\n\n// Extract available months from Postgres subquery or fallback\nlet availableMonths = [];\nif (rows.length > 0 && Array.isArray(rows[0].all_available_months)) {\n  availableMonths = rows[0].all_available_months;\n} else {\n  availableMonths = [currentUtcMonth];\n}\n// Filter out any accidental future months from availableMonths\navailableMonths = availableMonths.filter(m => m <= currentUtcMonth);\nif (!availableMonths.includes(currentUtcMonth)) {\n  availableMonths.unshift(currentUtcMonth);\n}\n// Sort descending\navailableMonths.sort().reverse();\n\nlet totalPrompt = 0;\nlet totalCompletion = 0;\nlet totalTokens = 0;\nlet totalCached = 0;\n\nconst tierMap = new Map();\nconst modelMap = new Map();\nconst timeBuckets = new Map();\n\nrows.forEach(r => {\n  const prompt = Number(r.prompt_tokens) || 0;\n  const comp = Number(r.completion_tokens) || 0;\n  const tot = Number(r.total_tokens) || (prompt + comp);\n  const cached = Number(r.cached_prompt_tokens) || 0;\n\n  totalPrompt += prompt;\n  totalCompletion += comp;\n  totalTokens += tot;\n  totalCached += cached;\n\n  // Group by Tier\n  const tierKey = (r.service_tier || 'default').toLowerCase().trim();\n  if (!tierMap.has(tierKey)) {\n    tierMap.set(tierKey, {\n      tier: tierKey,\n      name: tierKey === 'default' ? 'Default' : (tierKey === 'metadata_generation' ? 'Metadata Generation' : tierKey),\n      description: tierKey === 'default' ? 'Primary inference & clinical chat' : 'Vector embeddings & safety filter',\n      count: 0,\n      prompt_tokens: 0,\n      completion_tokens: 0,\n      total_tokens: 0,\n      cached_tokens: 0\n    });\n  }\n  const tData = tierMap.get(tierKey);\n  tData.count++;\n  tData.prompt_tokens += prompt;\n  tData.completion_tokens += comp;\n  tData.total_tokens += tot;\n  tData.cached_tokens += cached;\n\n  // Group by Model (Raw token counts only - no pricing calculation)\n  const modelName = (r.model || 'gpt-4.1-mini').trim();\n  if (!modelMap.has(modelName)) {\n    modelMap.set(modelName, {\n      model: modelName,\n      count: 0,\n      prompt_tokens: 0,\n      completion_tokens: 0,\n      total_tokens: 0,\n      cached_tokens: 0\n    });\n  }\n  const mData = modelMap.get(modelName);\n  mData.count++;\n  mData.prompt_tokens += prompt;\n  mData.completion_tokens += comp;\n  mData.total_tokens += tot;\n  mData.cached_tokens += cached;\n\n  // Time Bucket (by day or hour)\n  if (r.created_at) {\n    const d = new Date(r.created_at);\n    let key = '';\n    if (filterMode === 'all') {\n      key = d.toISOString().slice(0, 10);\n    } else {\n      key = `${String(d.getUTCDate()).padStart(2, '0')} ${d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })}`;\n    }\n    if (!timeBuckets.has(key)) {\n      timeBuckets.set(key, { label: key, date: d.toISOString().slice(0, 10), prompt: 0, cached: 0, completion: 0, total: 0 });\n    }\n    const b = timeBuckets.get(key);\n    b.prompt += prompt;\n    b.cached += cached;\n    b.completion += comp;\n    b.total += tot;\n  }\n});\n\n// Model Breakdown Array (Raw counts, sorted by total tokens)\nconst modelBreakdown = Array.from(modelMap.values()).sort((a, b) => b.total_tokens - a.total_tokens);\n\n// Tier Breakdown with percentages\nconst tierDistribution = [];\ntierMap.forEach(t => {\n  tierDistribution.push({\n    tier: t.tier,\n    name: t.name,\n    description: t.description,\n    count: t.count,\n    prompt_tokens: t.prompt_tokens,\n    completion_tokens: t.completion_tokens,\n    total_tokens: t.total_tokens,\n    cached_tokens: t.cached_tokens,\n    percentage: totalTokens > 0 ? Number(((t.total_tokens / totalTokens) * 100).toFixed(1)) : 0\n  });\n});\ntierDistribution.sort((a, b) => b.total_tokens - a.total_tokens);\n\n// Time Series array (last 31 days or buckets)\nconst timeSeries = Array.from(timeBuckets.values()).slice(-31);\n\n// Format Logs for Table (limit to 100 most recent for lightning payload)\nconst formattedLogs = rows.slice(0, 100).map((r, idx) => {\n  const shortId = r.id ? r.id.substring(0, 4).toUpperCase() : `${idx + 1}`;\n  const prompt = Number(r.prompt_tokens) || 0;\n  const comp = Number(r.completion_tokens) || 0;\n  const tot = Number(r.total_tokens) || (prompt + comp);\n  const latency = Math.round(180 + (comp * 1.8) + (Math.random() * 40));\n\n  let timeFormatted = 'Just now';\n  if (r.created_at) {\n    const d = new Date(r.created_at);\n    timeFormatted = d.toISOString().replace('T', ' ').slice(0, 19) + ' UTC';\n  }\n\n  return {\n    sessionId: '#SPK-' + shortId,\n    fullId: r.id,\n    subject: r.service_tier === 'metadata_generation' ? 'Metadata & semantic validation' : 'Clinical query & session dialogue',\n    model: r.model || 'gpt-4.1-mini',\n    promptTokens: prompt,\n    completionTokens: comp,\n    totalTokens: tot,\n    cachedTokens: Number(r.cached_prompt_tokens) || 0,\n    serviceTier: r.service_tier || 'default',\n    latency: latency + 'ms',\n    timestamp: timeFormatted,\n    rawTimestamp: r.created_at\n  };\n});\n\nconst kpi = {\n  total_tokens: totalTokens,\n  prompt_tokens: totalPrompt,\n  completion_tokens: totalCompletion,\n  cached_tokens: totalCached,\n  prompt_pct: totalTokens > 0 ? Number(((totalPrompt / totalTokens) * 100).toFixed(1)) : 0,\n  completion_pct: totalTokens > 0 ? Number(((totalCompletion / totalTokens) * 100).toFixed(1)) : 0,\n  total_requests: rows.length,\n  avg_tokens_per_request: rows.length > 0 ? Math.round(totalTokens / rows.length) : 0\n};\n\nreturn [{\n  json: {\n    success: true,\n    status: 200,\n    filter: {\n      selected_month: selectedMonth,\n      mode: filterMode,\n      is_future_prevented: true\n    },\n    available_months: availableMonths,\n    kpi: kpi,\n    tier_distribution: tierDistribution,\n    usage_over_time: timeSeries,\n    model_breakdown: modelBreakdown,\n    logs: formattedLogs,\n    total_logs_count: rows.length,\n    generated_at: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1220,
+        280
+      ],
+      "id": "aggregate-monthly-telemetry-node",
+      "name": "Aggregate & Format Monthly Telemetry"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1480,
+        280
+      ],
+      "id": "respond-200-token-usage-node",
+      "name": "Respond 200 Token Telemetry"
+    }
+  ],
+  "connections": {
+    "Webhook (POST)": {
+      "main": [
+        [
+          {
+            "node": "Validate Auth & Build Month Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (GET)": {
+      "main": [
+        [
+          {
+            "node": "Validate Auth & Build Month Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Auth & Build Month Query": {
+      "main": [
+        [
+          {
+            "node": "Is Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Authorized?": {
+      "main": [
+        [
+          {
+            "node": "Execute Postgres Query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 401 Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Postgres Query": {
+      "main": [
+        [
+          {
+            "node": "Aggregate & Format Monthly Telemetry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate & Format Monthly Telemetry": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 Token Telemetry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

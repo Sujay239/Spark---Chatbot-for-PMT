@@ -1,0 +1,1865 @@
+const fs = require("fs");
+const path = require("path");
+
+const targetFilePath = path.resolve(
+  __dirname,
+  "../admin-portal/token-usage.html",
+);
+const existingContent = fs.readFileSync(targetFilePath, "utf8");
+
+// Update Google Fonts link in <head> to include Inter and ensure Geist is prioritized
+let updatedHead = existingContent;
+const fontRegex =
+  /<link\s+href="https:\/\/fonts\.googleapis\.com\/css2\?family=Geist[\s\S]*?rel="stylesheet"\s*\/>/i;
+const newFontLink = `<link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />`;
+
+if (fontRegex.test(updatedHead)) {
+  updatedHead = updatedHead.replace(fontRegex, newFontLink);
+}
+
+// Update <style> block to include .font-ui and clean select/option typography
+const styleRegex = /<style>([\s\S]*?)<\/style>/i;
+const styleMatch = updatedHead.match(styleRegex);
+if (styleMatch) {
+  const customCss = `
+      /* UI Font Engine: Geist & Inter for sleek, modern SaaS controls */
+      .font-ui,
+      select,
+      option,
+      input[type="month"],
+      .month-picker-ctrl {
+        font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        letter-spacing: -0.01em;
+      }
+
+      select option {
+        background-color: #0e1c2e !important;
+        color: #d5e3fd !important;
+        padding: 9px 14px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+      }
+  `;
+  if (!styleMatch[1].includes(".font-ui")) {
+    updatedHead = updatedHead.replace(
+      styleRegex,
+      `<style>${styleMatch[1]}\n${customCss}\n</style>`,
+    );
+  }
+}
+
+// Find the line where <main starts and replace from <main down to </html>
+const mainIndex = updatedHead.indexOf(
+  '<main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8',
+);
+if (mainIndex === -1) {
+  console.error("Could not find <main start tag!");
+  process.exit(1);
+}
+
+const headAndSidebar = updatedHead.slice(0, mainIndex);
+
+const newMainAndScript = `<main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-y-auto w-full space-y-6">
+      <!-- Page Header & Filter Ribbon -->
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-outline-variant/30 pb-5">
+        <div>
+          <div class="flex items-center gap-2 mb-1 flex-wrap">
+            <span class="material-symbols-outlined text-primary text-2xl" data-icon="token">token</span>
+            <h1 class="text-headline-md font-headline-md font-semibold text-on-surface tracking-tight">
+              Token Usage &amp; Consumption Telemetry
+            </h1>
+            <span id="active-month-badge" class="px-2.5 py-0.5 rounded text-[11px] font-ui font-semibold bg-primary/15 text-primary border border-primary/30 uppercase tracking-wide">
+              OCTOBER 2026
+            </span>
+            <span id="db-engine-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-container border border-outline-variant/30 text-outline flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              PostgreSQL Node
+            </span>
+          </div>
+          <p class="text-body-md text-on-surface-variant font-ui">
+            Targeted monthly inference quotas, prompt caching metrics, and token throughput loaded directly from PostgreSQL.
+          </p>
+        </div>
+
+        <!-- Month Filter Controls (Strictly Previous Months + All, No Futures) -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          <!-- Stepper & Select Box -->
+          <div class="flex items-center rounded-xl border border-outline-variant/30 bg-surface-container-low/90 backdrop-blur-md p-1 gap-1 shadow-sm">
+            <button id="prev-month-btn" onclick="stepMonth(-1)"
+              class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-all disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+              title="Previous Month">
+              <span class="material-symbols-outlined text-base">chevron_left</span>
+            </button>
+            <div class="relative">
+              <select id="month-select" onchange="onMonthSelectChange(this.value)"
+                class="bg-surface-container/90 hover:bg-surface-container border border-outline-variant/30 hover:border-primary/50 text-on-surface text-[13px] font-medium font-ui rounded-lg pl-3 pr-8 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary/40 focus:outline-none cursor-pointer appearance-none transition-all shadow-inner tracking-tight">
+                <!-- Dynamically populated with past months only -->
+              </select>
+              <span class="material-symbols-outlined text-base text-outline absolute right-2 top-2 pointer-events-none transition-transform">expand_more</span>
+            </div>
+            <button id="next-month-btn" onclick="stepMonth(1)"
+              class="p-2 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-all disabled:opacity-25 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center"
+              title="Next Month (Future months strictly disabled)" disabled>
+              <span class="material-symbols-outlined text-base">chevron_right</span>
+            </button>
+          </div>
+
+          <!-- Quick Scope Switches -->
+          <div class="flex rounded-xl border border-outline-variant/30 bg-surface-container-low/90 p-1 text-xs font-ui font-medium">
+            <button id="btn-quick-current" onclick="selectMonth('current')"
+              class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-semibold transition-all cursor-pointer shadow-sm">
+              Current Month
+            </button>
+            <button id="btn-quick-all" onclick="selectMonth('all')"
+              class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer">
+              All Months
+            </button>
+          </div>
+
+          <!-- Native Month Picker Input (max clamped strictly to current month) -->
+          <div class="relative hidden sm:block" title="Jump to specific past month">
+            <input type="month" id="month-picker" onchange="onMonthPickerChange(this.value)"
+              class="bg-surface-container-low/90 hover:bg-surface-container text-on-surface text-xs font-ui rounded-xl border border-outline-variant/30 hover:border-primary/50 px-3 py-1.5 focus:border-primary focus:outline-none cursor-pointer transition-all shadow-sm">
+          </div>
+
+          <!-- Refresh Button -->
+          <button id="refresh-telemetry-btn" onclick="refreshCurrentMonth()"
+            class="p-2 rounded-xl border border-outline-variant/30 bg-surface-container-low/90 text-primary hover:bg-surface-container hover:border-primary/40 transition-all flex items-center justify-center cursor-pointer shadow-sm"
+            title="Refresh Live Postgres Telemetry">
+            <span id="refresh-icon" class="material-symbols-outlined text-lg">refresh</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Telemetry Error Banner (Directly Shown on Screen when Webhook Fails - ZERO FAKE DATA) -->
+      <div id="telemetry-error-banner"
+        class="hidden p-5 rounded-xl border border-error/50 bg-error-container/20 text-on-surface shadow-[0_0_30px_rgba(255,180,171,0.2)] transition-all duration-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div
+              class="w-11 h-11 rounded-lg bg-error-container/60 border border-error/50 flex items-center justify-center text-error shrink-0">
+              <span class="material-symbols-outlined text-2xl" data-icon="error">error</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="font-headline-sm text-headline-sm text-error font-bold tracking-tight">
+                  Failed to get datas
+                </h2>
+                <span
+                  class="px-2 py-0.5 rounded text-label-sm font-label-sm bg-error/20 text-error border border-error/40 font-mono">
+                  ERROR
+                </span>
+              </div>
+              <p id="telemetry-error-message" class="text-body-sm font-body-sm text-on-surface-variant mt-1 font-mono">
+                Could not retrieve telemetry from n8n webhook.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+            <button onclick="refreshCurrentMonth()"
+              class="px-4 py-2 rounded-lg bg-error-container hover:bg-error-container/80 text-error font-semibold text-body-sm border border-error/50 flex items-center gap-2 cursor-pointer transition-colors shadow-sm">
+              <span class="material-symbols-outlined text-base" data-icon="refresh">refresh</span>
+              <span>Retry</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telemetry Canvas Wrapper -->
+      <div id="telemetry-canvas" class="space-y-6 transition-opacity duration-200">
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- KPI 1: Total Tokens -->
+          <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+            <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+              <span id="kpi-total-tokens-label" class="font-ui font-medium uppercase tracking-wider text-[11px]">TOTAL TOKENS (OCTOBER 2026)</span>
+              <span class="material-symbols-outlined text-primary text-base" data-icon="generating_tokens">generating_tokens</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span id="kpi-total-tokens" class="text-2xl font-bold font-mono text-on-surface">--</span>
+              <span id="kpi-total-tokens-badge" class="text-xs text-primary font-mono font-semibold">Postgres</span>
+            </div>
+            <div id="kpi-total-tokens-sub" class="text-[11px] text-on-surface-variant font-ui">Prompt + Completion load for selected period</div>
+          </div>
+
+          <!-- KPI 2: Prompt Tokens -->
+          <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+            <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+              <span class="font-ui font-medium uppercase tracking-wider text-[11px]">PROMPT TOKENS</span>
+              <span class="material-symbols-outlined text-secondary text-base" data-icon="input">input</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span id="kpi-prompt-tokens" class="text-2xl font-bold font-mono text-on-surface">--</span>
+              <span id="kpi-prompt-share" class="text-xs text-secondary font-mono font-semibold">--%</span>
+            </div>
+            <div id="kpi-prompt-sub" class="text-[11px] text-on-surface-variant font-ui">Input context &amp; instructions tokens</div>
+          </div>
+
+          <!-- KPI 3: Completion Tokens -->
+          <div class="glass-tier-1 p-4 rounded-xl border border-outline-variant/30 space-y-2">
+            <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+              <span class="font-ui font-medium uppercase tracking-wider text-[11px]">COMPLETION TOKENS</span>
+              <span class="material-symbols-outlined text-primary text-base" data-icon="output">output</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span id="kpi-completion-tokens" class="text-2xl font-bold font-mono text-on-surface">--</span>
+              <span id="kpi-completion-share" class="text-xs text-primary font-mono font-semibold">--%</span>
+            </div>
+            <div id="kpi-completion-sub" class="text-[11px] text-on-surface-variant font-ui">Generated LLM reasoning &amp; output tokens</div>
+          </div>
+
+          <!-- KPI 4: Cached Tokens (Replaced OPERATIONS / LOGS) -->
+          <div class="glass-tier-1 p-4 rounded-xl border border-purple-500/30 space-y-2 relative overflow-hidden bg-purple-950/20">
+            <div class="flex items-center justify-between text-outline text-label-sm font-label-sm">
+              <span id="kpi-cached-tokens-label" class="font-ui font-medium uppercase tracking-wider text-[11px] text-purple-300">CACHED TOKENS</span>
+              <span class="material-symbols-outlined text-purple-400 text-base" data-icon="offline_bolt">offline_bolt</span>
+            </div>
+            <div class="flex items-baseline justify-between">
+              <span id="kpi-cached-tokens" class="text-2xl font-bold font-mono text-purple-300">--</span>
+              <span id="kpi-cached-savings-pct" class="text-xs text-purple-400 font-mono font-semibold">--% saved</span>
+            </div>
+            <div id="kpi-cached-sub" class="text-[11px] text-on-surface-variant font-ui">Context prompt tokens served from cache</div>
+          </div>
+        </div>
+
+        <!-- Model Distribution & Throughput Graphs -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Usage by Tier Donut Chart (Col 1) -->
+          <div class="glass-tier-1 p-5 rounded-xl border border-outline-variant/30 space-y-4 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                    <span class="material-symbols-outlined text-lg">pie_chart</span>
+                  </div>
+                  <div>
+                    <h2 class="text-headline-sm font-headline-sm font-semibold text-on-surface">Usage by Tier</h2>
+                    <p class="text-[11px] text-on-surface-variant font-ui">Token allocation across service tiers</p>
+                  </div>
+                </div>
+                <span id="tier-count-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-outline uppercase font-semibold">
+                  2 Tiers
+                </span>
+              </div>
+
+              <!-- Donut Visual -->
+              <div class="relative flex items-center justify-center my-4">
+                <svg viewBox="0 0 180 180" class="w-48 h-48 -rotate-90 transform">
+                  <!-- Base track circle -->
+                  <circle cx="90" cy="90" r="62" stroke="rgba(255,255,255,0.05)" stroke-width="22" fill="transparent" />
+
+                  <!-- Default Tier (Emerald Green) -->
+                  <circle
+                    id="tier-donut-default"
+                    cx="90" cy="90" r="62"
+                    stroke="#10b981"
+                    stroke-width="22"
+                    stroke-dasharray="0 389.6"
+                    stroke-dashoffset="0"
+                    fill="transparent"
+                    stroke-linecap="butt"
+                    class="transition-all duration-500 hover:brightness-125 cursor-pointer filter hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                    onmouseenter="highlightTier('default')"
+                    onmouseleave="resetTierHighlight()"
+                  />
+
+                  <!-- Metadata Generation Tier (Slate Gray) -->
+                  <circle
+                    id="tier-donut-meta"
+                    cx="90" cy="90" r="62"
+                    stroke="#64748b"
+                    stroke-width="22"
+                    stroke-dasharray="0 389.6"
+                    stroke-dashoffset="0"
+                    fill="transparent"
+                    stroke-linecap="butt"
+                    class="transition-all duration-500 hover:brightness-125 cursor-pointer filter hover:drop-shadow-[0_0_8px_rgba(100,116,139,0.6)]"
+                    onmouseenter="highlightTier('meta')"
+                    onmouseleave="resetTierHighlight()"
+                  />
+                </svg>
+
+                <!-- Center Hollow Telemetry Info -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                  <span id="tier-center-label" class="text-[10px] font-ui uppercase tracking-wider text-outline font-semibold">TOTAL TOKENS</span>
+                  <span id="tier-center-val" class="text-xl font-bold font-mono text-on-surface tracking-tight">--</span>
+                  <span id="tier-center-sub" class="text-[10px] font-ui text-emerald-400 font-semibold">-- tokens</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Tier Legend Breakdown -->
+            <div id="tier-legend-container" class="space-y-2.5 pt-3 border-t border-outline-variant/20">
+              <!-- Tier 1: Default -->
+              <div
+                id="tier-card-default"
+                class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container/40 hover:bg-surface-container/80 border border-outline-variant/15 hover:border-emerald-500/30 transition-all cursor-pointer group"
+                onmouseenter="highlightTier('default')"
+                onmouseleave="resetTierHighlight()">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] group-hover:scale-125 transition-transform"></span>
+                  <div>
+                    <div class="font-semibold text-xs text-on-surface group-hover:text-emerald-400 transition-colors font-ui">Default</div>
+                    <div id="tier-legend-default-sub" class="text-[10px] text-on-surface-variant font-ui">Primary inference &bull; <span class="text-purple-400 font-mono">-- cached</span></div>
+                  </div>
+                </div>
+                <div class="text-right font-mono">
+                  <div id="tier-legend-default-tokens" class="font-bold text-xs text-on-surface">--</div>
+                  <div id="tier-legend-default-pct" class="text-[11px] text-emerald-400 font-semibold">--%</div>
+                </div>
+              </div>
+
+              <!-- Tier 2: Metadata_generation -->
+              <div
+                id="tier-card-meta"
+                class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container/40 hover:bg-surface-container/80 border border-outline-variant/15 hover:border-slate-400/30 transition-all cursor-pointer group"
+                onmouseenter="highlightTier('meta')"
+                onmouseleave="resetTierHighlight()">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-[0_0_8px_rgba(100,116,139,0.6)] group-hover:scale-125 transition-transform"></span>
+                  <div>
+                    <div class="font-semibold text-xs text-on-surface group-hover:text-slate-300 transition-colors font-ui">Metadata_generation</div>
+                    <div id="tier-legend-meta-sub" class="text-[10px] text-on-surface-variant font-ui">Vector embeddings &bull; <span class="text-purple-400 font-mono">0 cached</span></div>
+                  </div>
+                </div>
+                <div class="text-right font-mono">
+                  <div id="tier-legend-meta-tokens" class="font-bold text-xs text-on-surface">--</div>
+                  <div id="tier-legend-meta-pct" class="text-[11px] text-slate-400 font-semibold">--%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Token Usage Over Time Graph Chart (Col 2 & 3) -->
+          <div class="lg:col-span-2 glass-tier-1 p-5 rounded-xl border border-outline-variant/30 space-y-4 flex flex-col justify-between">
+            <div>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-outline-variant/20 pb-3 gap-3">
+                <div>
+                  <h2 class="text-headline-sm font-headline-sm font-semibold text-on-surface">Token Usage Over Time</h2>
+                  <p id="chart-subtitle" class="text-xs text-on-surface-variant font-ui">Daily prompt, cached, and completion token throughput</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <!-- Range Switch: 7 Days | 15 Days | 1 Month -->
+                  <div class="flex rounded-lg border border-outline-variant/30 bg-surface-container-high/60 p-0.5 text-xs font-ui">
+                    <button id="chart-range-7d" onclick="setChartRange('7d')"
+                      class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]">
+                      7 Days
+                    </button>
+                    <button id="chart-range-15d" onclick="setChartRange('15d')"
+                      class="px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]">
+                      15 Days
+                    </button>
+                    <button id="chart-range-1m" onclick="setChartRange('1m')"
+                      class="px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold transition-all cursor-pointer text-[11px]">
+                      1 Month
+                    </button>
+                  </div>
+
+                  <!-- 3 Bars Legend -->
+                  <div class="flex items-center gap-3 text-xs font-ui">
+                    <div class="flex items-center gap-1.5" title="Input Prompt Tokens">
+                      <span class="w-2.5 h-2.5 rounded-sm bg-primary inline-block"></span>
+                      <span class="text-on-surface-variant text-[11px]">Prompt</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" title="Context Cached Tokens">
+                      <span class="w-2.5 h-2.5 rounded-sm bg-purple-500 inline-block shadow-[0_0_6px_rgba(168,85,247,0.4)]"></span>
+                      <span class="text-purple-400 text-[11px] font-medium">Cached</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" title="Generated Completion Tokens">
+                      <span class="w-2.5 h-2.5 rounded-sm bg-secondary inline-block"></span>
+                      <span class="text-on-surface-variant text-[11px]">Completion</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Visual Graph Chart Bars (3 Bars per bucket) -->
+              <div class="pt-6 pb-2">
+                <div id="chart-bars-container" class="flex items-end justify-between gap-2 h-40 px-2 overflow-x-auto">
+                  <div class="w-full h-32 flex items-center justify-center text-outline text-xs font-ui">
+                    Loading distribution telemetry...
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Metric Row (Now with Cached & Cost Saved) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-outline-variant/20 text-center">
+              <div class="p-2 rounded bg-surface-container/40">
+                <span class="text-[10px] text-outline uppercase font-ui font-medium block">Range Prompt</span>
+                <span id="chart-prompt-sum" class="text-sm font-bold font-mono text-primary">--</span>
+              </div>
+              <div class="p-2 rounded bg-surface-container/40">
+                <span class="text-[10px] text-purple-400/90 uppercase font-ui font-medium block">Range Cached</span>
+                <span id="chart-cached-sum" class="text-sm font-bold font-mono text-purple-400">--</span>
+              </div>
+              <div class="p-2 rounded bg-surface-container/40">
+                <span class="text-[10px] text-outline uppercase font-ui font-medium block">Range Completion</span>
+                <span id="chart-comp-sum" class="text-sm font-bold font-mono text-secondary">--</span>
+              </div>
+              <div class="p-2 rounded bg-surface-container/40">
+                <span class="text-[10px] text-emerald-400/90 uppercase font-ui font-medium block">Cache Cost Saved</span>
+                <span id="chart-savings-sum" class="text-sm font-bold font-mono text-emerald-400">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Token Logs Table (With Cached Tkns Column) -->
+        <div class="glass-tier-1 rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm">
+          <div class="p-4 border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface-container-low/60">
+            <div>
+              <h3 class="text-headline-sm font-headline-sm font-semibold text-on-surface">Recent Token Logs</h3>
+              <p id="table-subtitle" class="text-xs text-on-surface-variant font-ui">Real-time token audit records loaded via PostgreSQL node</p>
+            </div>
+            <div class="text-xs font-mono text-outline" id="top-log-count">
+              Loading telemetry logs...
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-surface-container-high/40 text-outline font-ui uppercase text-[10px] font-semibold border-b border-outline-variant/30">
+                <tr>
+                  <th class="py-3 px-4">Session ID</th>
+                  <th class="py-3 px-4">Subject / Intent</th>
+                  <th class="py-3 px-4">Model Engine</th>
+                  <th class="py-3 px-4 text-right">Prompt Tkns</th>
+                  <th class="py-3 px-4 text-right text-purple-400">Cached Tkns</th>
+                  <th class="py-3 px-4 text-right">Completion Tkns</th>
+                  <th class="py-3 px-4 text-right">Total Tkns</th>
+                  <th class="py-3 px-4 text-center">Latency</th>
+                  <th class="py-3 px-4 text-right">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="token-logs-tbody" class="divide-y divide-outline-variant/20 font-mono">
+                <tr>
+                  <td colspan="9" class="py-12 text-center text-outline font-ui text-xs">
+                    <div class="flex flex-col items-center justify-center space-y-2">
+                      <span class="material-symbols-outlined text-2xl animate-spin text-primary">progress_activity</span>
+                      <span>Loading token telemetry records...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="p-4 bg-surface-container-lowest/60 border-t border-outline-variant/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-label-sm font-label-sm text-on-surface-variant font-ui">
+            <div id="log-showing-count">Showing 0 of 0 logs</div>
+            <div class="flex items-center gap-2">
+              <button
+                id="log-prev-btn"
+                onclick="changeLogPage(-1)"
+                class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                disabled>
+                Previous
+              </button>
+              <div id="log-page-numbers" class="flex items-center gap-1 font-mono">
+                <!-- Dynamic Page Buttons -->
+              </div>
+              <button
+                id="log-next-btn"
+                onclick="changeLogPage(1)"
+                class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 hover:border-primary/40 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                disabled>
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cost Estimation Breakdown Section -->
+        <div class="bg-surface-container/60 border border-outline-variant/30 rounded-xl p-6 backdrop-blur-md relative overflow-hidden shadow-2xl mb-8">
+          <!-- Accent Top Bar -->
+          <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-cyan-400 to-primary/20"></div>
+
+          <!-- Section Header -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-outline-variant/20">
+            <div class="flex items-start gap-3">
+              <div class="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-primary shrink-0 shadow-inner">
+                <span class="material-symbols-outlined text-2xl">calculate</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                  <h2 class="text-lg font-bold text-on-surface tracking-tight font-headline-sm">Cost Estimation Breakdown</h2>
+                  <span id="cost-period-badge" class="text-[10px] font-ui font-semibold px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30 uppercase tracking-wider">Active Period</span>
+                  <span id="fx-rate-badge" class="text-[10px] font-ui px-2.5 py-0.5 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface-variant font-medium flex items-center gap-1.5 transition-all shadow-sm" title="Real-time live market exchange rate">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="fx-rate-text">Live FX: Fetching...</span>
+                  </span>
+                </div>
+                <p class="text-xs text-on-surface-variant/80 mt-1 font-ui">
+                  Estimated API cost for all recorded token usage in selected period, calculated per model from PostgreSQL metrics
+                </p>
+              </div>
+            </div>
+
+            <!-- Top Metric Chips & Export -->
+            <div class="flex flex-wrap items-center gap-3">
+              <!-- Prompt Used Chip -->
+              <div class="px-3.5 py-2 rounded-lg bg-surface-container/80 border border-outline-variant/30 flex flex-col">
+                <span class="text-[10px] font-ui font-medium uppercase tracking-wider text-on-surface-variant/70">Prompt Tokens</span>
+                <span id="cost-prompt-tokens" class="text-primary font-bold font-mono text-sm tracking-tight">--</span>
+              </div>
+
+              <!-- Cached Tokens Chip (Dedicated) -->
+              <div class="px-3.5 py-2 rounded-lg bg-purple-950/30 border border-purple-500/30 flex flex-col">
+                <span class="text-[10px] font-ui font-medium uppercase tracking-wider text-purple-300">Cached Tokens</span>
+                <span id="cost-cached-tokens" class="text-purple-400 font-bold font-mono text-sm tracking-tight">--</span>
+              </div>
+
+              <!-- Completion Used Chip -->
+              <div class="px-3.5 py-2 rounded-lg bg-surface-container/80 border border-outline-variant/30 flex flex-col">
+                <span class="text-[10px] font-ui font-medium uppercase tracking-wider text-on-surface-variant/70">Completion Tokens</span>
+                <span id="cost-completion-tokens" class="text-emerald-400 font-bold font-mono text-sm tracking-tight">--</span>
+              </div>
+
+              <!-- Total Tokens Chip -->
+              <div class="px-3.5 py-2 rounded-lg bg-surface-container/80 border border-outline-variant/30 flex flex-col">
+                <span class="text-[10px] font-ui font-medium uppercase tracking-wider text-on-surface-variant/70">Total Tokens</span>
+                <span id="cost-total-tokens" class="text-amber-400 font-bold font-mono text-sm tracking-tight">--</span>
+              </div>
+
+              <!-- Total Cost Chip -->
+              <div class="px-3.5 py-2 rounded-lg bg-primary/10 border border-primary/30 flex flex-col">
+                <span class="text-[10px] font-ui uppercase tracking-wider text-primary font-semibold">Est. Total Cost</span>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="cost-total-usd" class="text-on-surface font-bold font-mono text-sm tracking-tight">--</span>
+                  <span id="cost-total-inr" class="text-on-surface-variant/80 font-mono text-[10px]">--</span>
+                </div>
+              </div>
+
+              <!-- Export Button -->
+              <button
+                onclick="exportCostBreakdown()"
+                class="px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 hover:border-primary/50 text-xs font-ui font-medium text-on-surface hover:text-primary transition-all flex items-center gap-1.5 cursor-pointer shadow-sm group">
+                <span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover:text-primary transition-colors">download</span>
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto mt-4 -mx-2 sm:mx-0">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-outline-variant/30 text-[11px] font-ui uppercase font-semibold tracking-wider text-on-surface-variant/70 bg-surface-container/40">
+                  <th class="py-3 px-4">Model</th>
+                  <th class="py-3 px-4 text-right">Prompt</th>
+                  <th class="py-3 px-4 text-right text-purple-400">Cached</th>
+                  <th class="py-3 px-4 text-right">Completion</th>
+                  <th class="py-3 px-4 text-right">Total Tokens</th>
+                  <th class="py-3 px-4 text-center">Rate (1M In / Out)</th>
+                  <th class="py-3 px-4 text-center w-36 sm:w-44">Cost Share</th>
+                  <th class="py-3 px-4 text-right">Estimated Cost</th>
+                </tr>
+              </thead>
+              <tbody id="cost-table-tbody" class="divide-y divide-outline-variant/15 font-mono text-[12px]">
+                <tr>
+                  <td colspan="8" class="py-6 text-center text-outline font-ui">Loading pricing telemetry...</td>
+                </tr>
+              </tbody>
+
+              <!-- Table Summary Footer -->
+              <tfoot id="cost-table-tfoot">
+                <!-- Dynamically generated footer -->
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Footer Notes & Caching Benefit -->
+          <div class="mt-4 pt-3 border-t border-outline-variant/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-on-surface-variant font-ui">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-purple-400 text-base">savings</span>
+              <span id="cost-savings-note">Prompt caching reduced total telemetry costs in this period.</span>
+            </div>
+            <div class="text-outline font-mono text-[10px]">
+              Queried via n8n PostgreSQL Node &bull; Server Load Optimized &bull; Zero Fake Data
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Live Clock Display
+    function updateClock() {
+      const now = new Date();
+      const utcString = now.toUTCString().split(' ')[4] + ' UTC';
+      const clockElements = document.querySelectorAll('.utc-clock-display, #utc-clock');
+      clockElements.forEach(el => {
+        el.textContent = 'LIVE: ' + utcString;
+      });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Hydrate user profile from authenticated session
+    const adminEmail = localStorage.getItem("adminEmail") || sessionStorage.getItem("adminEmail");
+    if (adminEmail) {
+      const nameEls = document.querySelectorAll(".user-profile-name, #user-profile-name, #logs-user-name, #kb-user-name");
+      nameEls.forEach(el => { el.textContent = adminEmail.split('@')[0]; });
+    }
+
+    // =========================================================================
+    // STATE & MONTH FILTER ENGINE (PREVENTS FUTURE MONTHS STRICTLY)
+    // =========================================================================
+    const TOKEN_USAGE_WEBHOOK_URL = "https://n8n.srv917960.hstgr.cloud/webhook/spark-token-usage";
+    const USER_DEFAULT_AUTH_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHBpcmVzSW4iOjM2MDAsImlhdCI6MTc5MTQ0NjY2N30.7UegdwC6cfL9NuaTVKulBgMFRjAfl-zwbJr6LF6Rf0U";
+
+    function getAuthToken() {
+      return localStorage.getItem("authToken") || 
+             sessionStorage.getItem("authToken") || 
+             localStorage.getItem("adminToken") || 
+             sessionStorage.getItem("adminToken") || 
+             USER_DEFAULT_AUTH_TOKEN;
+    }
+
+    const MONTH_NAMES = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    let currentUtcMonth = "";  // e.g. "2026-10"
+    let activeMonth = "";       // "2026-10" or "all"
+    let activeTelemetryData = null;
+    let currentLogPage = 1;
+    const logPageSize = 10;
+    let activeChartRange = "1m"; // "7d", "15d", or "1m"
+
+    // =========================================================================
+    // FRONTEND MODEL PRICING & RATE CARD (LIGHTWEIGHT CLIENT-SIDE ENGINE)
+    // Rates in USD per 1 Million (1M) tokens.
+    // ZERO pricing calculation in n8n workflows for maximum speed & agility!
+    // =========================================================================
+    // Real-Time Dynamic USD to INR Exchange Rate (Live API with failover & caching)
+    let liveUsdToInrRate = 95.25; // Dynamic live market rate (updated continuously from live API)
+    let isLiveFxLoaded = false;
+
+    async function fetchLiveExchangeRate() {
+      // 1. Check session cache first (fresh for 30 minutes)
+      const cachedRate = sessionStorage.getItem("spark_usd_inr_rate");
+      const cachedTime = sessionStorage.getItem("spark_usd_inr_time");
+      const now = Date.now();
+
+      if (cachedRate && cachedTime && (now - Number(cachedTime) < 30 * 60 * 1000)) {
+        const parsed = parseFloat(cachedRate);
+        if (!isNaN(parsed) && parsed > 20) {
+          liveUsdToInrRate = parsed;
+          isLiveFxLoaded = true;
+          updateFxBadge(parsed, false);
+          return parsed;
+        }
+      }
+
+      // 2. High-availability live exchange rate endpoints
+      const endpoints = [
+        "https://open.er-api.com/v6/latest/USD",
+        "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json",
+        "https://api.exchangerate-api.com/v4/latest/USD"
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000);
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+
+          if (!res.ok) continue;
+          const data = await res.json();
+          let inr = null;
+          if (data?.rates?.INR) inr = Number(data.rates.INR);
+          else if (data?.usd?.inr) inr = Number(data.usd.inr);
+
+          if (inr && !isNaN(inr) && inr > 20) {
+            liveUsdToInrRate = inr;
+            isLiveFxLoaded = true;
+            sessionStorage.setItem("spark_usd_inr_rate", inr.toString());
+            sessionStorage.setItem("spark_usd_inr_time", now.toString());
+            updateFxBadge(inr, true);
+
+            // Re-render cost table if data is already loaded so INR amounts reflect live rate
+            if (typeof activeTelemetryData !== 'undefined' && activeTelemetryData && activeTelemetryData.model_breakdown) {
+              const pricing = computeFrontendPricing(activeTelemetryData.model_breakdown, activeTelemetryData.kpi);
+              renderCostBreakdown(pricing, activeTelemetryData.kpi);
+            }
+            return inr;
+          }
+        } catch (e) {
+          console.warn("FX endpoint failover:", url, e.message);
+        }
+      }
+
+      // Fallback if all network endpoints fail
+      updateFxBadge(liveUsdToInrRate, false);
+      return liveUsdToInrRate;
+    }
+
+    function updateFxBadge(rate, isLive) {
+      if (typeof document === 'undefined') return;
+      const badge = document.getElementById("fx-rate-badge");
+      if (!badge) return;
+      if (isLive) {
+        badge.className = "text-[10px] font-ui px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-medium flex items-center gap-1.5 transition-all shadow-sm";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Live FX: $1 = ₹' + rate.toFixed(2) + '</span>';
+      } else {
+        badge.className = "text-[10px] font-ui px-2.5 py-0.5 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface-variant font-medium flex items-center gap-1.5 transition-all";
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400/80"></span><span>FX Rate: $1 = ₹' + rate.toFixed(2) + '</span>';
+      }
+    }
+
+    const MODEL_RATE_CARD = {
+      "gpt-5.1-2025-11-13": {
+        inputRate: 2.50,
+        cachedRate: 1.25,
+        outputRate: 10.00,
+        role: "Flagship Clinical Reasoning & Escalations",
+        badge: "Flagship"
+      },
+      "gpt-4.1-mini": {
+        inputRate: 0.15,
+        cachedRate: 0.075,
+        outputRate: 0.60,
+        role: "Metadata Generation & Safety Guardrails",
+        badge: "Primary"
+      },
+      "gpt-4o": {
+        inputRate: 2.50,
+        cachedRate: 1.25,
+        outputRate: 10.00,
+        role: "Clinical Diagnostics & Escalations",
+        badge: "Flagship"
+      },
+      "gpt-4o-mini": {
+        inputRate: 0.15,
+        cachedRate: 0.075,
+        outputRate: 0.60,
+        role: "Patient Q&A & Device Setup Inquiries",
+        badge: "Primary"
+      },
+      "claude-3.5-sonnet": {
+        inputRate: 3.00,
+        cachedRate: 1.50,
+        outputRate: 15.00,
+        role: "Medical Second-Opinion Fallback",
+        badge: "Fallback"
+      },
+      "pmt-guardrail-v2": {
+        inputRate: 0.10,
+        cachedRate: 0.05,
+        outputRate: 0.40,
+        role: "PII Shield & Dosage Safety Policy Engine",
+        badge: "Safety"
+      },
+      "text-embedding-3-small": {
+        inputRate: 0.02,
+        cachedRate: 0.01,
+        outputRate: 0.00,
+        role: "Knowledge Base Semantic Indexing",
+        badge: "Vector"
+      },
+      "default": {
+        inputRate: 0.50,
+        cachedRate: 0.25,
+        outputRate: 1.50,
+        role: "Inference Engine",
+        badge: "General"
+      }
+    };
+
+    function getModelRate(modelName) {
+      if (!modelName) return MODEL_RATE_CARD["default"];
+      const lower = modelName.toLowerCase().trim();
+      const key = Object.keys(MODEL_RATE_CARD).find(k => k.toLowerCase() === lower);
+      return key ? MODEL_RATE_CARD[key] : MODEL_RATE_CARD["default"];
+    }
+
+    // Pure Frontend Billing & Savings Calculation using Live Market FX
+    function computeFrontendPricing(rawModels, kpi) {
+      let fleetCostUsd = 0;
+      let totalCachedSavingsUsd = 0;
+
+      const models = (rawModels || []).map(m => {
+        const rate = getModelRate(m.model);
+        const prompt = Number(m.prompt_tokens) || 0;
+        const cached = Number(m.cached_tokens) || 0;
+        const comp = Number(m.completion_tokens) || 0;
+        const total = Number(m.total_tokens) || (prompt + comp);
+
+        const uncachedPrompt = Math.max(0, prompt - cached);
+        const promptCost = (uncachedPrompt / 1000000) * rate.inputRate;
+        const cachedCost = (cached / 1000000) * rate.cachedRate;
+        const compCost = (comp / 1000000) * rate.outputRate;
+        const modelCostUsd = promptCost + cachedCost + compCost;
+
+        // Prompt cache savings: standard input price minus discounted cached price
+        const modelSavingsUsd = (cached / 1000000) * (rate.inputRate - rate.cachedRate);
+        totalCachedSavingsUsd += modelSavingsUsd;
+        fleetCostUsd += modelCostUsd;
+
+        return {
+          model: m.model,
+          count: m.count || 0,
+          role: rate.role,
+          badge: rate.badge,
+          rate: rate,
+          prompt_tokens: prompt,
+          cached_tokens: cached,
+          completion_tokens: comp,
+          total_tokens: total,
+          rate_label: "$" + rate.inputRate.toFixed(2) + " / $" + rate.outputRate.toFixed(2),
+          cost_usd: modelCostUsd,
+          cost_usd_formatted: "$" + modelCostUsd.toFixed(4),
+          cost_inr_formatted: "₹" + (modelCostUsd * liveUsdToInrRate).toFixed(2),
+          cost_share_pct: 0
+        };
+      });
+
+      models.forEach(m => {
+        m.cost_share_pct = fleetCostUsd > 0 ? Number(((m.cost_usd / fleetCostUsd) * 100).toFixed(1)) : 0;
+      });
+      models.sort((a, b) => b.total_tokens - a.total_tokens);
+
+      const baselineCost = fleetCostUsd + totalCachedSavingsUsd;
+      const savingsPct = baselineCost > 0 ? Number(((totalCachedSavingsUsd / baselineCost) * 100).toFixed(1)) : 0;
+
+      return {
+        models,
+        fleetCostUsd,
+        fleetCostUsdFormatted: "$" + fleetCostUsd.toFixed(4),
+        fleetCostInrFormatted: "₹" + (fleetCostUsd * liveUsdToInrRate).toFixed(2),
+        totalCachedSavingsUsd,
+        totalCachedSavingsUsdFormatted: "$" + totalCachedSavingsUsd.toFixed(4),
+        savingsPct,
+        fxRate: liveUsdToInrRate
+      };
+    }
+
+    // Helpers
+    function formatNumber(num) {
+      if (num === null || num === undefined || isNaN(num)) return "0";
+      return Number(num).toLocaleString();
+    }
+
+    function formatCompact(num) {
+      if (!num || isNaN(num)) return "0";
+      const n = Number(num);
+      if (n >= 1000000) return (n / 1000000).toFixed(2) + "M";
+      if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+      return n.toString();
+    }
+
+    function getMonthLabel(ym) {
+      if (!ym || ym === "all") return "All Months (Fleet Telemetry)";
+      const [y, m] = ym.split("-").map(Number);
+      return \`\${MONTH_NAMES[m - 1]} \${y}\`;
+    }
+
+    // Initialize Month Controls: builds dropdown backwards from current month
+    function initMonthControls() {
+      const now = new Date();
+      const yr = now.getUTCFullYear();
+      const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
+      currentUtcMonth = \`\${yr}-\${mo}\`;
+      activeMonth = currentUtcMonth;
+
+      const selectEl = document.getElementById("month-select");
+      const pickerEl = document.getElementById("month-picker");
+
+      if (pickerEl) {
+        // Enforce max attribute strictly: browsers disable any future month in calendar!
+        pickerEl.max = currentUtcMonth;
+        pickerEl.value = currentUtcMonth;
+      }
+
+      if (selectEl) {
+        selectEl.innerHTML = "";
+
+        // 1. All Option
+        const optAll = document.createElement("option");
+        optAll.value = "all";
+        optAll.textContent = "All Months (Fleet Telemetry)";
+        selectEl.appendChild(optAll);
+
+        // 2. Add past 24 months starting from current month going backwards
+        for (let i = 0; i < 24; i++) {
+          const d = new Date(Date.UTC(yr, now.getUTCMonth() - i, 1));
+          const optYm = \`\${d.getUTCFullYear()}-\${String(d.getUTCMonth() + 1).padStart(2, "0")}\`;
+          
+          // STRICT CHECK: Disallow any future months
+          if (optYm > currentUtcMonth) continue;
+
+          const opt = document.createElement("option");
+          opt.value = optYm;
+          const isCurrent = optYm === currentUtcMonth;
+          opt.textContent = \`\${MONTH_NAMES[d.getUTCMonth()]} \${d.getUTCFullYear()} \${isCurrent ? "(Current)" : ""}\`;
+          selectEl.appendChild(opt);
+        }
+
+        selectEl.value = activeMonth;
+      }
+
+      updateControlStates();
+    }
+
+    function updateControlStates() {
+      const selectEl = document.getElementById("month-select");
+      const pickerEl = document.getElementById("month-picker");
+      const prevBtn = document.getElementById("prev-month-btn");
+      const nextBtn = document.getElementById("next-month-btn");
+      const badgeMonth = document.getElementById("active-month-badge");
+      const quickCurrent = document.getElementById("btn-quick-current");
+      const quickAll = document.getElementById("btn-quick-all");
+
+      if (selectEl) selectEl.value = activeMonth;
+      if (pickerEl && activeMonth !== "all") pickerEl.value = activeMonth;
+
+      if (badgeMonth) {
+        badgeMonth.textContent = activeMonth === "all" ? "ALL MONTHS" : getMonthLabel(activeMonth).toUpperCase();
+      }
+
+      // Next month button must be DISABLED when at current month or 'all' to prevent future stepping
+      if (nextBtn) {
+        nextBtn.disabled = (activeMonth === "all" || activeMonth >= currentUtcMonth);
+      }
+      if (prevBtn) {
+        prevBtn.disabled = (activeMonth === "all");
+      }
+
+      // Quick buttons styling
+      if (quickCurrent && quickAll) {
+        if (activeMonth === currentUtcMonth) {
+          quickCurrent.className = "px-3 py-1.5 rounded-lg bg-primary text-on-primary font-semibold transition-all cursor-pointer shadow-sm";
+          quickAll.className = "px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer";
+        } else if (activeMonth === "all") {
+          quickAll.className = "px-3 py-1.5 rounded-lg bg-primary text-on-primary font-semibold transition-all cursor-pointer shadow-sm";
+          quickCurrent.className = "px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer";
+        } else {
+          quickCurrent.className = "px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer";
+          quickAll.className = "px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer";
+        }
+      }
+    }
+
+    // Step Month Handler (-1 for prev, +1 for next)
+    function stepMonth(direction) {
+      if (activeMonth === "all") {
+        activeMonth = currentUtcMonth;
+      } else {
+        const [y, m] = activeMonth.split("-").map(Number);
+        const d = new Date(Date.UTC(y, m - 1 + direction, 1));
+        const newYm = \`\${d.getUTCFullYear()}-\${String(d.getUTCMonth() + 1).padStart(2, "0")}\`;
+        
+        // STRICT ENFORCEMENT: block stepping into the future
+        if (newYm > currentUtcMonth) {
+          console.warn("Future month blocked:", newYm);
+          return;
+        }
+        activeMonth = newYm;
+      }
+
+      updateControlStates();
+      fetchTokenTelemetry(activeMonth);
+    }
+
+    // Dropdown change
+    function onMonthSelectChange(val) {
+      if (val !== "all" && val > currentUtcMonth) {
+        console.warn("Blocked attempt to select future month:", val);
+        activeMonth = currentUtcMonth;
+      } else {
+        activeMonth = val;
+      }
+      updateControlStates();
+      fetchTokenTelemetry(activeMonth);
+    }
+
+    // Native picker change
+    function onMonthPickerChange(val) {
+      if (!val) return;
+      if (val > currentUtcMonth) {
+        console.warn("Blocked future month picker value:", val);
+        activeMonth = currentUtcMonth;
+      } else {
+        activeMonth = val;
+      }
+      updateControlStates();
+      fetchTokenTelemetry(activeMonth);
+    }
+
+    // Quick select buttons
+    function selectMonth(mode) {
+      if (mode === "current") {
+        activeMonth = currentUtcMonth;
+      } else if (mode === "all") {
+        activeMonth = "all";
+      }
+      updateControlStates();
+      fetchTokenTelemetry(activeMonth);
+    }
+
+    function refreshCurrentMonth() {
+      fetchLiveExchangeRate();
+      fetchTokenTelemetry(activeMonth);
+    }
+
+    // Chart Range Selector (7 Days / 15 Days / 1 Month)
+    function setChartRange(range) {
+      activeChartRange = range;
+      const btn7d = document.getElementById("chart-range-7d");
+      const btn15d = document.getElementById("chart-range-15d");
+      const btn1m = document.getElementById("chart-range-1m");
+      const subtitle = document.getElementById("chart-subtitle");
+
+      const activeCls = "px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold transition-all cursor-pointer text-[11px]";
+      const inactiveCls = "px-2.5 py-1 rounded text-on-surface-variant hover:text-on-surface transition-all cursor-pointer font-medium text-[11px]";
+
+      if (btn7d) btn7d.className = range === "7d" ? activeCls : inactiveCls;
+      if (btn15d) btn15d.className = range === "15d" ? activeCls : inactiveCls;
+      if (btn1m) btn1m.className = range === "1m" ? activeCls : inactiveCls;
+
+      if (subtitle) {
+        if (range === "7d") subtitle.textContent = "Last 7 days prompt, cached, and completion token throughput";
+        else if (range === "15d") subtitle.textContent = "Last 15 days prompt, cached, and completion token throughput";
+        else subtitle.textContent = "Full monthly prompt, cached, and completion token throughput";
+      }
+
+      if (activeTelemetryData?.usage_over_time) {
+        const pricing = computeFrontendPricing(activeTelemetryData.model_breakdown || [], activeTelemetryData.kpi);
+        renderTimeChart(activeTelemetryData.usage_over_time, activeTelemetryData.kpi, pricing);
+      }
+    }
+
+    // =========================================================================
+    // ERROR STATE (STRICTLY ZERO FAKE / FALLBACK DATA)
+    // =========================================================================
+    function showErrorState(detail) {
+      activeTelemetryData = null;
+
+      // 1. Show Screen Error Banner
+      const banner = document.getElementById("telemetry-error-banner");
+      const msgEl = document.getElementById("telemetry-error-message");
+      if (banner) banner.classList.remove("hidden");
+      if (msgEl) msgEl.textContent = detail || "Could not retrieve telemetry from n8n webhook.";
+
+      // 2. Status Badge in Header
+      const badge = document.getElementById("db-engine-badge");
+      if (badge) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-error-container/30 border border-error/40 text-error flex items-center gap-1.5";
+        badge.innerHTML = \`<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Failed to get datas\`;
+      }
+
+      // 3. Reset All KPI Cards to '--' (Strictly ZERO fallback / fake numbers)
+      const kpiTotal = document.getElementById("kpi-total-tokens");
+      const kpiPrompt = document.getElementById("kpi-prompt-tokens");
+      const kpiPromptShare = document.getElementById("kpi-prompt-share");
+      const kpiComp = document.getElementById("kpi-completion-tokens");
+      const kpiCompShare = document.getElementById("kpi-completion-share");
+      const kpiCached = document.getElementById("kpi-cached-tokens");
+      const kpiCachedPct = document.getElementById("kpi-cached-savings-pct");
+      const kpiCachedSub = document.getElementById("kpi-cached-sub");
+
+      if (kpiTotal) kpiTotal.textContent = "--";
+      if (kpiPrompt) kpiPrompt.textContent = "--";
+      if (kpiPromptShare) kpiPromptShare.textContent = "--%";
+      if (kpiComp) kpiComp.textContent = "--";
+      if (kpiCompShare) kpiCompShare.textContent = "--%";
+      if (kpiCached) kpiCached.textContent = "--";
+      if (kpiCachedPct) kpiCachedPct.textContent = "--% saved";
+      if (kpiCachedSub) kpiCachedSub.textContent = "Telemetry unavailable";
+
+      // 4. Reset Donut Visual to Empty
+      const donutDefault = document.getElementById("tier-donut-default");
+      const donutMeta = document.getElementById("tier-donut-meta");
+      if (donutDefault) donutDefault.setAttribute("stroke-dasharray", "0 389.6");
+      if (donutMeta) donutMeta.setAttribute("stroke-dasharray", "0 389.6");
+
+      const centerLabel = document.getElementById("tier-center-label");
+      const centerVal = document.getElementById("tier-center-val");
+      const centerSub = document.getElementById("tier-center-sub");
+      if (centerLabel) centerLabel.textContent = "NO DATA";
+      if (centerVal) centerVal.textContent = "--";
+      if (centerSub) centerSub.textContent = "Failed to get datas";
+
+      const defTokens = document.getElementById("tier-legend-default-tokens");
+      const defPct = document.getElementById("tier-legend-default-pct");
+      const metaTokens = document.getElementById("tier-legend-meta-tokens");
+      const metaPct = document.getElementById("tier-legend-meta-pct");
+      if (defTokens) defTokens.textContent = "--";
+      if (defPct) defPct.textContent = "--%";
+      if (metaTokens) metaTokens.textContent = "--";
+      if (metaPct) metaPct.textContent = "--%";
+
+      // 5. Reset Time Chart Bars to Empty Error State
+      const chartContainer = document.getElementById("chart-bars-container");
+      if (chartContainer) {
+        chartContainer.innerHTML = \`
+          <div class="w-full h-36 flex flex-col items-center justify-center text-error/80 font-ui text-xs gap-1.5 bg-error-container/10 rounded-lg border border-error/20">
+            <span class="material-symbols-outlined text-2xl text-error">cloud_off</span>
+            <span class="font-semibold">Failed to get datas</span>
+            <span class="text-outline text-[11px] font-mono">\${detail || "Could not retrieve hourly/daily distribution"}</span>
+          </div>
+        \`;
+      }
+      const promptSum = document.getElementById("chart-prompt-sum");
+      const cachedSum = document.getElementById("chart-cached-sum");
+      const compSum = document.getElementById("chart-comp-sum");
+      const savingsSum = document.getElementById("chart-savings-sum");
+      if (promptSum) promptSum.textContent = "--";
+      if (cachedSum) cachedSum.textContent = "--";
+      if (compSum) compSum.textContent = "--";
+      if (savingsSum) savingsSum.textContent = "--";
+
+      // 6. Reset Recent Token Logs Table to Error Row (9 columns)
+      const tbody = document.getElementById("token-logs-tbody");
+      if (tbody) {
+        tbody.innerHTML = \`
+          <tr>
+            <td colspan="9" class="py-12 text-center text-error font-ui text-xs">
+              <div class="flex flex-col items-center justify-center space-y-2">
+                <span class="material-symbols-outlined text-3xl text-error">error_outline</span>
+                <span class="font-semibold text-sm">Failed to get datas</span>
+                <span class="text-outline text-xs font-mono">\${detail || "No token audit logs retrieved from live webhook."}</span>
+              </div>
+            </td>
+          </tr>
+        \`;
+      }
+      const topCount = document.getElementById("top-log-count");
+      const bottomCount = document.getElementById("log-showing-count");
+      if (topCount) topCount.textContent = "Failed to get datas";
+      if (bottomCount) bottomCount.textContent = "Showing 0 of 0 logs";
+
+      // 7. Reset Cost Breakdown Table to Error State
+      const costPrompt = document.getElementById("cost-prompt-tokens");
+      const costCached = document.getElementById("cost-cached-tokens");
+      const costComp = document.getElementById("cost-completion-tokens");
+      const costTotal = document.getElementById("cost-total-tokens");
+      const costUsd = document.getElementById("cost-total-usd");
+      const costInr = document.getElementById("cost-total-inr");
+      const savingsNote = document.getElementById("cost-savings-note");
+
+      if (costPrompt) costPrompt.textContent = "--";
+      if (costCached) costCached.textContent = "--";
+      if (costComp) costComp.textContent = "--";
+      if (costTotal) costTotal.textContent = "--";
+      if (costUsd) costUsd.textContent = "--";
+      if (costInr) costInr.textContent = "--";
+      if (savingsNote) savingsNote.textContent = "Telemetry cost estimation unavailable (failed to get datas).";
+
+      const costTbody = document.getElementById("cost-table-tbody");
+      const costTfoot = document.getElementById("cost-table-tfoot");
+      if (costTbody) {
+        costTbody.innerHTML = \`
+          <tr>
+            <td colspan="8" class="py-8 text-center text-error font-ui text-xs">
+              <span class="font-semibold">Failed to get datas</span> &bull; \${detail || "Cost breakdown unavailable"}
+            </td>
+          </tr>
+        \`;
+      }
+      if (costTfoot) costTfoot.innerHTML = "";
+    }
+
+    function hideErrorState() {
+      const banner = document.getElementById("telemetry-error-banner");
+      if (banner) banner.classList.add("hidden");
+
+      const badge = document.getElementById("db-engine-badge");
+      if (badge) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-surface-container border border-outline-variant/30 text-outline flex items-center gap-1.5";
+        badge.innerHTML = \`<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>PostgreSQL Node\`;
+      }
+    }
+
+    // =========================================================================
+    // DATA FETCHING & WEBHHOOK HYDRATION (POSTGRESQL DRIVEN - ZERO FALLBACK)
+    // =========================================================================
+    async function fetchTokenTelemetry(month) {
+      const refreshIcon = document.getElementById("refresh-icon");
+      const canvasEl = document.getElementById("telemetry-canvas");
+
+      if (refreshIcon) refreshIcon.classList.add("animate-spin");
+      if (canvasEl) canvasEl.classList.add("opacity-60", "pointer-events-none");
+
+      const queryUrl = \`\${TOKEN_USAGE_WEBHOOK_URL}?month=\${encodeURIComponent(month)}\`;
+      const token = getAuthToken();
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 14000);
+
+      try {
+        const response = await fetch(queryUrl, {
+          method: "GET",
+          headers: {
+            "Authorization": "Bearer " + token,
+            "x-api-key": token,
+            "Content-Type": "application/json"
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (response.status === 401) {
+          throw new Error("HTTP 401: Unauthorized access. Missing or invalid authorization token.");
+        }
+
+        if (!response.ok) {
+          throw new Error(\`Webhook returned HTTP \${response.status}: \${response.statusText || "Server error"}\`);
+        }
+
+        let raw;
+        try {
+          raw = await response.json();
+        } catch (jsonErr) {
+          throw new Error("Webhook returned an invalid or empty JSON response.");
+        }
+
+        const data = Array.isArray(raw) ? raw[0] : raw;
+
+        if (!data || !data.kpi) {
+          throw new Error("Invalid payload: Webhook did not return expected telemetry data structure.");
+        }
+
+        // Live retrieval success: hide error and render actual live data
+        hideErrorState();
+        activeTelemetryData = data;
+        renderAllTelemetry(data);
+      } catch (err) {
+        clearTimeout(timeoutId);
+        const errMsg = err.name === "AbortError" 
+          ? "Webhook timed out after 14 seconds. n8n workflow took too long to respond."
+          : (err.message || "Failed to connect to webhook");
+        console.error("Webhook fetch failed:", errMsg);
+
+        // DIRECTLY SHOW ERROR STATE: ZERO FAKE / FALLBACK DATA
+        showErrorState(errMsg);
+      } finally {
+        if (refreshIcon) {
+          setTimeout(() => refreshIcon.classList.remove("animate-spin"), 400);
+        }
+        if (canvasEl) {
+          canvasEl.classList.remove("opacity-60", "pointer-events-none");
+        }
+      }
+    }
+
+    // =========================================================================
+    // TELEMETRY RENDER ENGINE (FOR REAL LIVE DATA)
+    // =========================================================================
+    function renderAllTelemetry(data) {
+      currentLogPage = 1;
+      // 1. Calculate pricing entirely on frontend (ZERO n8n calculation overhead)
+      const pricing = computeFrontendPricing(data.model_breakdown || [], data.kpi);
+
+      // 2. Render KPIs with frontend pricing values
+      renderKPIs(data.kpi, data.filter?.selected_month, pricing);
+
+      // 3. Render Tier Donut
+      renderTierDonut(data.tier_distribution, data.kpi);
+
+      // 4. Render Time Chart with frontend cache savings rate
+      renderTimeChart(data.usage_over_time, data.kpi, pricing);
+
+      // 5. Render Logs Table
+      renderLogsTable(data.logs || []);
+
+      // 6. Render Cost Breakdown with frontend computed figures
+      renderCostBreakdown(pricing, data.kpi);
+    }
+
+    function renderKPIs(kpi, month, pricing) {
+      const monthLabel = getMonthLabel(month || activeMonth).toUpperCase();
+      const labelEl = document.getElementById("kpi-total-tokens-label");
+      if (labelEl) labelEl.textContent = \`TOTAL TOKENS (\${monthLabel})\`;
+
+      const totalTokensEl = document.getElementById("kpi-total-tokens");
+      if (totalTokensEl) totalTokensEl.textContent = formatNumber(kpi.total_tokens);
+
+      const promptTokensEl = document.getElementById("kpi-prompt-tokens");
+      if (promptTokensEl) promptTokensEl.textContent = formatNumber(kpi.prompt_tokens);
+
+      const promptShareEl = document.getElementById("kpi-prompt-share");
+      if (promptShareEl) promptShareEl.textContent = (kpi.prompt_pct || "0.0") + "%";
+
+      const compTokensEl = document.getElementById("kpi-completion-tokens");
+      if (compTokensEl) compTokensEl.textContent = formatNumber(kpi.completion_tokens);
+
+      const compShareEl = document.getElementById("kpi-completion-share");
+      if (compShareEl) compShareEl.textContent = (kpi.completion_pct || "0.0") + "%";
+
+      // Card 4: CACHED TOKENS (Using Frontend-Calculated Pricing)
+      const cachedTokensEl = document.getElementById("kpi-cached-tokens");
+      if (cachedTokensEl) cachedTokensEl.textContent = formatNumber(kpi.cached_tokens);
+
+      const cachedSavingsPctEl = document.getElementById("kpi-cached-savings-pct");
+      if (cachedSavingsPctEl) {
+        cachedSavingsPctEl.textContent = \`\${pricing?.savingsPct || 0}% saved\`;
+      }
+
+      const cachedSubEl = document.getElementById("kpi-cached-sub");
+      if (cachedSubEl) {
+        const savedUsd = pricing?.totalCachedSavingsUsdFormatted || "$0.0000";
+        cachedSubEl.innerHTML = \`<span class="text-purple-300 font-mono font-medium">\${formatCompact(kpi.cached_tokens)}</span> cached tokens (saved \${savedUsd})\`;
+      }
+    }
+
+    function renderTierDonut(tiers, kpi) {
+      const defaultTier = tiers?.find(t => t.tier === 'default') || { total_tokens: 0, percentage: 0, cached_tokens: 0 };
+      const metaTier = tiers?.find(t => t.tier === 'metadata_generation') || { total_tokens: 0, percentage: 0, cached_tokens: 0 };
+
+      const defaultPct = Number(defaultTier.percentage) || 0;
+      const metaPct = Number(metaTier.percentage) || 0;
+
+      const track = 389.56; // 2 * PI * 62
+      const defaultDash = ((defaultPct / 100) * track).toFixed(1);
+      const metaDash = ((metaPct / 100) * track).toFixed(1);
+      const metaOffset = (-parseFloat(defaultDash)).toFixed(1);
+
+      const donutDefault = document.getElementById("tier-donut-default");
+      const donutMeta = document.getElementById("tier-donut-meta");
+
+      if (donutDefault) {
+        donutDefault.setAttribute("stroke-dasharray", \`\${defaultDash} \${track}\`);
+        donutDefault.setAttribute("stroke-dashoffset", "0");
+      }
+      if (donutMeta) {
+        donutMeta.setAttribute("stroke-dasharray", \`\${metaDash} \${track}\`);
+        donutMeta.setAttribute("stroke-dashoffset", metaOffset);
+      }
+
+      const centerLabel = document.getElementById("tier-center-label");
+      const centerVal = document.getElementById("tier-center-val");
+      const centerSub = document.getElementById("tier-center-sub");
+
+      if (centerLabel) centerLabel.textContent = "TOTAL TOKENS";
+      if (centerVal) centerVal.textContent = formatCompact(kpi.total_tokens);
+      if (centerSub) centerSub.textContent = \`\${formatNumber(kpi.total_tokens)} tokens\`;
+
+      // Legend cards
+      const defTokensEl = document.getElementById("tier-legend-default-tokens");
+      const defPctEl = document.getElementById("tier-legend-default-pct");
+      const defSubEl = document.getElementById("tier-legend-default-sub");
+      if (defTokensEl) defTokensEl.textContent = formatNumber(defaultTier.total_tokens);
+      if (defPctEl) defPctEl.textContent = defaultPct + "%";
+      if (defSubEl) {
+        defSubEl.innerHTML = \`Primary inference &bull; <span class="text-purple-400 font-mono">\${formatCompact(defaultTier.cached_tokens || kpi.cached_tokens)} cached</span>\`;
+      }
+
+      const metaTokensEl = document.getElementById("tier-legend-meta-tokens");
+      const metaPctEl = document.getElementById("tier-legend-meta-pct");
+      const metaSubEl = document.getElementById("tier-legend-meta-sub");
+      if (metaTokensEl) metaTokensEl.textContent = formatNumber(metaTier.total_tokens);
+      if (metaPctEl) metaPctEl.textContent = metaPct + "%";
+      if (metaSubEl) {
+        metaSubEl.innerHTML = \`Vector embeddings &bull; <span class="text-purple-400 font-mono">\${formatCompact(metaTier.cached_tokens || 0)} cached</span>\`;
+      }
+    }
+
+        // Builds a continuous, chronologically ordered calendar timeline for the selected range.
+    // Handles sparse Postgres date entries by filling missing days with zero-activity slots.
+    function buildDailyTimeline(timeSeries, range, monthFilter, currentMonth) {
+      const dataMap = new Map();
+      (timeSeries || []).forEach(item => {
+        const dStr = (item.date || item.day || item.created_at || "").slice(0, 10);
+        if (dStr) dataMap.set(dStr, item);
+      });
+
+      const now = new Date();
+      let anchorDate;
+      if (!monthFilter || monthFilter === "all" || monthFilter === currentMonth) {
+        anchorDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      } else {
+        const [y, m] = monthFilter.split("-").map(Number);
+        const lastDayOfMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+        anchorDate = new Date(Date.UTC(y, m - 1, lastDayOfMonth));
+      }
+
+      let daysCount = 30;
+      if (range === "7d") {
+        daysCount = 7;
+      } else if (range === "15d") {
+        daysCount = 15;
+      } else if (range === "1m") {
+        if (monthFilter && monthFilter !== "all") {
+          const [y, m] = monthFilter.split("-").map(Number);
+          daysCount = new Date(Date.UTC(y, m, 0)).getUTCDate();
+          anchorDate = new Date(Date.UTC(y, m - 1, daysCount));
+        } else {
+          daysCount = 30;
+        }
+      }
+
+      const points = [];
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const d = new Date(anchorDate);
+        d.setUTCDate(d.getUTCDate() - i);
+        const ymd = d.toISOString().slice(0, 10);
+        const dayNum = String(d.getUTCDate()).padStart(2, "0");
+        const monthShort = MONTH_NAMES[d.getUTCMonth()].slice(0, 3);
+        const fullLabel = \`\${dayNum} \${monthShort}\`;
+        const shortLabel = daysCount > 15 ? dayNum : fullLabel;
+
+        const existing = dataMap.get(ymd);
+        if (existing) {
+          points.push({
+            ...existing,
+            date: ymd,
+            label: fullLabel,
+            shortLabel: shortLabel,
+            prompt: Number(existing.prompt) || 0,
+            cached: Number(existing.cached) || 0,
+            completion: Number(existing.completion) || 0,
+            total: Number(existing.total) || ((Number(existing.prompt) || 0) + (Number(existing.completion) || 0)),
+            hasActivity: true
+          });
+        } else {
+          points.push({
+            date: ymd,
+            label: fullLabel,
+            shortLabel: shortLabel,
+            prompt: 0,
+            cached: 0,
+            completion: 0,
+            total: 0,
+            hasActivity: false
+          });
+        }
+      }
+      return points;
+    }
+
+    // Render Time Chart with 3 Bars per Bucket: Prompt, Cached, Completion
+    // Filtered by activeChartRange (7d, 15d, 1m) and continuous daily timeline
+    function renderTimeChart(timeSeries, kpi, pricing) {
+      const container = document.getElementById("chart-bars-container");
+      const promptSumEl = document.getElementById("chart-prompt-sum");
+      const cachedSumEl = document.getElementById("chart-cached-sum");
+      const compSumEl = document.getElementById("chart-comp-sum");
+      const savingsSumEl = document.getElementById("chart-savings-sum");
+
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (!timeSeries || timeSeries.length === 0) {
+        container.innerHTML = '<div class="w-full h-32 flex items-center justify-center text-outline text-xs font-ui">No time distribution records for this month</div>';
+        if (promptSumEl) promptSumEl.textContent = "--";
+        if (cachedSumEl) cachedSumEl.textContent = "--";
+        if (compSumEl) compSumEl.textContent = "--";
+        if (savingsSumEl) savingsSumEl.textContent = "--";
+        return;
+      }
+
+      // Build continuous chronological daily timeline according to range: 7d, 15d, 1m
+      const points = buildDailyTimeline(timeSeries, activeChartRange, activeMonth, currentUtcMonth);
+
+      // Calculate sums for the active range
+      let rangePrompt = 0;
+      let rangeCached = 0;
+      let rangeComp = 0;
+      points.forEach(p => {
+        rangePrompt += (Number(p.prompt) || 0);
+        rangeCached += (Number(p.cached) || 0);
+        rangeComp += (Number(p.completion) || 0);
+      });
+
+      // Calculate range savings in frontend using blended model cache savings or $1.25/1M
+      const blendedSavingsPer1M = (kpi?.cached_tokens > 0 && pricing?.totalCachedSavingsUsd > 0)
+        ? (pricing.totalCachedSavingsUsd / (kpi.cached_tokens / 1000000))
+        : 1.25;
+      const rangeSavingsUsd = (rangeCached / 1000000) * blendedSavingsPer1M;
+
+      if (promptSumEl) promptSumEl.textContent = formatNumber(rangePrompt);
+      if (cachedSumEl) cachedSumEl.textContent = formatNumber(rangeCached);
+      if (compSumEl) compSumEl.textContent = formatNumber(rangeComp);
+      if (savingsSumEl) savingsSumEl.textContent = "$" + rangeSavingsUsd.toFixed(4);
+
+      // Find peak single-bar value for proportional height
+      const peakVal = Math.max(...points.map(t => Math.max(t.prompt || 0, t.cached || 0, t.completion || 0)), 100);
+
+      // Dynamic column width classes based on number of columns
+      const colWidthCls = points.length <= 7
+        ? "min-w-[42px] max-w-[70px] flex-1"
+        : (points.length <= 15 ? "min-w-[28px] max-w-[50px] flex-1" : "min-w-[18px] max-w-[32px] flex-1");
+
+      points.forEach(item => {
+        const col = document.createElement("div");
+        col.className = \`\${colWidthCls} flex flex-col items-center gap-1 group cursor-pointer transition-all\`;
+
+        if (item.hasActivity && (item.total > 0 || item.prompt > 0 || item.cached > 0 || item.completion > 0)) {
+          const pHeight = Math.max(8, Math.min(100, Math.round(((item.prompt || 0) / peakVal) * 100)));
+          const kHeight = item.cached > 0 ? Math.max(8, Math.min(100, Math.round(((item.cached || 0) / peakVal) * 100))) : 2;
+          const cHeight = Math.max(8, Math.min(100, Math.round(((item.completion || 0) / peakVal) * 100)));
+
+          col.title = \`\${item.label} (\${item.date})\\nPrompt: \${formatNumber(item.prompt)}\\nCached: \${formatNumber(item.cached)}\\nCompletion: \${formatNumber(item.completion)}\\nTotal: \${formatNumber(item.total)}\`;
+
+          const labelColor = points.length > 15 ? "text-primary font-bold" : "text-outline group-hover:text-primary";
+
+          col.innerHTML = \`
+            <div class="w-full flex items-end justify-center gap-0.5 h-32 px-0.5">
+              <!-- Prompt Bar (Cyan) -->
+              <div class="w-1/3 bg-primary/75 group-hover:bg-primary transition-all rounded-t shadow-sm" style="height: \${pHeight}%"></div>
+              <!-- Cached Bar (Purple) -->
+              <div class="w-1/3 bg-purple-500/80 group-hover:bg-purple-400 transition-all rounded-t shadow-[0_0_6px_rgba(168,85,247,0.3)]" style="height: \${kHeight}%"></div>
+              <!-- Completion Bar (Blue) -->
+              <div class="w-1/3 bg-secondary/75 group-hover:bg-secondary transition-all rounded-t shadow-sm" style="height: \${cHeight}%"></div>
+            </div>
+            <span class="text-[9px] \${labelColor} font-ui truncate w-full text-center transition-colors">\${item.shortLabel}</span>
+          \`;
+        } else {
+          // Zero-token day: subtle resting baseline bar
+          col.title = \`\${item.label} (\${item.date})\\nNo token activity recorded\`;
+
+          const labelColor = points.length > 15 ? "text-outline/40" : "text-outline/50 group-hover:text-outline";
+
+          col.innerHTML = \`
+            <div class="w-full flex items-end justify-center h-32 px-1">
+              <div class="w-full h-[2px] bg-outline-variant/30 group-hover:bg-primary/50 transition-colors rounded-full mb-0.5"></div>
+            </div>
+            <span class="text-[9px] \${labelColor} font-mono truncate w-full text-center transition-colors">\${item.shortLabel}</span>
+          \`;
+        }
+
+        container.appendChild(col);
+      });
+    }
+
+    // Pagination for Logs Table (With 9 Columns including Cached Tkns)
+    function renderLogsTable(logs) {
+      const tbody = document.getElementById("token-logs-tbody");
+      const topCountEl = document.getElementById("top-log-count");
+      const bottomCountEl = document.getElementById("log-showing-count");
+      const pageNumbersEl = document.getElementById("log-page-numbers");
+      const prevBtn = document.getElementById("log-prev-btn");
+      const nextBtn = document.getElementById("log-next-btn");
+
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const totalLogs = logs.length;
+      const totalPages = Math.max(1, Math.ceil(totalLogs / logPageSize));
+      if (currentLogPage > totalPages) currentLogPage = totalPages;
+
+      if (totalLogs === 0) {
+        tbody.innerHTML = \`
+          <tr>
+            <td colspan="9" class="py-10 text-center text-outline font-ui text-xs">
+              <span class="material-symbols-outlined text-2xl block mb-1">hourglass_empty</span>
+              No token audit logs recorded for the selected period in PostgreSQL.
+            </td>
+          </tr>
+        \`;
+        if (topCountEl) topCountEl.textContent = "0 logs found";
+        if (bottomCountEl) bottomCountEl.textContent = "Showing 0 of 0 logs";
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        if (pageNumbersEl) pageNumbersEl.innerHTML = "";
+        return;
+      }
+
+      const start = (currentLogPage - 1) * logPageSize;
+      const end = Math.min(start + logPageSize, totalLogs);
+      const pageLogs = logs.slice(start, end);
+
+      pageLogs.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-surface-container/30 transition-colors";
+        tr.innerHTML = \`
+          <td class="py-3 px-4 font-bold text-primary font-mono">\${r.sessionId || "#SPK-8920"}</td>
+          <td class="py-3 px-4 font-ui text-on-surface truncate max-w-[240px]">\${r.subject || "Clinical query inference dialogue"}</td>
+          <td class="py-3 px-4 text-on-surface-variant font-mono">\${r.model || "gpt-5.1"}</td>
+          <td class="py-3 px-4 text-right text-outline font-mono">\${formatNumber(r.promptTokens)}</td>
+          <td class="py-3 px-4 text-right text-purple-400 font-mono font-medium">\${formatNumber(r.cachedTokens || 0)}</td>
+          <td class="py-3 px-4 text-right text-on-surface font-mono">\${formatNumber(r.completionTokens)}</td>
+          <td class="py-3 px-4 text-right font-bold text-primary font-mono">\${formatNumber(r.totalTokens)}</td>
+          <td class="py-3 px-4 text-center text-on-surface font-mono">\${r.latency || "380ms"}</td>
+          <td class="py-3 px-4 text-right text-outline text-[11px] font-mono">\${r.timestamp || "Recently"}</td>
+        \`;
+        tbody.appendChild(tr);
+      });
+
+      if (topCountEl) {
+        topCountEl.textContent = \`Showing page \${currentLogPage} of \${totalPages} (\${totalLogs} total logs)\`;
+      }
+      if (bottomCountEl) {
+        bottomCountEl.textContent = \`Showing \${start + 1}-\${end} of \${totalLogs} logs\`;
+      }
+
+      if (prevBtn) prevBtn.disabled = (currentLogPage === 1);
+      if (nextBtn) nextBtn.disabled = (currentLogPage === totalPages);
+
+      if (pageNumbersEl) {
+        pageNumbersEl.innerHTML = "";
+        const maxButtons = Math.min(5, totalPages);
+        let startPage = Math.max(1, currentLogPage - 2);
+        let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+        if (endPage - startPage < maxButtons - 1) {
+          startPage = Math.max(1, endPage - maxButtons + 1);
+        }
+
+        for (let p = startPage; p <= endPage; p++) {
+          const btn = document.createElement("button");
+          btn.textContent = p;
+          btn.onclick = () => { currentLogPage = p; renderLogsTable(logs); };
+          if (p === currentLogPage) {
+            btn.className = "px-2.5 py-1 rounded bg-primary/20 text-primary border border-primary/40 font-semibold cursor-pointer text-xs font-mono";
+          } else {
+            btn.className = "px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-on-surface cursor-pointer text-xs font-mono transition-colors";
+          }
+          pageNumbersEl.appendChild(btn);
+        }
+      }
+    }
+
+    function changeLogPage(delta) {
+      if (!activeTelemetryData?.logs) return;
+      const totalPages = Math.ceil(activeTelemetryData.logs.length / logPageSize);
+      const target = currentLogPage + delta;
+      if (target >= 1 && target <= totalPages) {
+        currentLogPage = target;
+        renderLogsTable(activeTelemetryData.logs);
+      }
+    }
+
+    function renderCostBreakdown(pricing, kpi) {
+      const models = pricing?.models || [];
+
+      // Top chips
+      const promptChip = document.getElementById("cost-prompt-tokens");
+      const cachedChip = document.getElementById("cost-cached-tokens");
+      const compChip = document.getElementById("cost-completion-tokens");
+      const totalChip = document.getElementById("cost-total-tokens");
+      const costUsdChip = document.getElementById("cost-total-usd");
+      const costInrChip = document.getElementById("cost-total-inr");
+      const savingsNote = document.getElementById("cost-savings-note");
+
+      if (promptChip) promptChip.textContent = formatNumber(kpi.prompt_tokens);
+      if (cachedChip) cachedChip.textContent = formatNumber(kpi.cached_tokens);
+      if (compChip) compChip.textContent = formatNumber(kpi.completion_tokens);
+      if (totalChip) totalChip.textContent = formatNumber(kpi.total_tokens);
+      if (costUsdChip) costUsdChip.textContent = pricing?.fleetCostUsdFormatted || "$0.0000";
+      if (costInrChip) costInrChip.textContent = pricing?.fleetCostInrFormatted || "₹0.00";
+
+      if (savingsNote) {
+        const savedUsd = pricing?.totalCachedSavingsUsdFormatted || "$0.0000";
+        const savedPct = (pricing?.savingsPct || 0) + "%";
+        savingsNote.innerHTML = \`Prompt caching reduced total telemetry costs by <strong class="text-purple-300 font-mono font-semibold">\${savedUsd} (\${savedPct})</strong> this period.\`;
+      }
+
+      const tbody = document.getElementById("cost-table-tbody");
+      const tfoot = document.getElementById("cost-table-tfoot");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (!models || models.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-outline font-ui">No models active in this month</td></tr>';
+        if (tfoot) tfoot.innerHTML = "";
+        return;
+      }
+
+      models.forEach(m => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-surface-container/40 transition-colors group";
+        const share = m.cost_share_pct || 0;
+
+        tr.innerHTML = \`
+          <td class="py-3.5 px-4 font-ui">
+            <div class="flex items-center gap-2.5">
+              <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+              <div>
+                <div class="font-bold text-on-surface flex items-center gap-1.5 font-mono">
+                  \${m.model}
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-primary/20 text-primary border border-primary/30 uppercase font-ui">\${m.badge || "Model"}</span>
+                </div>
+                <div class="text-[11px] text-on-surface-variant/80 font-ui">\${m.role || "Inference Engine"}</div>
+              </div>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 text-right text-primary font-medium font-mono">\${formatNumber(m.prompt_tokens)}</td>
+          <td class="py-3.5 px-4 text-right text-purple-400 font-medium font-mono">\${formatNumber(m.cached_tokens)}</td>
+          <td class="py-3.5 px-4 text-right text-emerald-400 font-medium font-mono">\${formatNumber(m.completion_tokens)}</td>
+          <td class="py-3.5 px-4 text-right font-bold text-on-surface font-mono">\${formatNumber(m.total_tokens)}</td>
+          <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px] font-mono">\${m.rate_label}</td>
+          <td class="py-3.5 px-4">
+            <div class="flex items-center gap-2 justify-center">
+              <div class="w-24 sm:w-28 bg-surface-container-high h-2 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-primary to-cyan-400 h-full rounded-full transition-all duration-500" style="width: \${share}%"></div>
+              </div>
+              <span class="text-[11px] text-on-surface font-semibold w-9 text-right font-mono">\${share}%</span>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 text-right font-mono">
+            <div class="font-bold text-amber-300 text-[13px]">\${m.cost_usd_formatted}</div>
+            <div class="text-[10px] text-on-surface-variant/70 font-ui">\${m.cost_inr_formatted}</div>
+          </td>
+        \`;
+        tbody.appendChild(tr);
+      });
+
+      if (tfoot) {
+        tfoot.innerHTML = \`
+          <tr class="bg-surface-container/70 border-t-2 border-outline-variant/40 font-mono text-xs font-semibold text-on-surface">
+            <td class="py-3.5 px-4 font-bold font-ui text-on-surface">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+                <span>Active Period Total (\${models.length} Models)</span>
+              </div>
+            </td>
+            <td class="py-3.5 px-4 text-right text-primary font-bold text-sm">\${formatNumber(kpi.prompt_tokens)}</td>
+            <td class="py-3.5 px-4 text-right text-purple-400 font-bold text-sm">\${formatNumber(kpi.cached_tokens)}</td>
+            <td class="py-3.5 px-4 text-right text-emerald-400 font-bold text-sm">\${formatNumber(kpi.completion_tokens)}</td>
+            <td class="py-3.5 px-4 text-right text-amber-400 font-bold text-sm">\${formatNumber(kpi.total_tokens)}</td>
+            <td class="py-3.5 px-4 text-center text-on-surface-variant text-[11px] font-ui">Client Calculated</td>
+            <td class="py-3.5 px-4 text-center text-on-surface font-bold">100.0%</td>
+            <td class="py-3.5 px-4 text-right">
+              <div class="font-bold text-amber-300 text-sm">\${pricing?.fleetCostUsdFormatted || "$0.0000"}</div>
+              <div class="text-[10px] text-on-surface-variant font-ui">\${pricing?.fleetCostInrFormatted || "₹0.00"}</div>
+            </td>
+          </tr>
+        \`;
+      }
+    }
+
+    // Dynamic CSV Export (Calculated purely on frontend)
+    function exportCostBreakdown() {
+      if (!activeTelemetryData?.model_breakdown) {
+        alert("No live cost data loaded to export.");
+        return;
+      }
+      const pricing = computeFrontendPricing(activeTelemetryData.model_breakdown, activeTelemetryData.kpi);
+      const models = pricing.models;
+      const kpi = activeTelemetryData.kpi;
+
+      const rows = [
+        ["Model", "Role", "Prompt Tokens", "Cached Tokens", "Completion Tokens", "Total Tokens", "Rate (In / Out per 1M)", "Cost Share", "Estimated Cost USD", "Estimated Cost INR"]
+      ];
+
+      models.forEach(m => {
+        rows.push([
+          m.model,
+          m.role,
+          m.prompt_tokens,
+          m.cached_tokens,
+          m.completion_tokens,
+          m.total_tokens,
+          m.rate_label,
+          m.cost_share_pct + "%",
+          m.cost_usd_formatted,
+          m.cost_inr_formatted
+        ]);
+      });
+
+      rows.push([
+        "TOTAL",
+        \`Period Total (\${models.length} Models)\`,
+        kpi.prompt_tokens,
+        kpi.cached_tokens,
+        kpi.completion_tokens,
+        kpi.total_tokens,
+        "Client Calculated",
+        "100.0%",
+        pricing.fleetCostUsdFormatted,
+        pricing.fleetCostInrFormatted
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.map(val => \`"\${val}"\`).join(",")).join("\\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", \`spark_token_cost_\${activeMonth}_\${new Date().toISOString().slice(0, 10)}.csv\`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Usage by Tier Donut Interactive Highlighting
+    function highlightTier(tier) {
+      const labelEl = document.getElementById('tier-center-label');
+      const valEl = document.getElementById('tier-center-val');
+      const subEl = document.getElementById('tier-center-sub');
+      const donutDefault = document.getElementById('tier-donut-default');
+      const donutMeta = document.getElementById('tier-donut-meta');
+
+      if (!activeTelemetryData?.tier_distribution) return;
+      const defTier = activeTelemetryData.tier_distribution.find(t => t.tier === 'default') || { total_tokens: 0, percentage: 0 };
+      const metaTier = activeTelemetryData.tier_distribution.find(t => t.tier === 'metadata_generation') || { total_tokens: 0, percentage: 0 };
+
+      if (tier === 'default') {
+        if (labelEl) labelEl.textContent = 'DEFAULT TIER';
+        if (valEl) {
+          valEl.textContent = formatCompact(defTier.total_tokens);
+          valEl.className = 'text-xl font-bold font-mono text-emerald-400 tracking-tight transition-colors';
+        }
+        if (subEl) {
+          subEl.textContent = \`\${defTier.percentage}% share\`;
+          subEl.className = 'text-[10px] font-ui text-emerald-300 font-semibold transition-colors';
+        }
+        if (donutDefault) donutDefault.style.strokeWidth = '26';
+        if (donutMeta) donutMeta.style.opacity = '0.35';
+      } else if (tier === 'meta') {
+        if (labelEl) labelEl.textContent = 'METADATA GEN';
+        if (valEl) {
+          valEl.textContent = formatCompact(metaTier.total_tokens);
+          valEl.className = 'text-xl font-bold font-mono text-slate-300 tracking-tight transition-colors';
+        }
+        if (subEl) {
+          subEl.textContent = \`\${metaTier.percentage}% share\`;
+          subEl.className = 'text-[10px] font-ui text-slate-400 font-semibold transition-colors';
+        }
+        if (donutMeta) donutMeta.style.strokeWidth = '26';
+        if (donutDefault) donutDefault.style.opacity = '0.35';
+      }
+    }
+
+    function resetTierHighlight() {
+      const labelEl = document.getElementById('tier-center-label');
+      const valEl = document.getElementById('tier-center-val');
+      const subEl = document.getElementById('tier-center-sub');
+      const donutDefault = document.getElementById('tier-donut-default');
+      const donutMeta = document.getElementById('tier-donut-meta');
+
+      const total = activeTelemetryData?.kpi?.total_tokens || 0;
+      if (labelEl) labelEl.textContent = 'TOTAL TOKENS';
+      if (valEl) {
+        valEl.textContent = formatCompact(total);
+        valEl.className = 'text-xl font-bold font-mono text-on-surface tracking-tight transition-colors';
+      }
+      if (subEl) {
+        subEl.textContent = \`\${formatNumber(total)} tokens\`;
+        subEl.className = 'text-[10px] font-ui text-emerald-400 font-semibold transition-colors';
+      }
+      if (donutDefault) {
+        donutDefault.style.strokeWidth = '22';
+        donutDefault.style.opacity = '1';
+      }
+      if (donutMeta) {
+        donutMeta.style.strokeWidth = '22';
+        donutMeta.style.opacity = '1';
+      }
+    }
+
+    // Auto-initialize on load
+    document.addEventListener("DOMContentLoaded", () => {
+      initMonthControls();
+      fetchLiveExchangeRate();
+      fetchTokenTelemetry(activeMonth);
+    });
+  </script>
+</body>
+</html>
+`;
+
+const updatedContent = headAndSidebar + newMainAndScript;
+fs.writeFileSync(targetFilePath, updatedContent, "utf8");
+console.log(
+  "Successfully updated token-usage.html with Cached Tokens card, 3-bar Time Series & 7d/15d/1m range switches! Total length:",
+  updatedContent.length,
+);

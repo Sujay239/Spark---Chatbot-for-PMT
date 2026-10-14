@@ -10,8 +10,10 @@ This directory contains the production-ready **n8n Workflow** that powers the re
 | :--- | :--- |
 | [`spark-overview-telemetry.json`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/spark-overview-telemetry.json) | Full n8n workflow export for the Overview dashboard (`overview.html`). |
 | [`spark-session-logs-telemetry.json`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/spark-session-logs-telemetry.json) | Dedicated real-time dynamic session logs workflow for Session Telemetry Ledger (`session-logs.html`). |
+| [`spark-token-usage-telemetry.json`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/spark-token-usage-telemetry.json) | High-performance PostgreSQL-driven monthly token usage workflow with future month prevention and server load optimization (`token-usage.html`). |
 | [`test-webhook.ps1`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/test-webhook.ps1) | PowerShell test suite validating Overview Webhook (200 OK & 401 Unauthorized), CORS preflight, and JSON schema. |
 | [`test-session-logs-webhook.ps1`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/test-session-logs-webhook.ps1) | PowerShell test suite validating Session Logs Webhook (200 OK & 401 Unauthorized) and full session payload. |
+| [`test-token-usage-webhook.ps1`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/test-token-usage-webhook.ps1) | PowerShell test suite validating Token Usage Webhook (200 OK, 401 Unauthorized, monthly queries & fleet query). |
 | [`README.md`](file:///d:/Z_work/Sujay/Spark%20-%20PMT%20chatbot/n8n/README.md) | Technical architecture, authentication, and endpoint documentation. |
 
 ---
@@ -31,6 +33,19 @@ This directory contains the production-ready **n8n Workflow** that powers the re
   - Complete sessions list with parsed IP/geo, device/browser user agent, duration, first question, and complete dialogue turns (`[USER]` and `[BOT]`).
   - Supports live streaming, search filtering, and drawer previews.
 
+### C. Token Usage Telemetry Workflow (`spark-token-usage-telemetry.json`)
+- **Webhook Endpoint**: `https://n8n.srv917960.hstgr.cloud/webhook/spark-token-usage`
+- **Database Engine**: Direct PostgreSQL Node (`n8n-nodes-base.postgres`) connected to Supabase (`fyxl43WRvTWVDiig`).
+- **Load Optimization**: Executes parameterized date range SQL query (`WHERE created_at >= 'YYYY-MM-01' AND created_at < 'YYYY-MM-01' + INTERVAL '1 month'`) to pull strictly the selected month's records, eliminating full-table loads unless the user explicitly chooses `all`.
+- **Future Month Prevention**: Strictly clamps any request with future date stamps to the current UTC month.
+- **Output**:
+  - Live 4 KPI Ribbon: Total Tokens, Prompt Tokens (% share), Completion Tokens (% share), and Cached Tokens.
+  - Interactive Tier Donut Chart: Default vs. Metadata Generation tier split.
+  - Token Usage Over Time: Day-by-day / hour-by-hour prompt, cached, and completion token trends.
+  - Raw Model Breakdown: Per-model raw token aggregates (prompt, cached, completion, total).
+  - Recent Token Audit Logs: Paginated 10-per-page token audit trail with cached tokens.
+  - **Zero Backend Pricing Overhead**: All pricing rate cards, USD/INR conversions, and cost shares are computed directly in the frontend (`token-usage.html`), eliminating n8n execution latency and enabling instant rate updates without touching backend workflows.
+
 ---
 
 ## 3. Webhook Endpoint Details
@@ -39,6 +54,7 @@ This directory contains the production-ready **n8n Workflow** that powers the re
 - **Endpoints**:
   - `POST` / `GET` `/webhook/spark-overview-v2`
   - `POST` / `GET` `/webhook/spark-session-logs`
+  - `POST` / `GET` `/webhook/spark-token-usage?month=YYYY-MM` (or `?month=all`)
 - **Authentication**: Bearer Token or `x-api-key` header (requires authenticated admin session token).
 - **CORS**: Fully enabled (`Access-Control-Allow-Origin: *`, `GET, POST, OPTIONS`).
 

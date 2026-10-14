@@ -1142,7 +1142,6 @@
         hideErrorState();
         cachedTelemetryData = payload;
         renderOverviewData(payload);
-        console.log("Telemetry updated from n8n webhook:", payload);
       } catch (err) {
         clearTimeout(timeoutId);
         const errMsg =

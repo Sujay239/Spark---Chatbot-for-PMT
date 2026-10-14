@@ -813,7 +813,6 @@
           const payload = Array.isArray(json) ? json[0] : json;
           if (payload && Array.isArray(payload.sessions)) {
             data = payload;
-            console.log("Loaded live sessions from n8n webhook:", data.sessions.length);
           }
         }
       } catch (err) {
@@ -1452,7 +1451,6 @@
         }
       });
 
-      console.log("Starting Session Logs Telemetry Engine: calling fetchSessionLogs()...");
       fetchSessionLogs();
       startLiveStreamInterval();
     }
